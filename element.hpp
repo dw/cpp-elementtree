@@ -15,7 +15,7 @@ namespace etree {
 class Element;
 class ElementSet;
 void maybeTakeNode(ElementSet *set, xmlNodePtr node);
-Element SubElement(Element &parent, UniversalName uname);
+Element SubElement(Element &parent, const UniversalName &uname);
 
 
 struct element_error : public std::runtime_error
@@ -31,29 +31,31 @@ class AttrMap
     xmlNodePtr node_;
     AttrMap(xmlNodePtr node) : node_(node) {}
 
-    static const xmlChar *c_str(std::string s)
+    static const xmlChar *c_str(const std::string &s)
     {
         return (const xmlChar *) (s.empty() ? nullptr : s.c_str());
     }
 
     public:
-    bool has(UniversalName un) const
+    bool has(const UniversalName &un) const
     {
         return ::xmlHasNsProp(node_, c_str(un.tag()), c_str(un.ns()));
     }
 
-    std::string get(UniversalName un, std::string default_="") const
+    std::string get(const UniversalName &un,
+                    const std::string &default_="") const
     {
+        std::string out(default_);
         const char *s = (const char *) xmlGetNsProp(node_, c_str(un.tag()),
                                                            c_str(un.ns()));
         if(s) {
-            default_ = s;
+            out = s;
             ::xmlFree((void *) s);
         }
-        return default_;
+        return out;
     }
 
-    const xmlNsPtr findNs_(std::string ns)
+    const xmlNsPtr findNs_(const std::string &ns)
     {
         if(! ns.size()) {
             return nullptr;
@@ -67,7 +69,7 @@ class AttrMap
         throw element_error("could not find ns");
     }
 
-    void set(const UniversalName un, const std::string s)
+    void set(const UniversalName &un, const std::string &s)
     {
         ::xmlSetNsProp(node_, findNs_(un.ns()), c_str(un.tag()), c_str(s));
     }
@@ -80,14 +82,14 @@ class AttrMap
             const char *ns = p->ns ? (const char *) p->ns->href : "";
             const char *s = (const char *) ::xmlNodeGetContent((xmlNodePtr) p);
             assert(s != nullptr);
-            names.push_back(UniversalName(ns, (const char *)p->name));
+            names.emplace_back(ns, (const char *)p->name);
             p = p->next;
         }
         return names;
     }
 
     /*
-    void operator[] (const UniversalName un, const std::string s)
+    void operator[] (const UniversalName &un, const std::string s)
     {
         ::xmlSetNsProp(node_, c_str(un.ns()), c_str(un.tag()), c_str(s));
     }
@@ -110,8 +112,9 @@ class Element
 
     Element() : set_(nullptr), node_(nullptr) {}
     Element(const Element &e) : set_(e.set_), node_(e.node_) {}
+    Element(Element &&e) : set_(e.set_), node_(e.node_) {}
     Element(ElementSet *set, xmlNodePtr node) : set_(set), node_(node) {}
-    Element(ElementSet *set, UniversalName un) : set_(set)
+    Element(ElementSet *set, const UniversalName &un) : set_(set)
     {
         node_ = ::xmlNewNode(nullptr, (const xmlChar *)(un.tag().c_str()));
         if(node_ == nullptr) {
@@ -142,8 +145,7 @@ class Element
 
     UniversalName uname() const
     {
-        UniversalName un(ns(), tag());
-        return un;
+        return {ns(), tag()};
     }
 
     std::string tag() const
@@ -161,7 +163,7 @@ class Element
 
     AttrMap attrib() const
     {
-        return AttrMap(node_);
+        return {node_};
     }
 
     operator bool() const
@@ -181,7 +183,7 @@ class Element
                 throw element_error("operator[] out of bounds");
             }
         }
-        return Element(set_, cur);
+        return {set_, cur};
     }
 
     bool isIndirectParent(Element &e)
@@ -192,6 +194,7 @@ class Element
                 if(parent == e.node_) {
                     return true;
                 }
+                parent = parent->parent;
             }
         }
         return false;
@@ -225,11 +228,10 @@ class Element
 
     Element getparent()
     {
-        Element e;
         if(node_->parent) {
-            e = Element(set_, node_->parent);
+            return {set_, node_->parent};
         }
-        return e;
+        return {};
     }
 
     //
@@ -370,10 +372,9 @@ class ElementSet {
         }
     }
 
-    Element element(UniversalName un)
+    Element element(const UniversalName &un)
     {
-        Element e(this, un);
-        return e;
+        return {this, un};
     }
 
     Element fromstring(std::string s)
