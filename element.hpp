@@ -6,15 +6,16 @@
 #include <stdexcept>
 #include <utility>
 
+#include "deleter.hpp"
 #include "uname.hpp"
 
 
 namespace etree {
 
 
+class DocProxy;
+class NodeProxy;
 class Element;
-class ElementSet;
-void maybeTakeNode(ElementSet *set, xmlNodePtr node);
 Element SubElement(Element &parent, const UniversalName &uname);
 
 
@@ -24,12 +25,116 @@ struct element_error : public std::runtime_error
 };
 
 
+struct DocProxy
+{
+    xmlDocPtr doc;
+    unsigned int refs;
+
+    DocProxy(xmlDocPtr doc) : doc(doc), refs(1)
+    {
+        assert(! doc->_private);
+        doc->_private = static_cast<void *>(this);
+    }
+
+    ~DocProxy()
+    {
+        doc->_private = nullptr;
+        xmlFreeDoc(doc);
+    }
+
+    void ref()
+    {
+        refs++;
+        std::cout << "!! DocProxy::ref() now " << refs << std::endl;
+    }
+
+    void unref()
+    {
+        refs--;
+        std::cout << "!! DocProxy::unref() now " << refs << std::endl;
+        if(! refs) {
+            std::cout << "@@ Deleting " << this << std::endl;
+            delete this;
+        }
+    }
+
+    static DocProxy *ref_doc(xmlDocPtr doc)
+    {
+        assert(doc);
+        auto proxy = static_cast<DocProxy *>(doc->_private);
+        if(proxy) {
+            proxy->ref();
+        } else {
+            proxy = new DocProxy(doc);
+        }
+        return proxy;
+    }
+};
+
+
+struct NodeProxy
+{
+    xmlNodePtr node;
+    DocProxy *doc_proxy;
+    unsigned int refs;
+
+    NodeProxy(xmlNodePtr node) : node(node), refs(1)
+    {
+        assert(! node->_private);
+        node->_private = static_cast<void *>(this);
+        doc_proxy = DocProxy::ref_doc(node->doc);
+    }
+
+    ~NodeProxy()
+    {
+        node->_private = nullptr;
+        doc_proxy->unref();
+    }
+
+    void ref()
+    {
+        assert(refs < 100);
+        refs++;
+        std::cout << "!! NodeProxy::ref() now " << refs << std::endl;
+    }
+
+    void unref()
+    {
+        refs--;
+        std::cout << "!! NodeProxy::unref() now " << refs << std::endl;
+        if(! refs) {
+            std::cout << "@@ Deleting " << this << std::endl;
+            delete this;
+        }
+    }
+
+    static NodeProxy *ref_node(xmlNodePtr node)
+    {
+        assert(node);
+        auto proxy = static_cast<NodeProxy *>(node->_private);
+        if(proxy) {
+            proxy->ref();
+        } else {
+            proxy = new NodeProxy(node);
+        }
+        return proxy;
+    }
+};
+
+
 class AttrMap
 {
     friend Element;
 
+    NodeProxy *proxy_ = 0;
     xmlNodePtr node_;
-    AttrMap(xmlNodePtr node) : node_(node) {}
+
+    AttrMap(xmlNodePtr node) : node_(node)
+    {
+        if(node_) {
+            proxy_ = NodeProxy::ref_node(node_);
+        }
+    }
 
     static const xmlChar *c_str(const std::string &s)
     {
@@ -37,14 +142,27 @@ class AttrMap
     }
 
     public:
+    ~AttrMap()
+    {
+        if(node_) {
+            proxy_->unref();
+        }
+    }
+
     bool has(const UniversalName &un) const
     {
+        if(! node_) {
+            return false;
+        }
         return ::xmlHasNsProp(node_, c_str(un.tag()), c_str(un.ns()));
     }
 
     std::string get(const UniversalName &un,
                     const std::string &default_="") const
     {
+        if(! node_) {
+            return default_;
+        }
         std::string out(default_);
         const char *s = (const char *) xmlGetNsProp(node_, c_str(un.tag()),
                                                            c_str(un.ns()));
@@ -71,53 +189,73 @@ class AttrMap
 
     void set(const UniversalName &un, const std::string &s)
     {
-        ::xmlSetNsProp(node_, findNs_(un.ns()), c_str(un.tag()), c_str(s));
+        if(node_) {
+            ::xmlSetNsProp(node_, findNs_(un.ns()), c_str(un.tag()), c_str(s));
+        }
     }
 
     std::vector<UniversalName> keys() const
     {
         std::vector<UniversalName> names;
+        if(! node_) {
+            return names;
+        }
         xmlAttrPtr p = node_->properties;
         while(p) {
-            const char *ns = p->ns ? (const char *) p->ns->href : "";
+            const char *ns = p->ns ? (const char *)p->ns->href : "";
             names.emplace_back(ns, (const char *)p->name);
             p = p->next;
         }
         return names;
     }
-
-    /*
-    void operator[] (const UniversalName &un, const std::string s)
-    {
-        ::xmlSetNsProp(node_, c_str(un.ns()), c_str(un.tag()), c_str(s));
-    }
-    */
 };
 
 
 class Element
 {
-    ElementSet *set_;
-    xmlNodePtr node_;
+    NodeProxy *proxy_ = nullptr;
+    xmlNodePtr node_ = nullptr;
 
     public:
     ~Element()
     {
-        if(set_ && node_) {
-            maybeTakeNode(set_, node_);
+        if(node_) {
+            proxy_->unref();
         }
     }
 
-    Element() : set_(nullptr), node_(nullptr) {}
-    Element(const Element &e) : set_(e.set_), node_(e.node_) {}
-    Element(Element &&e) : set_(e.set_), node_(e.node_) {}
-    Element(ElementSet *set, xmlNodePtr node) : set_(set), node_(node) {}
-    Element(ElementSet *set, const UniversalName &un) : set_(set)
+    Element() {}
+    Element(const Element &e) : node_(e.node_)
     {
-        node_ = ::xmlNewNode(nullptr, (const xmlChar *)(un.tag().c_str()));
-        if(node_ == nullptr) {
-            throw element_error("allocaion failed");
+        if(node_) {
+            proxy_ = NodeProxy::ref_node(node_);
         }
+    }
+
+    Element(Element &&e) : node_(e.node_), proxy_(e.proxy_)
+    {
+        e.node_ = nullptr;
+        e.proxy_ = nullptr;
+    }
+
+    Element(xmlNodePtr node) : node_(node) {
+        proxy_ = NodeProxy::ref_node(node_);
+    }
+
+    Element(const UniversalName &un)
+    {
+        xmlDocPtr doc = ::xmlNewDoc(nullptr);
+        if(doc == nullptr) {
+            throw element_error("allocation failed");
+        }
+
+        node_ = ::xmlNewDocNode(doc, nullptr,
+            (const xmlChar *)(un.tag().c_str()), nullptr);
+        if(node_ == nullptr) {
+            throw element_error("allocation failed");
+        }
+        ::xmlDocSetRootElement(doc, node_);
+        proxy_ = NodeProxy::ref_node(node_);
 
         if(un.ns().size()) {
             xmlNsPtr ns = ::xmlNewNs(node_,
@@ -129,11 +267,6 @@ class Element
             }
             ::xmlSetNs(node_, ns);
         }
-    }
-
-    ElementSet *set() const
-    {
-        return set_;
     }
 
     size_t size() const
@@ -159,10 +292,21 @@ class Element
         return "";
     }
 
+    // -------
+    // Attributes
+    // -------
+
     AttrMap attrib() const
     {
         return {node_};
     }
+
+    std::string get(const UniversalName &un,
+                    const std::string &default_="") const
+    {
+        return attrib().get(un, default_);
+    }
+
 
     operator bool() const
     {
@@ -181,7 +325,7 @@ class Element
                 throw element_error("operator[] out of bounds");
             }
         }
-        return {set_, cur};
+        return {cur};
     }
 
     bool isIndirectParent(const Element &e)
@@ -226,8 +370,8 @@ class Element
 
     Element getparent() const
     {
-        if(node_->parent) {
-            return {set_, node_->parent};
+        if(node_->parent && node_->parent->type != XML_DOCUMENT_NODE) {
+            return {node_->parent};
         }
         return {};
     }
@@ -340,64 +484,13 @@ void dumpVector(const char *s, T v)
 }
 
 
-class ElementSet {
-    friend void maybeTakeNode(ElementSet *set, xmlNodePtr node);
-    std::vector<xmlNodePtr> nodes;
-
-    void maybeTake(xmlNodePtr node)
-    {
-        if(node->parent == nullptr) {
-            if(! std::binary_search(nodes.begin(), nodes.end(), node,
-                                    std::greater<xmlNodePtr>())) {
-                nodes.push_back(node);
-                std::push_heap(nodes.begin(), nodes.end());
-            }
-        }
-    }
-
-    ElementSet(const ElementSet &) {}
-
-    public:
-    ElementSet() : nodes() {}
-
-    ~ElementSet()
-    {
-        for(auto node : nodes) {
-            if(! node->parent) {
-                std::cout << "node with no parent: " << node << std::endl;
-                xmlFreeNode(node);
-            }
-        }
-    }
-
-    Element element(const UniversalName &un)
-    {
-        return {this, un};
-    }
-
-    Element fromstring(std::string s)
-    {
-        xmlDocPtr doc = ::xmlReadMemory(s.data(), s.size(),
-            nullptr, nullptr, 0);
-        assert(doc != nullptr);
-    }
-};
-
-
-void maybeTakeNode(ElementSet *set, xmlNodePtr node)
+Element SubElement(Element &parent, const UniversalName &uname)
 {
-    set->maybeTake(node);
-}
-
-
-Element SubElement(Element &parent, UniversalName &uname)
-{
-    ElementSet *set = parent.set();
-    if(set == nullptr) {
+    if(! parent) {
         throw element_error("cannot create sub-element on empty element.");
     }
 
-    Element elem = set->element(uname);
+    Element elem(uname);
     parent.append(elem);
     return elem;
 }
