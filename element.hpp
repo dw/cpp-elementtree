@@ -80,8 +80,6 @@ class AttrMap
         xmlAttrPtr p = node_->properties;
         while(p) {
             const char *ns = p->ns ? (const char *) p->ns->href : "";
-            const char *s = (const char *) ::xmlNodeGetContent((xmlNodePtr) p);
-            assert(s != nullptr);
             names.emplace_back(ns, (const char *)p->name);
             p = p->next;
         }
@@ -148,12 +146,12 @@ class Element
         return {ns(), tag()};
     }
 
-    std::string tag() const
+    const char *tag() const
     {
         return node_ ? (const char *) node_->name : "";
     }
 
-    std::string ns() const
+    const char *ns() const
     {
         if(node_ && node_->nsDef) {
             return (const char *) node_->nsDef->href;
@@ -186,7 +184,7 @@ class Element
         return {set_, cur};
     }
 
-    bool isIndirectParent(Element &e)
+    bool isIndirectParent(const Element &e)
     {
         if(node_) {
             xmlNodePtr parent = node_->parent;
@@ -226,7 +224,7 @@ class Element
         }
     }
 
-    Element getparent()
+    Element getparent() const
     {
         if(node_->parent) {
             return {set_, node_->parent};
@@ -278,7 +276,7 @@ class Element
         }
     }
 
-    void _setNodeText(xmlNodePtr node, std::string &s)
+    void _setNodeText(xmlNodePtr node, const std::string &s)
     {
         _removeText(node->children);
         // TODO: CDATA
@@ -293,7 +291,7 @@ class Element
         }
     }
 
-    void _setTailText(xmlNodePtr node, std::string &s)
+    void _setTailText(xmlNodePtr node, const std::string &s)
     {
         _removeText(node->next);
         if(s.size()) {
@@ -309,7 +307,7 @@ class Element
         return node_ ? _collectText(node_->children) : "";
     }
 
-    void text(std::string s)
+    void text(const std::string &s)
     {
         if(node_) {
             _setNodeText(node_, s);
@@ -321,7 +319,7 @@ class Element
         return node_ ? _collectText(node_->next) : "";
     }
 
-    void tail(std::string s)
+    void tail(const std::string &s)
     {
         if(node_) {
             _setTailText(node_, s);

@@ -17,8 +17,13 @@ class UniversalName {
     std::string tag_;
 
     public:
-    UniversalName(std::string ns, std::string tag) : ns_(ns), tag_(tag) {}
-    UniversalName(std::string uname)
+    UniversalName(const std::string &ns, const std::string &tag)
+        : ns_(ns), tag_(tag) {}
+    UniversalName(const UniversalName &other)
+        : ns_(other.ns_), tag_(other.tag_) {}
+    UniversalName(UniversalName &&other)
+        : ns_(other.ns_), tag_(other.tag_) {}
+    UniversalName(const std::string &uname)
     {
         if(uname.size() > 0 && uname[0] == '{') {
             size_t e = uname.find('}');
