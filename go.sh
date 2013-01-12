@@ -4,11 +4,11 @@
 
 
 # -fsanitize=address-full,bounds \
+    #-std=c++0x \
 /opt/local/bin/clang++-mp-3.3 \
     -liconv \
     -lz \
     -g \
-    -std=c++0x \
     -ob \
     -lxml2 \
     -stdlib=libc++ \
