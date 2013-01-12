@@ -1,4 +1,6 @@
 
+#include <cassert>
+
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xmlsave.h>
@@ -199,7 +201,7 @@ static const xmlNsPtr findNs_(xmlNodePtr node, const std::string &ns)
             return p;
         }
     }
-    throw element_error("could not find ns");
+    throw missing_namespace_error();
 }
 
 
@@ -416,13 +418,13 @@ Element::Element(const UniversalName &un)
 {
     xmlDocPtr doc = ::xmlNewDoc(0);
     if(doc == 0) {
-        throw element_error("allocation failed");
+        throw memory_error();
     }
 
     xmlNodePtr node = ::xmlNewDocNode(doc, 0,
         (const xmlChar *)(un.tag().c_str()), 0);
     if(node == 0) {
-        throw element_error("allocation failed");
+        throw memory_error();
     }
     ::xmlDocSetRootElement(doc, node);
     proxy_ = NodeProxy::ref_node(node);
@@ -431,7 +433,7 @@ Element::Element(const UniversalName &un)
         xmlNsPtr ns = ::xmlNewNs(node, (xmlChar *)un.ns().c_str(), 0);
         if(ns == 0) {
             ::xmlFreeNode(node);
-            throw element_error("allocation failed");
+            throw memory_error();
         }
         ::xmlSetNs(node, ns);
     }
@@ -497,7 +499,7 @@ Element Element::operator[] (size_t i)
         }
         cur = cur->next;
         if(! cur) {
-            throw element_error("operator[] out of bounds");
+            throw out_of_bounds_error();
         }
     }
     return Element(NodeProxy::ref_node(cur));
@@ -526,7 +528,7 @@ void Element::append(Element &e)
         std::cout << "appending " << e.proxy_->node;
         std::cout << " to " << proxy_->node << std::endl;
         if(isIndirectParent(e)) {
-            throw element_error("cannot append indirect parent to child");
+            throw cyclical_tree_error();
         }
         ::xmlUnlinkNode(e.proxy_->node);
         ::xmlAddChild(proxy_->node, e.proxy_->node);
@@ -644,7 +646,7 @@ std::string tostring(const Element &e)
 Element SubElement(Element &parent, const UniversalName &uname)
 {
     if(! parent) {
-        throw element_error("cannot create sub-element on empty element.");
+        throw empty_element_error();
     }
 
     Element elem(uname);

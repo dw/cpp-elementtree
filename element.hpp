@@ -3,14 +3,8 @@
 #define ETREE_ELEMENT_H
 
 #include <iostream>
-#include <algorithm>
 #include <cstdio>
-#include <cstring>
 #include <vector>
-#include <cassert>
-#include <utility>
-
-#include "exceptions.hpp"
 
 
 namespace etree {
@@ -120,11 +114,16 @@ class Element
 #define DEFINE_EXCEPTION(name)                          \
     struct name : public std::runtime_error {           \
         name() : std::runtime_error("etree::"#name) {}  \
-    }
+    };
 
-DEFINE_EXCEPTION(uname_error)
-DEFINE_EXCEPTION(serialization_error)
+DEFINE_EXCEPTION(cyclical_tree_error)
 DEFINE_EXCEPTION(element_error)
+DEFINE_EXCEPTION(empty_element_error)
+DEFINE_EXCEPTION(memory_error)
+DEFINE_EXCEPTION(missing_namespace_error)
+DEFINE_EXCEPTION(out_of_bounds_error)
+DEFINE_EXCEPTION(serialization_error)
+DEFINE_EXCEPTION(uname_error)
 
 #undef DEFINE_EXCEPTION
 
