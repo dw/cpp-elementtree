@@ -15,4 +15,4 @@
     -L/usr/local/libxml2/lib \
     -I/usr/local/libxml2/include/libxml2 \
     \
-    b.cc element.cpp uname.cpp && ./b
+    b.cc element.cpp && ./b

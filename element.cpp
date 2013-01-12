@@ -1,13 +1,125 @@
 
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#include <libxml/xmlsave.h>
+
 #include "element.hpp"
 
 
 namespace etree {
 
 
+/// --------------------------------------
+/// libxml2 DOM reference counting classes
+/// --------------------------------------
+
+struct DocProxy
+{
+    xmlDocPtr doc;
+    unsigned int refs;
+
+    DocProxy(xmlDocPtr doc) : doc(doc), refs(1)
+    {
+        assert(! doc->_private);
+        doc->_private = static_cast<void *>(this);
+    }
+
+    ~DocProxy()
+    {
+        doc->_private = 0;
+        xmlFreeDoc(doc);
+    }
+
+    void ref()
+    {
+        refs++;
+        std::cout << "!! DocProxy::ref() now " << refs << std::endl;
+    }
+
+    void unref()
+    {
+        refs--;
+        std::cout << "!! DocProxy::unref() now " << refs << std::endl;
+        if(! refs) {
+            std::cout << "@@ Deleting " << this << std::endl;
+            delete this;
+        }
+    }
+
+    static DocProxy *ref_doc(xmlDocPtr doc)
+    {
+        assert(doc);
+        DocProxy *proxy = static_cast<DocProxy *>(doc->_private);
+        if(proxy) {
+            proxy->ref();
+        } else {
+            proxy = new DocProxy(doc);
+        }
+        return proxy;
+    }
+};
+
+
+struct NodeProxy
+{
+    xmlNodePtr node;
+    DocProxy *doc_proxy;
+    unsigned int refs;
+
+    NodeProxy(xmlNodePtr node) : node(node), refs(1)
+    {
+        assert(! node->_private);
+        node->_private = static_cast<void *>(this);
+        doc_proxy = DocProxy::ref_doc(node->doc);
+    }
+
+    ~NodeProxy()
+    {
+        node->_private = 0;
+        doc_proxy->unref();
+    }
+
+    void ref()
+    {
+        assert(refs < 100);
+        refs++;
+        std::cout << "!! NodeProxy::ref() now " << refs << std::endl;
+    }
+
+    void unref()
+    {
+        refs--;
+        std::cout << "!! NodeProxy::unref() now " << refs << std::endl;
+        if(! refs) {
+            std::cout << "@@ Deleting " << this << std::endl;
+            delete this;
+        }
+    }
+
+    static NodeProxy *ref_node(xmlNodePtr node)
+    {
+        assert(node);
+        NodeProxy *proxy = static_cast<NodeProxy *>(node->_private);
+        if(proxy) {
+            proxy->ref();
+        } else {
+            proxy = new NodeProxy(node);
+        }
+        return proxy;
+    }
+};
+
+
 /// -------------------------
 /// Internal helper functions
 /// -------------------------
+
+
+static const xmlChar *c_str(const std::string &s)
+{
+    return (const xmlChar *) (s.empty() ? 0 : s.c_str());
+}
+
 
 static xmlNodePtr _textNodeOrSkip(xmlNodePtr node)
 {
@@ -76,13 +188,175 @@ static std::string _collectText(xmlNodePtr node)
 }
 
 
+static const xmlNsPtr findNs_(xmlNodePtr node, const std::string &ns)
+{
+    if(! ns.size()) {
+        return 0;
+    }
+    xmlNsPtr p = node->nsDef;
+    while(p) {
+        if(ns == (const char *) p->href) {
+            return p;
+        }
+    }
+    throw element_error("could not find ns");
+}
+
+
+/// -----------------------
+/// UniversalName functions
+/// -----------------------
+
+
+void UniversalName::from_string(const std::string &uname)
+{
+    if(uname.size() > 0 && uname[0] == '{') {
+        size_t e = uname.find('}');
+        if(e == std::string::npos) {
+            throw uname_error();
+        } else if(uname.size() - 1 == e) {
+            throw uname_error();
+        }
+        ns_ = uname.substr(1, e - 1);
+        tag_ = uname.substr(e + 1);
+        if(tag_.size() == 0) {
+            throw uname_error();
+        }
+    } else {
+        ns_ = "";
+        tag_ = uname;
+    }
+}
+
+
+UniversalName::UniversalName(const std::string &ns, const std::string &tag)
+    : ns_(ns)
+    , tag_(tag)
+{
+}
+
+
+UniversalName::UniversalName(const UniversalName &other)
+    : ns_(other.ns_)
+    , tag_(other.tag_)
+{
+}
+
+
+UniversalName::UniversalName(const std::string &uname)
+{
+    from_string(uname);
+}
+
+
+UniversalName::UniversalName(const char *uname)
+{
+    from_string(uname);
+}
+
+
+const std::string &UniversalName::tag() const
+{
+    return tag_;
+}
+
+
+const std::string &UniversalName::ns() const
+{
+    return ns_;
+}
+
+
+bool UniversalName::operator=(const UniversalName &other)
+{
+    return other.tag_ == tag_ && other.ns_ == ns_;
+}
+
+
+typedef int dave;
+typedef int dave;
+
+
+/// -----------------
+/// AttrMap functions
+/// -----------------
+
+AttrMap::AttrMap(NodeProxy *proxy)
+    : proxy_(proxy)
+{
+    if(proxy_) {
+        proxy_->ref();
+    }
+}
+
+
+AttrMap::~AttrMap()
+{
+    if(proxy_) {
+        proxy_->unref();
+    }
+}
+
+
+bool AttrMap::has(const UniversalName &un) const
+{
+    if(! proxy_) {
+        return false;
+    }
+    return ::xmlHasNsProp(proxy_->node, c_str(un.tag()), c_str(un.ns()));
+}
+
+
+std::string AttrMap::get(const UniversalName &un,
+                         const std::string &default_) const
+{
+    if(! proxy_) {
+        return default_;
+    }
+    std::string out(default_);
+    const char *s = (const char *)
+        ::xmlGetNsProp(proxy_->node, c_str(un.tag()), c_str(un.ns()));
+
+    if(s) {
+        out = s;
+        ::xmlFree((void *) s);
+    }
+    return out;
+}
+
+
+void AttrMap::set(const UniversalName &un, const std::string &s)
+{
+    if(proxy_) {
+        ::xmlSetNsProp(proxy_->node,
+           findNs_(proxy_->node, un.ns()), c_str(un.tag()), c_str(s));
+    }
+}
+
+
+std::vector<UniversalName> AttrMap::keys() const
+{
+    std::vector<UniversalName> names;
+    if(! proxy_) {
+        return names;
+    }
+    xmlAttrPtr p = proxy_->node->properties;
+    while(p) {
+        const char *ns = p->ns ? (const char *)p->ns->href : "";
+        names.push_back(UniversalName(ns, (const char *)p->name));
+        p = p->next;
+    }
+    return names;
+}
+
+
 /// ---------------------
 /// ElementTree functions
 /// ---------------------
 
 ElementTree::~ElementTree()
 {
-    if(doc_) {
+    if(proxy_) {
         proxy_->unref();
     }
 }
@@ -90,7 +364,6 @@ ElementTree::~ElementTree()
 
 ElementTree::ElementTree()
     : proxy_(0)
-    , doc_(0)
 {
 }
 
@@ -103,7 +376,7 @@ ElementTree::ElementTree()
 
 Element::~Element()
 {
-    if(node_) {
+    if(proxy_) {
         proxy_->unref();
     }
 }
@@ -111,33 +384,31 @@ Element::~Element()
 
 Element::Element()
     : proxy_(0)
-    , node_(0)
 {
 }
 
 
 Element::Element(const Element &e)
-    : node_(e.node_)
+    : proxy_(e.proxy_)
 {
-    proxy_ = node_ ? NodeProxy::ref_node(node_) : 0;
+    if(proxy_) {
+        proxy_->ref();
+    }
 }
 
 
 #if __cplusplus >= 201103L
 Element::Element(Element &&e)
-    : node_(e.node_)
-    , proxy_(e.proxy_)
+    : proxy_(e.proxy_)
 {
-    e.node_ = 0;
     e.proxy_ = 0;
 }
 #endif
 
 
-Element::Element(xmlNodePtr node)
-    : node_(node)
+Element::Element(NodeProxy *proxy)
+    : proxy_(proxy)
 {
-    proxy_ = NodeProxy::ref_node(node_);
 }
 
 
@@ -148,30 +419,28 @@ Element::Element(const UniversalName &un)
         throw element_error("allocation failed");
     }
 
-    node_ = ::xmlNewDocNode(doc, 0,
+    xmlNodePtr node = ::xmlNewDocNode(doc, 0,
         (const xmlChar *)(un.tag().c_str()), 0);
-    if(node_ == 0) {
+    if(node == 0) {
         throw element_error("allocation failed");
     }
-    ::xmlDocSetRootElement(doc, node_);
-    proxy_ = NodeProxy::ref_node(node_);
+    ::xmlDocSetRootElement(doc, node);
+    proxy_ = NodeProxy::ref_node(node);
 
     if(un.ns().size()) {
-        xmlNsPtr ns = ::xmlNewNs(node_,
-                                 (xmlChar *)un.ns().c_str(), 0);
+        xmlNsPtr ns = ::xmlNewNs(node, (xmlChar *)un.ns().c_str(), 0);
         if(ns == 0) {
-            ::xmlFreeNode(node_);
-            node_ = 0;
+            ::xmlFreeNode(node);
             throw element_error("allocation failed");
         }
-        ::xmlSetNs(node_, ns);
+        ::xmlSetNs(node, ns);
     }
 }
 
 
 size_t Element::size() const
 {
-    return ::xmlChildElementCount(node_);
+    return ::xmlChildElementCount(proxy_->node);
 }
 
 
@@ -183,14 +452,14 @@ UniversalName Element::uname() const
 
 const char *Element::tag() const
 {
-    return node_ ? (const char *) node_->name : "";
+    return proxy_ ? (const char *) proxy_->node->name : "";
 }
 
 
 const char *Element::ns() const
 {
-    if(node_ && node_->nsDef) {
-        return (const char *) node_->nsDef->href;
+    if(proxy_ && proxy_->node->nsDef) {
+        return (const char *) proxy_->node->nsDef->href;
     }
     return "";
 }
@@ -198,7 +467,7 @@ const char *Element::ns() const
 
 AttrMap Element::attrib() const
 {
-    return AttrMap(node_);
+    return AttrMap(proxy_);
 }
 
 
@@ -211,13 +480,17 @@ std::string Element::get(const UniversalName &un,
 
 Element::operator bool() const
 {
-    return node_ != 0;
+    return proxy_ != 0;
 }
 
 
 Element Element::operator[] (size_t i)
 {
-    xmlNodePtr cur = node_->children;
+    if(! proxy_) {
+        return Element();
+    }
+
+    xmlNodePtr cur = proxy_->node->children;
     while(i) {
         if(cur->type == XML_ELEMENT_NODE) {
             i--;
@@ -227,16 +500,17 @@ Element Element::operator[] (size_t i)
             throw element_error("operator[] out of bounds");
         }
     }
-    return Element(cur);
+    return Element(NodeProxy::ref_node(cur));
 }
 
 
 bool Element::isIndirectParent(const Element &e)
 {
-    if(node_) {
-        xmlNodePtr parent = node_->parent;
+    if(proxy_ && e.proxy_) {
+        xmlNodePtr other = e.proxy_->node;
+        xmlNodePtr parent = proxy_->node->parent;
         while(parent) {
-            if(parent == e.node_) {
+            if(parent == other) {
                 return true;
             }
             parent = parent->parent;
@@ -248,73 +522,118 @@ bool Element::isIndirectParent(const Element &e)
 
 void Element::append(Element &e)
 {
-    std::cout << "appending " << e.node_ << " to " << node_ << std::endl;
-    if((! *this) || isIndirectParent(e)) {
-        throw element_error("cannot append indirect parent to child");
+    if(proxy_ && e.proxy_) {
+        std::cout << "appending " << e.proxy_->node;
+        std::cout << " to " << proxy_->node << std::endl;
+        if(isIndirectParent(e)) {
+            throw element_error("cannot append indirect parent to child");
+        }
+        ::xmlUnlinkNode(e.proxy_->node);
+        ::xmlAddChild(proxy_->node, e.proxy_->node);
     }
-    ::xmlUnlinkNode(e.node_);
-    ::xmlAddChild(node_, e.node_);
 }
 
 
 void Element::insert(size_t i, Element &e)
 {
-    if(i == size()) {
-        append(e);
-    } else {
-        ::xmlAddPrevSibling(this[i].node_, e.node_);
+    if(proxy_ && e.proxy_) {
+        if(i == size()) {
+            append(e);
+        } else {
+            ::xmlAddPrevSibling(this[i].proxy_->node, e.proxy_->node);
+        }
     }
 }
 
 
 void Element::remove(Element &e)
 {
-    if(e.node_->parent == node_) {
-        ::xmlUnlinkNode(e.node_);
+    if(proxy_ && e.proxy_) {
+        if(e.proxy_->node->parent == proxy_->node) {
+            ::xmlUnlinkNode(e.proxy_->node);
+        }
     }
 }
 
 
 Element Element::getparent() const
 {
-    if(node_->parent && node_->parent->type != XML_DOCUMENT_NODE) {
-        return Element(node_->parent);
+    if(proxy_->node && proxy_->node->parent &&
+            proxy_->node->parent->type != XML_DOCUMENT_NODE) {
+        return Element(NodeProxy::ref_node(proxy_->node->parent));
     }
     return Element();
 }
 
 
-xmlNodePtr Element::_node() const
+NodeProxy *Element::proxy() const
 {
-    return node_;
+    return proxy_;
 }
 
 
 std::string Element::text() const
 {
-    return node_ ? _collectText(node_->children) : "";
+    return proxy_ ? _collectText(proxy_->node->children) : "";
 }
 
 
 void Element::text(const std::string &s)
 {
-    if(node_) {
-        _setNodeText(node_, s);
+    if(proxy_) {
+        _setNodeText(proxy_->node, s);
     }
 }
 
 
 std::string Element::tail() const
 {
-    return node_ ? _collectText(node_->next) : "";
+    return proxy_ ? _collectText(proxy_->node->next) : "";
 }
 
 
 void Element::tail(const std::string &s)
 {
-    if(node_) {
-        _setTailText(node_, s);
+    if(proxy_) {
+        _setTailText(proxy_->node, s);
     }
+}
+
+
+/// -------------------------
+/// tostring() implementation
+/// -------------------------
+
+
+static int writeCallback(void *ctx, const char *buffer, int len)
+{
+    std::string *s = static_cast<std::string *>(ctx);
+    s->append(buffer, len);
+    return len;
+}
+
+
+static int closeCallback(void *ctx)
+{
+    return 0;
+}
+
+
+std::string tostring(const Element &e)
+{
+    NodeProxy *proxy = e.proxy();
+    std::string out;
+    if(proxy) {
+        xmlSaveCtxtPtr ctx = ::xmlSaveToIO(writeCallback, closeCallback,
+            static_cast<void *>(&out), 0, 0);
+
+        int ret = ::xmlSaveTree(ctx, proxy->node);
+        ::xmlSaveClose(ctx);
+        if(ret == -1) {
+            throw serialization_error();
+        }
+    }
+    return out;
 }
 
 
@@ -337,42 +656,24 @@ Element SubElement(Element &parent, const UniversalName &uname)
 Element fromstring(const std::string &s)
 {
     xmlDocPtr doc = ::xmlReadMemory(s.data(), s.size(), 0, 0, 0);
-    if(! doc) {
+    if(! (doc && doc->children)) {
         return Element();
     }
 
-    return Element(doc->children);
+    return Element(NodeProxy::ref_node(doc->children));
 }
 
 
-static int writeCallback(void *ctx, const char *buffer, int len)
-{
-    std::string *s = static_cast<std::string *>(ctx);
-    s->append(buffer, len);
-    return len;
-}
+/// ----------------------
+/// parse() implementation
+/// ----------------------
 
 
-static int closeCallback(void *ctx)
-{
-    return 0;
-}
 
 
-std::string tostring(const Element &e)
-{
-    std::string out;
-    xmlSaveCtxtPtr ctx = ::xmlSaveToIO(writeCallback, closeCallback,
-        static_cast<void *>(&out), 0, 0);
-
-    int ret = ::xmlSaveTree(ctx, e._node());
-    ::xmlSaveClose(ctx);
-    if(ret == -1) {
-        throw serialization_error();
-    }
-
-    return out;
-}
+/// -----------------
+/// iostreams support
+/// -----------------
 
 
 std::ostream &operator<< (std::ostream &out, const Element &elem)
@@ -383,6 +684,16 @@ std::ostream &operator<< (std::ostream &out, const Element &elem)
     } else {
         out << "<empty Element>";
     }
+    return out;
+}
+
+
+std::ostream& operator<< (std::ostream& out, const UniversalName& un)
+{
+    if(un.ns().size()) {
+        out << "{" << un.ns() << "}";
+    }
+    out << un.tag();
     return out;
 }
 
