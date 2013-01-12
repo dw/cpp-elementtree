@@ -215,14 +215,14 @@ void QName::from_string(const std::string &uname)
     if(uname.size() > 0 && uname[0] == '{') {
         size_t e = uname.find('}');
         if(e == std::string::npos) {
-            throw uname_error();
+            throw qname_error();
         } else if(uname.size() - 1 == e) {
-            throw uname_error();
+            throw qname_error();
         }
         ns_ = uname.substr(1, e - 1);
         tag_ = uname.substr(e + 1);
         if(tag_.size() == 0) {
-            throw uname_error();
+            throw qname_error();
         }
     } else {
         ns_ = "";

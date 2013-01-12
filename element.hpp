@@ -121,7 +121,7 @@ DEFINE_EXCEPTION(memory_error)
 DEFINE_EXCEPTION(missing_namespace_error)
 DEFINE_EXCEPTION(out_of_bounds_error)
 DEFINE_EXCEPTION(serialization_error)
-DEFINE_EXCEPTION(uname_error)
+DEFINE_EXCEPTION(qname_error)
 
 #undef DEFINE_EXCEPTION
 
