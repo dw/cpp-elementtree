@@ -205,12 +205,12 @@ static const xmlNsPtr findNs_(xmlNodePtr node, const std::string &ns)
 }
 
 
-/// -----------------------
-/// UniversalName functions
-/// -----------------------
+/// ---------------
+/// QName functions
+/// ---------------
 
 
-void UniversalName::from_string(const std::string &uname)
+void QName::from_string(const std::string &uname)
 {
     if(uname.size() > 0 && uname[0] == '{') {
         size_t e = uname.find('}');
@@ -231,45 +231,45 @@ void UniversalName::from_string(const std::string &uname)
 }
 
 
-UniversalName::UniversalName(const std::string &ns, const std::string &tag)
+QName::QName(const std::string &ns, const std::string &tag)
     : ns_(ns)
     , tag_(tag)
 {
 }
 
 
-UniversalName::UniversalName(const UniversalName &other)
+QName::QName(const QName &other)
     : ns_(other.ns_)
     , tag_(other.tag_)
 {
 }
 
 
-UniversalName::UniversalName(const std::string &uname)
+QName::QName(const std::string &uname)
 {
     from_string(uname);
 }
 
 
-UniversalName::UniversalName(const char *uname)
+QName::QName(const char *uname)
 {
     from_string(uname);
 }
 
 
-const std::string &UniversalName::tag() const
+const std::string &QName::tag() const
 {
     return tag_;
 }
 
 
-const std::string &UniversalName::ns() const
+const std::string &QName::ns() const
 {
     return ns_;
 }
 
 
-bool UniversalName::operator=(const UniversalName &other)
+bool QName::operator=(const QName &other)
 {
     return other.tag_ == tag_ && other.ns_ == ns_;
 }
@@ -300,7 +300,7 @@ AttrMap::~AttrMap()
 }
 
 
-bool AttrMap::has(const UniversalName &un) const
+bool AttrMap::has(const QName &un) const
 {
     if(! proxy_) {
         return false;
@@ -309,7 +309,7 @@ bool AttrMap::has(const UniversalName &un) const
 }
 
 
-std::string AttrMap::get(const UniversalName &un,
+std::string AttrMap::get(const QName &un,
                          const std::string &default_) const
 {
     if(! proxy_) {
@@ -327,7 +327,7 @@ std::string AttrMap::get(const UniversalName &un,
 }
 
 
-void AttrMap::set(const UniversalName &un, const std::string &s)
+void AttrMap::set(const QName &un, const std::string &s)
 {
     if(proxy_) {
         ::xmlSetNsProp(proxy_->node,
@@ -336,16 +336,16 @@ void AttrMap::set(const UniversalName &un, const std::string &s)
 }
 
 
-std::vector<UniversalName> AttrMap::keys() const
+std::vector<QName> AttrMap::keys() const
 {
-    std::vector<UniversalName> names;
+    std::vector<QName> names;
     if(! proxy_) {
         return names;
     }
     xmlAttrPtr p = proxy_->node->properties;
     while(p) {
         const char *ns = p->ns ? (const char *)p->ns->href : "";
-        names.push_back(UniversalName(ns, (const char *)p->name));
+        names.push_back(QName(ns, (const char *)p->name));
         p = p->next;
     }
     return names;
@@ -414,7 +414,7 @@ Element::Element(NodeProxy *proxy)
 }
 
 
-Element::Element(const UniversalName &un)
+Element::Element(const QName &un)
 {
     xmlDocPtr doc = ::xmlNewDoc(0);
     if(doc == 0) {
@@ -446,9 +446,9 @@ size_t Element::size() const
 }
 
 
-UniversalName Element::uname() const
+QName Element::uname() const
 {
-    return UniversalName(ns(), tag());
+    return QName(ns(), tag());
 }
 
 
@@ -473,7 +473,7 @@ AttrMap Element::attrib() const
 }
 
 
-std::string Element::get(const UniversalName &un,
+std::string Element::get(const QName &un,
                          const std::string &default_) const
 {
     return attrib().get(un, default_);
@@ -643,7 +643,7 @@ std::string tostring(const Element &e)
 /// Helper functions
 /// ----------------
 
-Element SubElement(Element &parent, const UniversalName &uname)
+Element SubElement(Element &parent, const QName &uname)
 {
     if(! parent) {
         throw empty_element_error();
@@ -690,7 +690,7 @@ std::ostream &operator<< (std::ostream &out, const Element &elem)
 }
 
 
-std::ostream& operator<< (std::ostream& out, const UniversalName& un)
+std::ostream& operator<< (std::ostream& out, const QName& un)
 {
     if(un.ns().size()) {
         out << "{" << un.ns() << "}";

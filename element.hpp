@@ -15,9 +15,9 @@ class DocProxy;
 class Element;
 class ElementTree;
 class NodeProxy;
-class UniversalName;
+class QName;
 
-Element SubElement(Element &parent, const UniversalName &uname);
+Element SubElement(Element &parent, const QName &uname);
 Element fromstring(const std::string &s);
 std::string tostring(const Element &e);
 ElementTree parse(FILE *fp);
@@ -26,24 +26,24 @@ ElementTree parse(const std::string &path);
 ElementTree parse(int fd);
 
 std::ostream &operator<< (std::ostream &out, const Element &elem);
-std::ostream &operator<< (std::ostream &out, const UniversalName &un);
+std::ostream &operator<< (std::ostream &out, const QName &un);
 
 
-class UniversalName {
+class QName {
     std::string ns_;
     std::string tag_;
 
     void from_string(const std::string &uname);
 
     public:
-    UniversalName(const std::string &ns, const std::string &tag);
-    UniversalName(const UniversalName &other);
-    UniversalName(const std::string &uname);
-    UniversalName(const char *uname);
+    QName(const std::string &ns, const std::string &tag);
+    QName(const QName &other);
+    QName(const std::string &uname);
+    QName(const char *uname);
 
     const std::string &tag() const;
     const std::string &ns() const;
-    bool operator=(const UniversalName &other);
+    bool operator=(const QName &other);
 };
 
 
@@ -55,11 +55,10 @@ class AttrMap
     ~AttrMap();
     AttrMap(NodeProxy *proxy);
 
-    bool has(const UniversalName &un) const;
-    std::string get(const UniversalName &un,
-                    const std::string &default_="") const;
-    void set(const UniversalName &un, const std::string &s);
-    std::vector<UniversalName> keys() const;
+    bool has(const QName &un) const;
+    std::string get(const QName &un, const std::string &default_="") const;
+    void set(const QName &un, const std::string &s);
+    std::vector<QName> keys() const;
 };
 
 
@@ -82,19 +81,18 @@ class Element
     Element();
     Element(const Element &e);
     Element(NodeProxy *node);
-    Element(const UniversalName &un);
+    Element(const QName &un);
 
     #if __cplusplus >= 201103L
     Element(Element &&e);
     #endif
 
     size_t size() const;
-    UniversalName uname() const;
+    QName uname() const;
     const char *tag() const;
     const char *ns() const;
     AttrMap attrib() const;
-    std::string get(const UniversalName &un,
-                    const std::string &default_="") const;
+    std::string get(const QName &un, const std::string &default_="") const;
     operator bool() const;
     Element operator[] (size_t i);
     bool isIndirectParent(const Element &e);
