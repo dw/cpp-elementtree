@@ -1,31 +1,32 @@
 
+#ifndef ETREE_ELEMENT_H
+#define ETREE_ELEMENT_H
+
+#include <iostream>
 #include <algorithm>
 #include <cstring>
 #include <vector>
 #include <cassert>
-#include <stdexcept>
 #include <utility>
 
-#include "deleter.hpp"
+#include "exceptions.hpp"
 #include "uname.hpp"
+
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#include <libxml/xmlsave.h>
 
 
 namespace etree {
 
 
-class DocProxy;
-class NodeProxy;
 class Element;
 Element SubElement(Element &parent, const UniversalName &uname);
+Element fromstring(const std::string &s);
+std::string tostring(const Element &e);
 
 
-struct element_error : public std::runtime_error
-{
-    element_error(const char *s) : std::runtime_error(s) {}
-};
-
-
-struct DocProxy
+class DocProxy
 {
     xmlDocPtr doc;
     unsigned int refs;
@@ -38,10 +39,11 @@ struct DocProxy
 
     ~DocProxy()
     {
-        doc->_private = nullptr;
+        doc->_private = 0;
         xmlFreeDoc(doc);
     }
 
+    public:
     void ref()
     {
         refs++;
@@ -61,7 +63,7 @@ struct DocProxy
     static DocProxy *ref_doc(xmlDocPtr doc)
     {
         assert(doc);
-        auto proxy = static_cast<DocProxy *>(doc->_private);
+        DocProxy *proxy = static_cast<DocProxy *>(doc->_private);
         if(proxy) {
             proxy->ref();
         } else {
@@ -72,7 +74,7 @@ struct DocProxy
 };
 
 
-struct NodeProxy
+class NodeProxy
 {
     xmlNodePtr node;
     DocProxy *doc_proxy;
@@ -87,10 +89,11 @@ struct NodeProxy
 
     ~NodeProxy()
     {
-        node->_private = nullptr;
+        node->_private = 0;
         doc_proxy->unref();
     }
 
+    public:
     void ref()
     {
         assert(refs < 100);
@@ -111,7 +114,7 @@ struct NodeProxy
     static NodeProxy *ref_node(xmlNodePtr node)
     {
         assert(node);
-        auto proxy = static_cast<NodeProxy *>(node->_private);
+        NodeProxy *proxy = static_cast<NodeProxy *>(node->_private);
         if(proxy) {
             proxy->ref();
         } else {
@@ -124,21 +127,19 @@ struct NodeProxy
 
 class AttrMap
 {
-    friend Element;
+    friend class Element;
 
-    NodeProxy *proxy_ = 0;
+    NodeProxy *proxy_;
     xmlNodePtr node_;
 
     AttrMap(xmlNodePtr node) : node_(node)
     {
-        if(node_) {
-            proxy_ = NodeProxy::ref_node(node_);
-        }
+        proxy_ = node_ ? NodeProxy::ref_node(node_) : 0;
     }
 
     static const xmlChar *c_str(const std::string &s)
     {
-        return (const xmlChar *) (s.empty() ? nullptr : s.c_str());
+        return (const xmlChar *) (s.empty() ? 0 : s.c_str());
     }
 
     public:
@@ -176,7 +177,7 @@ class AttrMap
     const xmlNsPtr findNs_(const std::string &ns)
     {
         if(! ns.size()) {
-            return nullptr;
+            return 0;
         }
         xmlNsPtr p = node_->nsDef;
         while(p) {
@@ -203,7 +204,7 @@ class AttrMap
         xmlAttrPtr p = node_->properties;
         while(p) {
             const char *ns = p->ns ? (const char *)p->ns->href : "";
-            names.emplace_back(ns, (const char *)p->name);
+            names.push_back(UniversalName(ns, (const char *)p->name));
             p = p->next;
         }
         return names;
@@ -213,8 +214,8 @@ class AttrMap
 
 class Element
 {
-    NodeProxy *proxy_ = nullptr;
-    xmlNodePtr node_ = nullptr;
+    NodeProxy *proxy_;
+    xmlNodePtr node_;
 
     public:
     ~Element()
@@ -224,19 +225,19 @@ class Element
         }
     }
 
-    Element() {}
+    Element() : proxy_(0), node_(0) {}
     Element(const Element &e) : node_(e.node_)
     {
-        if(node_) {
-            proxy_ = NodeProxy::ref_node(node_);
-        }
+        proxy_ = node_ ? NodeProxy::ref_node(node_) : 0;
     }
 
+    /*
     Element(Element &&e) : node_(e.node_), proxy_(e.proxy_)
     {
-        e.node_ = nullptr;
-        e.proxy_ = nullptr;
+        e.node_ = 0;
+        e.proxy_ = 0;
     }
+    */
 
     Element(xmlNodePtr node) : node_(node) {
         proxy_ = NodeProxy::ref_node(node_);
@@ -244,14 +245,14 @@ class Element
 
     Element(const UniversalName &un)
     {
-        xmlDocPtr doc = ::xmlNewDoc(nullptr);
-        if(doc == nullptr) {
+        xmlDocPtr doc = ::xmlNewDoc(0);
+        if(doc == 0) {
             throw element_error("allocation failed");
         }
 
-        node_ = ::xmlNewDocNode(doc, nullptr,
-            (const xmlChar *)(un.tag().c_str()), nullptr);
-        if(node_ == nullptr) {
+        node_ = ::xmlNewDocNode(doc, 0,
+            (const xmlChar *)(un.tag().c_str()), 0);
+        if(node_ == 0) {
             throw element_error("allocation failed");
         }
         ::xmlDocSetRootElement(doc, node_);
@@ -259,10 +260,10 @@ class Element
 
         if(un.ns().size()) {
             xmlNsPtr ns = ::xmlNewNs(node_,
-                                     (xmlChar *)un.ns().c_str(), nullptr);
-            if(ns == nullptr) {
+                                     (xmlChar *)un.ns().c_str(), 0);
+            if(ns == 0) {
                 ::xmlFreeNode(node_);
-                node_ = nullptr;
+                node_ = 0;
                 throw element_error("allocation failed");
             }
             ::xmlSetNs(node_, ns);
@@ -276,7 +277,7 @@ class Element
 
     UniversalName uname() const
     {
-        return {ns(), tag()};
+        return UniversalName(ns(), tag());
     }
 
     const char *tag() const
@@ -298,7 +299,7 @@ class Element
 
     AttrMap attrib() const
     {
-        return {node_};
+        return AttrMap(node_);
     }
 
     std::string get(const UniversalName &un,
@@ -310,7 +311,7 @@ class Element
 
     operator bool() const
     {
-        return node_ != nullptr;
+        return node_ != 0;
     }
 
     Element operator[] (size_t i)
@@ -325,7 +326,7 @@ class Element
                 throw element_error("operator[] out of bounds");
             }
         }
-        return {cur};
+        return Element(cur);
     }
 
     bool isIndirectParent(const Element &e)
@@ -371,9 +372,9 @@ class Element
     Element getparent() const
     {
         if(node_->parent && node_->parent->type != XML_DOCUMENT_NODE) {
-            return {node_->parent};
+            return Element(node_->parent);
         }
-        return {};
+        return Element();
     }
 
     //
@@ -393,10 +394,10 @@ class Element
                     node = node->next;
                     break;
                 default:
-                    return nullptr;
+                    return 0;
             }
         }
-        return nullptr;
+        return 0;
     }
 
     std::string _collectText(xmlNodePtr node) const
@@ -426,7 +427,7 @@ class Element
         // TODO: CDATA
         if(s.size()) {
             xmlNodePtr text = ::xmlNewText((xmlChar *) s.c_str());
-            assert(text != nullptr);
+            assert(text != 0);
             if(node->children) {
                 ::xmlAddPrevSibling(node->children, text);
             } else {
@@ -440,12 +441,17 @@ class Element
         _removeText(node->next);
         if(s.size()) {
             xmlNodePtr text = ::xmlNewText((xmlChar *) s.c_str());
-            assert(text != nullptr);
+            assert(text != 0);
             ::xmlAddNextSibling(node, text);
         }
     }
 
     public:
+    xmlNodePtr _node() const
+    {
+        return node_;
+    }
+
     std::string text() const
     {
         return node_ ? _collectText(node_->children) : "";
@@ -472,28 +478,7 @@ class Element
 };
 
 
-template<class T>
-void dumpVector(const char *s, T v)
-{
-    int i = 0;
-    std::cout << s << ":" << std::endl;
-    for(auto e : v) {
-        std::cout << "vector " << i++ << ": " << e << std::endl;
-    }
-    std::cout << std::endl;
-}
-
-
-Element SubElement(Element &parent, const UniversalName &uname)
-{
-    if(! parent) {
-        throw element_error("cannot create sub-element on empty element.");
-    }
-
-    Element elem(uname);
-    parent.append(elem);
-    return elem;
-}
-
-
 } // namespace
+
+
+#endif
