@@ -117,6 +117,18 @@ class Element
 };
 
 
+#define DEFINE_EXCEPTION(name)                          \
+    struct name : public std::runtime_error {           \
+        name() : std::runtime_error("etree::"#name) {}  \
+    }
+
+DEFINE_EXCEPTION(uname_error)
+DEFINE_EXCEPTION(serialization_error)
+DEFINE_EXCEPTION(element_error)
+
+#undef DEFINE_EXCEPTION
+
+
 } // namespace
 
 
