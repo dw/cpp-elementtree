@@ -12,16 +12,16 @@
 #include <stdexcept>
 #include <vector>
 
+#include <libxml/tree.h>
+
 
 namespace etree {
 
 
 using std::string;
 class AttrMap;
-class DocProxy;
 class Element;
 class ElementTree;
-class NodeProxy;
 class QName;
 
 Element SubElement(Element &parent, const QName &qname);
@@ -79,11 +79,10 @@ class QName {
 
 class AttrIterator
 {
-    NodeProxy *proxy_;
-    int state;
+    xmlNodePtr node_;
 
     public:
-    AttrIterator(NodeProxy &proxy);
+    AttrIterator(xmlNodePtr elem);
     QName key();
     string value();
     bool next();
@@ -92,11 +91,11 @@ class AttrIterator
 
 class AttrMap
 {
-    NodeProxy &proxy_;
+    xmlNodePtr node_;
 
     public:
     ~AttrMap();
-    AttrMap(NodeProxy &proxy);
+    AttrMap(xmlNodePtr elem);
 
     bool has(const QName &qname) const;
     string get(const QName &qname, const string &default_="") const;
@@ -107,18 +106,18 @@ class AttrMap
 
 class ElementTree
 {
-    DocProxy &proxy_;
+    xmlDocPtr doc_;
 
     public:
     ~ElementTree();
     ElementTree();
-    ElementTree(struct DocProxy &proxy);
+    ElementTree(xmlDocPtr doc);
 };
 
 
 class Element
 {
-    NodeProxy &proxy_;
+    xmlNodePtr node_;
 
     // Never defined.
     Element();
@@ -127,7 +126,7 @@ class Element
     public:
     ~Element();
     Element(const Element &e);
-    Element(NodeProxy &node);
+    Element(xmlNodePtr node);
 
     static Element from_name(const QName &qname);
     Element(const QName &qname);
@@ -138,14 +137,17 @@ class Element
 
     size_t size() const;
     QName qname() const;
-    string tag() const;
-    string ns() const;
-    AttrMap attrib() const;
 
+    string tag() const;
+    void tag(const string &tag);
+
+    string ns() const;
+    void ns(const string &ns);
+
+    AttrMap attrib() const;
     string get(const QName &qname, const string &default_="") const;
 
     Element operator[] (size_t i);
-
     bool isIndirectParent(const Element &e);
     void append(Element &e);
     void insert(size_t i, Element &e);
@@ -156,7 +158,7 @@ class Element
     Nullable<Element> getprev() const;
     ElementTree getroottree() const;
 
-    NodeProxy &proxy() const;
+    xmlNodePtr _node() const;
     string text() const;
     void text(const string &s);
     string tail() const;
@@ -164,22 +166,22 @@ class Element
 };
 
 
-#define DEFINE_EXCEPTION(name)                          \
+#define EXCEPTION(name)                                 \
     struct name : public std::runtime_error {           \
         name() : std::runtime_error("etree::"#name) {}  \
     };
 
-DEFINE_EXCEPTION(cyclical_tree_error)
-DEFINE_EXCEPTION(element_error)
-DEFINE_EXCEPTION(parse_error)
-DEFINE_EXCEPTION(memory_error)
-DEFINE_EXCEPTION(missing_namespace_error)
-DEFINE_EXCEPTION(missing_value_error)
-DEFINE_EXCEPTION(out_of_bounds_error)
-DEFINE_EXCEPTION(qname_error)
-DEFINE_EXCEPTION(serialization_error)
+EXCEPTION(cyclical_tree_error)
+EXCEPTION(element_error)
+EXCEPTION(parse_error)
+EXCEPTION(memory_error)
+EXCEPTION(missing_namespace_error)
+EXCEPTION(missing_value_error)
+EXCEPTION(out_of_bounds_error)
+EXCEPTION(qname_error)
+EXCEPTION(serialization_error)
 
-#undef DEFINE_EXCEPTION
+#undef EXCEPTION
 
 
 } // namespace
