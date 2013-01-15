@@ -16,6 +16,7 @@
 namespace etree {
 
 
+using std::string;
 class AttrMap;
 class DocProxy;
 class Element;
@@ -24,16 +25,16 @@ class NodeProxy;
 class QName;
 
 Element SubElement(Element &parent, const QName &qname);
-Element fromstring(const std::string &s);
-Element XML(const std::string &s);
-std::string tostring(const Element &e);
+Element fromstring(const string &s);
+Element XML(const string &s);
+string tostring(const Element &e);
 ElementTree parse(std::istream &is);
-ElementTree parse(const std::string &path);
+ElementTree parse(const string &path);
 ElementTree parse(int fd);
 
 std::ostream &operator<< (std::ostream &out, const ElementTree &elem);
 std::ostream &operator<< (std::ostream &out, const Element &elem);
-std::ostream &operator<< (std::ostream &out, const QName &un);
+std::ostream &operator<< (std::ostream &out, const QName &qname);
 
 
 template<typename T>
@@ -55,23 +56,23 @@ class Nullable {
 };
 
 typedef Nullable<Element> NElement;
-typedef Nullable<std::string> NString;
+typedef Nullable<string> NString;
 
 
 class QName {
-    std::string ns_;
-    std::string tag_;
+    string ns_;
+    string tag_;
 
-    void from_string(const std::string &qname);
+    void from_string(const string &qname);
 
     public:
-    QName(const std::string &ns, const std::string &tag);
+    QName(const string &ns, const string &tag);
     QName(const QName &other);
-    QName(const std::string &qname);
+    QName(const string &qname);
     QName(const char *qname);
 
-    const std::string &tag() const;
-    const std::string &ns() const;
+    const string &tag() const;
+    const string &ns() const;
     bool operator=(const QName &other);
 };
 
@@ -82,50 +83,54 @@ class AttrIterator
     int state;
 
     public:
-    AttrIterator(NodeProxy *proxy);
+    AttrIterator(NodeProxy &proxy);
     QName key();
-    std::string value();
+    string value();
     bool next();
 };
 
 
 class AttrMap
 {
-    NodeProxy *proxy_;
+    NodeProxy &proxy_;
 
     public:
     ~AttrMap();
-    AttrMap(NodeProxy *proxy);
+    AttrMap(NodeProxy &proxy);
 
-    bool has(const QName &un) const;
-    std::string get(const QName &un, const std::string &default_="") const;
-    void set(const QName &un, const std::string &s);
+    bool has(const QName &qname) const;
+    string get(const QName &qname, const string &default_="") const;
+    void set(const QName &qname, const string &s);
     std::vector<QName> keys() const;
 };
 
 
 class ElementTree
 {
-    DocProxy *proxy_;
+    DocProxy &proxy_;
 
     public:
     ~ElementTree();
     ElementTree();
-    ElementTree(struct DocProxy *proxy);
-    operator bool() const;
+    ElementTree(struct DocProxy &proxy);
 };
 
 
 class Element
 {
-    NodeProxy *proxy_;
+    NodeProxy &proxy_;
+
+    // Never defined.
+    Element();
+    void operator=(const Element&);
 
     public:
     ~Element();
-    Element();
     Element(const Element &e);
-    Element(NodeProxy *node);
-    Element(const QName &un);
+    Element(NodeProxy &node);
+
+    static Element from_name(const QName &qname);
+    Element(const QName &qname);
 
     #if __cplusplus >= 201103L
     Element(Element &&e);
@@ -133,11 +138,12 @@ class Element
 
     size_t size() const;
     QName qname() const;
-    const char *tag() const;
-    const char *ns() const;
+    string tag() const;
+    string ns() const;
     AttrMap attrib() const;
-    std::string get(const QName &un, const std::string &default_="") const;
-    operator bool() const;
+
+    string get(const QName &qname, const string &default_="") const;
+
     Element operator[] (size_t i);
 
     bool isIndirectParent(const Element &e);
@@ -145,14 +151,16 @@ class Element
     void insert(size_t i, Element &e);
     void remove(Element &e);
 
-    Element getparent() const;
+    Nullable<Element> getnext() const;
+    Nullable<Element> getparent() const;
+    Nullable<Element> getprev() const;
     ElementTree getroottree() const;
 
-    NodeProxy *proxy() const;
-    std::string text() const;
-    void text(const std::string &s);
-    std::string tail() const;
-    void tail(const std::string &s);
+    NodeProxy &proxy() const;
+    string text() const;
+    void text(const string &s);
+    string tail() const;
+    void tail(const string &s);
 };
 
 
@@ -163,7 +171,7 @@ class Element
 
 DEFINE_EXCEPTION(cyclical_tree_error)
 DEFINE_EXCEPTION(element_error)
-DEFINE_EXCEPTION(empty_element_error)
+DEFINE_EXCEPTION(parse_error)
 DEFINE_EXCEPTION(memory_error)
 DEFINE_EXCEPTION(missing_namespace_error)
 DEFINE_EXCEPTION(missing_value_error)

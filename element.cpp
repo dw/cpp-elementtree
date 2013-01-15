@@ -40,7 +40,7 @@ Nullable<T>::Nullable(const Nullable<T> &val)
     : set_(val.set_)
 {
     if(set_) {
-        **this = *val;
+        new (reinterpret_cast<T *>(val_)) T(*val);
     }
 }
 
@@ -131,7 +131,7 @@ struct ProxyBase
         }
     }
 
-    static Q *get(T dom)
+    static Q &get(T dom)
     {
         assert(dom);
         Q *proxy = static_cast<Q *>(dom->_private);
@@ -140,7 +140,7 @@ struct ProxyBase
         } else {
             proxy = new Q(dom);
         }
-        return proxy;
+        return *proxy;
     }
 };
 
@@ -164,18 +164,18 @@ struct DocProxy
 struct NodeProxy
     : public ProxyBase<xmlNodePtr, NodeProxy>
 {
-    DocProxy *doc_proxy;
+    DocProxy &doc_proxy;
 
     NodeProxy(xmlNodePtr dom)
         : ProxyBase(dom)
+        , doc_proxy(DocProxy::get(dom->doc))
     {
-        doc_proxy = DocProxy::get(dom->doc);
     }
 
     virtual ~NodeProxy()
     {
         dom->_private = 0;
-        doc_proxy->unref();
+        doc_proxy.unref();
     }
 };
 
@@ -273,6 +273,34 @@ static const xmlNsPtr findNs_(xmlNodePtr node, const std::string &ns)
 }
 
 
+static NodeProxy &element_from_qname(const QName &qname)
+{
+    xmlDocPtr doc = ::xmlNewDoc(0);
+    if(doc == 0) {
+        throw memory_error();
+    }
+
+    xmlNodePtr node = ::xmlNewDocNode(doc, 0,
+        (const xmlChar *)(qname.tag().c_str()), 0);
+    if(! node) {
+        ::xmlFreeDoc(doc);
+        throw memory_error();
+    }
+    ::xmlDocSetRootElement(doc, node);
+
+    if(qname.ns().size()) {
+        xmlNsPtr ns = ::xmlNewNs(node, (xmlChar *)qname.ns().c_str(), 0);
+        if(ns == 0) {
+            ::xmlFreeDoc(doc);
+            throw memory_error();
+        }
+        ::xmlSetNs(node, ns);
+    }
+
+    return NodeProxy::get(node);
+}
+
+
 /// ---------------
 /// QName functions
 /// ---------------
@@ -347,8 +375,8 @@ bool QName::operator=(const QName &other)
 /// AttrMap iterators
 /// -----------------
 
-AttrIterator::AttrIterator(NodeProxy *proxy)
-    : proxy_(proxy)
+AttrIterator::AttrIterator(NodeProxy &proxy)
+    : proxy_(&proxy)
     , state(-1)
 {
 }
@@ -383,7 +411,7 @@ bool AttrIterator::next()
     if(! proxy_->dom->next) {
         return false;
     }
-    NodeProxy *new_ = NodeProxy::get(proxy_->dom->next);
+    NodeProxy *new_ = &NodeProxy::get(proxy_->dom->next);
     proxy_->unref();
     proxy_ = new_;
     return true;
@@ -394,41 +422,31 @@ bool AttrIterator::next()
 /// AttrMap functions
 /// -----------------
 
-AttrMap::AttrMap(NodeProxy *proxy)
+AttrMap::AttrMap(NodeProxy &proxy)
     : proxy_(proxy)
 {
-    if(proxy_) {
-        proxy_->ref();
-    }
+    proxy_.ref();
 }
 
 
 AttrMap::~AttrMap()
 {
-    if(proxy_) {
-        proxy_->unref();
-    }
+    proxy_.unref();
 }
 
 
-bool AttrMap::has(const QName &un) const
+bool AttrMap::has(const QName &qname) const
 {
-    if(! proxy_) {
-        return false;
-    }
-    return ::xmlHasNsProp(proxy_->dom, c_str(un.tag()), c_str(un.ns()));
+    return ::xmlHasNsProp(proxy_.dom, c_str(qname.tag()), c_str(qname.ns()));
 }
 
 
-std::string AttrMap::get(const QName &un,
+std::string AttrMap::get(const QName &qname,
                          const std::string &default_) const
 {
-    if(! proxy_) {
-        return default_;
-    }
     std::string out(default_);
     const char *s = (const char *)
-        ::xmlGetNsProp(proxy_->dom, c_str(un.tag()), c_str(un.ns()));
+        ::xmlGetNsProp(proxy_.dom, c_str(qname.tag()), c_str(qname.ns()));
 
     if(s) {
         out = s;
@@ -438,22 +456,17 @@ std::string AttrMap::get(const QName &un,
 }
 
 
-void AttrMap::set(const QName &un, const std::string &s)
+void AttrMap::set(const QName &qname, const std::string &s)
 {
-    if(proxy_) {
-        ::xmlSetNsProp(proxy_->dom,
-           findNs_(proxy_->dom, un.ns()), c_str(un.tag()), c_str(s));
-    }
+    ::xmlSetNsProp(proxy_.dom,
+       findNs_(proxy_.dom, qname.ns()), c_str(qname.tag()), c_str(s));
 }
 
 
 std::vector<QName> AttrMap::keys() const
 {
     std::vector<QName> names;
-    if(! proxy_) {
-        return names;
-    }
-    xmlAttrPtr p = proxy_->dom->properties;
+    xmlAttrPtr p = proxy_.dom->properties;
     while(p) {
         const char *ns = p->ns ? (const char *)p->ns->href : "";
         names.push_back(QName(ns, (const char *)p->name));
@@ -469,27 +482,13 @@ std::vector<QName> AttrMap::keys() const
 
 ElementTree::~ElementTree()
 {
-    if(proxy_) {
-        proxy_->unref();
-    }
+    proxy_.unref();
 }
 
 
-ElementTree::ElementTree()
-    : proxy_(0)
-{
-}
-
-
-ElementTree::ElementTree(DocProxy *proxy)
+ElementTree::ElementTree(DocProxy &proxy)
     : proxy_(proxy)
 {
-}
-
-
-ElementTree::operator bool() const
-{
-    return proxy_ != 0;
 }
 
 
@@ -499,24 +498,14 @@ ElementTree::operator bool() const
 
 Element::~Element()
 {
-    if(proxy_) {
-        proxy_->unref();
-    }
-}
-
-
-Element::Element()
-    : proxy_(0)
-{
+    proxy_.unref();
 }
 
 
 Element::Element(const Element &e)
     : proxy_(e.proxy_)
 {
-    if(proxy_) {
-        proxy_->ref();
-    }
+    proxy_.ref();
 }
 
 
@@ -529,41 +518,21 @@ Element::Element(Element &&e)
 #endif
 
 
-Element::Element(NodeProxy *proxy)
+Element::Element(NodeProxy &proxy)
     : proxy_(proxy)
 {
 }
 
 
-Element::Element(const QName &un)
+Element::Element(const QName &qname)
+    : proxy_(element_from_qname(qname))
 {
-    xmlDocPtr doc = ::xmlNewDoc(0);
-    if(doc == 0) {
-        throw memory_error();
-    }
-
-    xmlNodePtr node = ::xmlNewDocNode(doc, 0,
-        (const xmlChar *)(un.tag().c_str()), 0);
-    if(node == 0) {
-        throw memory_error();
-    }
-    ::xmlDocSetRootElement(doc, node);
-    proxy_ = NodeProxy::get(node);
-
-    if(un.ns().size()) {
-        xmlNsPtr ns = ::xmlNewNs(node, (xmlChar *)un.ns().c_str(), 0);
-        if(ns == 0) {
-            ::xmlFreeNode(node);
-            throw memory_error();
-        }
-        ::xmlSetNs(node, ns);
-    }
 }
 
 
 size_t Element::size() const
 {
-    return ::xmlChildElementCount(proxy_->dom);
+    return ::xmlChildElementCount(proxy_.dom);
 }
 
 
@@ -573,16 +542,16 @@ QName Element::qname() const
 }
 
 
-const char *Element::tag() const
+std::string Element::tag() const
 {
-    return proxy_ ? (const char *) proxy_->dom->name : "";
+    return reinterpret_cast<const char *>(proxy_.dom->name);
 }
 
 
-const char *Element::ns() const
+std::string Element::ns() const
 {
-    if(proxy_ && proxy_->dom->nsDef) {
-        return (const char *) proxy_->dom->nsDef->href;
+    if(proxy_.dom->nsDef) {
+        return reinterpret_cast<const char *>(proxy_.dom->nsDef->href);
     }
     return "";
 }
@@ -594,25 +563,15 @@ AttrMap Element::attrib() const
 }
 
 
-std::string Element::get(const QName &un, const std::string &default_) const
+std::string Element::get(const QName &qname, const std::string &default_) const
 {
-    return attrib().get(un, default_);
-}
-
-
-Element::operator bool() const
-{
-    return proxy_ != 0;
+    return attrib().get(qname, default_);
 }
 
 
 Element Element::operator[] (size_t i)
 {
-    if(! proxy_) {
-        return Element();
-    }
-
-    xmlNodePtr cur = proxy_->dom->children;
+    xmlNodePtr cur = proxy_.dom->children;
     while(i) {
         if(cur->type == XML_ELEMENT_NODE) {
             i--;
@@ -628,15 +587,13 @@ Element Element::operator[] (size_t i)
 
 bool Element::isIndirectParent(const Element &e)
 {
-    if(proxy_ && e.proxy_) {
-        xmlNodePtr other = e.proxy_->dom;
-        xmlNodePtr parent = proxy_->dom->parent;
-        while(parent) {
-            if(parent == other) {
-                return true;
-            }
-            parent = parent->parent;
+    xmlNodePtr other = e.proxy_.dom;
+    xmlNodePtr parent = proxy_.dom->parent;
+    while(parent) {
+        if(parent == other) {
+            return true;
         }
+        parent = parent->parent;
     }
     return false;
 }
@@ -644,60 +601,61 @@ bool Element::isIndirectParent(const Element &e)
 
 void Element::append(Element &e)
 {
-    if(proxy_ && e.proxy_) {
-        std::cout << "appending " << e.proxy_->dom;
-        std::cout << " to " << proxy_->dom << std::endl;
-        if(isIndirectParent(e)) {
-            throw cyclical_tree_error();
-        }
-        ::xmlUnlinkNode(e.proxy_->dom);
-        ::xmlAddChild(proxy_->dom, e.proxy_->dom);
+    std::cout << "appending " << e.proxy_.dom;
+    std::cout << " to " << proxy_.dom << std::endl;
+    if(isIndirectParent(e)) {
+        throw cyclical_tree_error();
     }
+    ::xmlUnlinkNode(e.proxy_.dom);
+    ::xmlAddChild(proxy_.dom, e.proxy_.dom);
 }
 
 
 void Element::insert(size_t i, Element &e)
 {
-    if(proxy_ && e.proxy_) {
-        if(i == size()) {
-            append(e);
-        } else {
-            ::xmlAddPrevSibling(this[i].proxy_->dom, e.proxy_->dom);
-        }
+    if(i == size()) {
+        append(e);
+    } else {
+        ::xmlAddPrevSibling(this[i].proxy_.dom, e.proxy_.dom);
     }
 }
 
 
 void Element::remove(Element &e)
 {
-    if(proxy_ && e.proxy_) {
-        if(e.proxy_->dom->parent == proxy_->dom) {
-            ::xmlUnlinkNode(e.proxy_->dom);
-        }
+    if(e.proxy_.dom->parent == proxy_.dom) {
+        ::xmlUnlinkNode(e.proxy_.dom);
     }
 }
 
 
-Element Element::getparent() const
+Nullable<Element> Element::getnext() const
 {
-    if(proxy_->dom && proxy_->dom->parent &&
-            proxy_->dom->parent->type != XML_DOCUMENT_NODE) {
-        return Element(NodeProxy::get(proxy_->dom->parent));
+    xmlNodePtr next = proxy_.dom->next;
+    if(next) {
+        return Nullable<Element>(NodeProxy::get(next));
     }
-    return Element();
+    return Nullable<Element>();
+}
+
+
+Nullable<Element> Element::getparent() const
+{
+    xmlNodePtr parent = proxy_.dom->parent;
+    if(parent && parent->type != XML_DOCUMENT_NODE) {
+        return Nullable<Element>(NodeProxy::get(parent));
+    }
+    return Nullable<Element>();
 }
 
 
 ElementTree Element::getroottree() const
 {
-    if(proxy_) {
-        return ElementTree(DocProxy::get(proxy_->dom->doc));
-    }
-    return ElementTree();
+    return ElementTree(DocProxy::get(proxy_.dom->doc));
 }
 
 
-NodeProxy *Element::proxy() const
+NodeProxy &Element::proxy() const
 {
     return proxy_;
 }
@@ -705,29 +663,25 @@ NodeProxy *Element::proxy() const
 
 std::string Element::text() const
 {
-    return proxy_ ? _collectText(proxy_->dom->children) : "";
+    return _collectText(proxy_.dom->children);
 }
 
 
 void Element::text(const std::string &s)
 {
-    if(proxy_) {
-        _setNodeText(proxy_->dom, s);
-    }
+    _setNodeText(proxy_.dom, s);
 }
 
 
 std::string Element::tail() const
 {
-    return proxy_ ? _collectText(proxy_->dom->next) : "";
+    return _collectText(proxy_.dom->next);
 }
 
 
 void Element::tail(const std::string &s)
 {
-    if(proxy_) {
-        _setTailText(proxy_->dom, s);
-    }
+    _setTailText(proxy_.dom, s);
 }
 
 
@@ -752,17 +706,14 @@ static int closeCallback(void *ctx)
 
 std::string tostring(const Element &e)
 {
-    NodeProxy *proxy = e.proxy();
     std::string out;
-    if(proxy) {
-        xmlSaveCtxtPtr ctx = ::xmlSaveToIO(writeCallback, closeCallback,
-            static_cast<void *>(&out), 0, 0);
+    xmlSaveCtxtPtr ctx = ::xmlSaveToIO(writeCallback, closeCallback,
+        static_cast<void *>(&out), 0, 0);
 
-        int ret = ::xmlSaveTree(ctx, proxy->dom);
-        ::xmlSaveClose(ctx);
-        if(ret == -1) {
-            throw serialization_error();
-        }
+    int ret = ::xmlSaveTree(ctx, e.proxy().dom);
+    ::xmlSaveClose(ctx);
+    if(ret == -1) {
+        throw serialization_error();
     }
     return out;
 }
@@ -774,10 +725,6 @@ std::string tostring(const Element &e)
 
 Element SubElement(Element &parent, const QName &qname)
 {
-    if(! parent) {
-        throw empty_element_error();
-    }
-
     Element elem(qname);
     parent.append(elem);
     return elem;
@@ -788,7 +735,8 @@ Element fromstring(const std::string &s)
 {
     xmlDocPtr doc = ::xmlReadMemory(s.data(), s.size(), 0, 0, 0);
     if(! (doc && doc->children)) {
-        return Element();
+        ::xmlFreeDoc(doc); // NULL ok.
+        throw parse_error();
     }
 
     return Element(NodeProxy::get(doc->children));
@@ -828,10 +776,11 @@ static ElementTree parse_internal(T obj)
 {
     xmlDocPtr doc = ::xmlReadIO(fn, DUMMY_close,
                                 static_cast<void *>(obj), 0, 0, 0);
-    if(doc) {
-        return ElementTree(DocProxy::get(doc));
+    if(! doc) {
+        throw parse_error();
     }
-    return ElementTree();
+
+    return ElementTree(DocProxy::get(doc));
 }
 
 
@@ -848,33 +797,25 @@ ElementTree parse(std::istream &is)
 
 std::ostream &operator<< (std::ostream &out, const ElementTree &tree)
 {
-    if(tree) {
-        out << "<ElementTree>";
-    } else {
-        out << "<invalid ElementTree>";
-    }
+    out << "<ElementTree>";
     return out;
 }
 
 
 std::ostream &operator<< (std::ostream &out, const Element &elem)
 {
-    if(elem) {
-        out << "<Element " << elem.tag() << " with " << elem.size();
-        out << " children>";
-    } else {
-        out << "<invalid Element>";
-    }
+    out << "<Element " << elem.tag() << " with " << elem.size();
+    out << " children>";
     return out;
 }
 
 
-std::ostream& operator<< (std::ostream& out, const QName& un)
+std::ostream& operator<< (std::ostream& out, const QName& qname)
 {
-    if(un.ns().size()) {
-        out << "{" << un.ns() << "}";
+    if(qname.ns().size()) {
+        out << "{" << qname.ns() << "}";
     }
-    out << un.tag();
+    out << qname.tag();
     return out;
 }
 
