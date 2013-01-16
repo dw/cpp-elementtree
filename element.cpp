@@ -610,11 +610,7 @@ string Element::ns() const
 
 void Element::ns(const string &ns)
 {
-    if(ns.empty()) {
-        node_->ns = 0;
-    } else {
-        
-    }
+    node_->ns = getNs_(node_, ns);
 }
 
 
