@@ -18,11 +18,13 @@
 #   define ETREE_0X
 #endif
 
-#include <libxml/tree.h>
+
+// libxml forwards.
+struct _xmlNode;
+struct _xmlDoc;
 
 
 namespace etree {
-
 
 using std::string;
 
@@ -30,6 +32,7 @@ class AttrMap;
 class Element;
 class ElementTree;
 class QName;
+
 
 Element SubElement(Element &parent, const QName &qname);
 Element fromstring(const char *s);
@@ -94,10 +97,10 @@ class QName {
 
 class AttrIterator
 {
-    xmlNodePtr node_;
+    _xmlNode *node_;
 
     public:
-    AttrIterator(xmlNodePtr elem);
+    AttrIterator(_xmlNode *elem);
     QName key();
     string value();
     bool next();
@@ -106,11 +109,11 @@ class AttrIterator
 
 class AttrMap
 {
-    xmlNodePtr node_;
+    _xmlNode *node_;
 
     public:
     ~AttrMap();
-    AttrMap(xmlNodePtr elem);
+    AttrMap(_xmlNode *elem);
 
     bool has(const QName &qname) const;
     string get(const QName &qname, const string &default_="") const;
@@ -124,12 +127,12 @@ class ElementTree
     template<typename P, typename T>
     friend P nodeFor__(const T &);
 
-    xmlDocPtr node_;
+    _xmlDoc *node_;
 
     public:
     ~ElementTree();
     ElementTree();
-    ElementTree(xmlDocPtr doc);
+    ElementTree(_xmlDoc *doc);
 };
 
 
@@ -138,7 +141,7 @@ class Element
     template<typename P, typename T>
     friend P nodeFor__(const T &);
 
-    xmlNodePtr node_;
+    _xmlNode *node_;
 
     // Never defined.
     Element();
@@ -147,7 +150,7 @@ class Element
     public:
     ~Element();
     Element(const Element &e);
-    Element(xmlNodePtr node);
+    Element(_xmlNode *node);
     Element(const QName &qname);
     #ifdef ETREE_0X
     Element(const QName &qname, kv_list attribs);
@@ -192,11 +195,12 @@ class Element
 
 EXCEPTION(cyclical_tree_error)
 EXCEPTION(element_error)
-EXCEPTION(parse_error)
+EXCEPTION(internal_error)
 EXCEPTION(memory_error)
 EXCEPTION(missing_namespace_error)
 EXCEPTION(missing_value_error)
 EXCEPTION(out_of_bounds_error)
+EXCEPTION(parse_error)
 EXCEPTION(qname_error)
 EXCEPTION(serialization_error)
 

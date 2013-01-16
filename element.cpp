@@ -5,6 +5,7 @@
  */
 
 #include <cassert>
+#include <cstdio> // snprintf().
 #include <cstring>
 
 #include <unistd.h>
@@ -12,6 +13,7 @@
 #include <fstream>
 
 #include <libxml/parser.h>
+#include <libxml/tree.h>
 #include <libxml/xmlsave.h>
 
 #include "element.hpp"
@@ -237,14 +239,42 @@ static string _collectText(xmlNodePtr node)
 }
 
 
-static const xmlNsPtr findNs_(xmlNodePtr node, const string &uri,
-                              bool create=false)
+static xmlNsPtr makeNs_(xmlNodePtr node, const string &uri)
 {
-    if(uri.empty()) {
-        return 0; // TODO: return default namespace
+    xmlChar prefix[6];
+    xmlNsPtr ns;
+
+    for(int i = 0; i <= 1000; i++) {
+        ::snprintf(reinterpret_cast<char *>(prefix), sizeof prefix,
+                   "ns%d", i);
+        ns = ::xmlSearchNs(node->doc, node, prefix);
+        if(! ns) {
+            break;
+        }
     }
 
-    for(xmlNodePtr cur = node; cur != 0; cur = cur->parent) {
+    if(ns) {
+        // ns0..1000 in use, something broken.
+        throw internal_error();
+    }
+
+    ns = ::xmlNewNs(node, reinterpret_cast<const xmlChar *>(uri.c_str()), prefix);
+    if(! ns) {
+        throw memory_error();
+    }
+    return ns;
+}
+
+
+static xmlNsPtr getNs_(xmlNodePtr node, const string &uri)
+{
+    if(uri.empty()) {
+        return 0;
+    }
+
+    // Look for existing definition.
+    xmlNodePtr doc_node = reinterpret_cast<xmlNodePtr>(node->doc);
+    for(xmlNodePtr cur = node; cur && cur != doc_node; cur = cur->parent) {
         for(xmlNsPtr ns = node->nsDef; ns != 0; ns = ns->next) {
             if(uri == reinterpret_cast<const char *>(ns->href)) {
                 return ns;
@@ -252,7 +282,7 @@ static const xmlNsPtr findNs_(xmlNodePtr node, const string &uri,
         }
     }
 
-    throw missing_namespace_error();
+    return makeNs_(node, uri);
 }
 
 
@@ -433,7 +463,7 @@ string AttrMap::get(const QName &qname,
 void AttrMap::set(const QName &qname, const string &s)
 {
     ::xmlSetNsProp(node_,
-       findNs_(node_, qname.ns()), c_str(qname.tag()), c_str(s));
+       getNs_(node_, qname.ns()), c_str(qname.tag()), c_str(s));
 }
 
 
