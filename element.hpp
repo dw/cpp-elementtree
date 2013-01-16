@@ -12,6 +12,12 @@
 #include <stdexcept>
 #include <vector>
 
+#if __cplusplus >= 201103L
+#   include <initializer_list>
+#   include <utility>
+#   define ETREE_0X
+#endif
+
 #include <libxml/tree.h>
 
 
@@ -19,13 +25,16 @@ namespace etree {
 
 
 using std::string;
+
 class AttrMap;
 class Element;
 class ElementTree;
 class QName;
 
 Element SubElement(Element &parent, const QName &qname);
+Element fromstring(const char *s);
 Element fromstring(const string &s);
+Element XML(const char *s);
 Element XML(const string &s);
 string tostring(const Element &e);
 ElementTree parse(std::istream &is);
@@ -35,6 +44,12 @@ ElementTree parse(int fd);
 std::ostream &operator<< (std::ostream &out, const ElementTree &elem);
 std::ostream &operator<< (std::ostream &out, const Element &elem);
 std::ostream &operator<< (std::ostream &out, const QName &qname);
+
+#ifdef ETREE_0X
+typedef std::pair<string, string> kv_pair;
+typedef std::initializer_list<kv_pair> kv_list;
+Element SubElement(Element &parent, const QName &qname, kv_list attribs);
+#endif
 
 
 template<typename T>
@@ -46,7 +61,7 @@ class Nullable {
     Nullable();
     Nullable(const T &val);
     Nullable(const Nullable<T> &val);
-    #if __cplusplus >= 201103L
+    #ifdef ETREE_0X
     Nullable(T &&val);
     #endif
     ~Nullable();
@@ -55,8 +70,7 @@ class Nullable {
     const T &operator *() const;
 };
 
-typedef Nullable<Element> NElement;
-typedef Nullable<string> NString;
+typedef Nullable<Element> NullableElement;
 
 
 class QName {
@@ -71,6 +85,7 @@ class QName {
     QName(const string &qname);
     QName(const char *qname);
 
+    string tostring() const;
     const string &tag() const;
     const string &ns() const;
     bool operator=(const QName &other);
@@ -106,7 +121,10 @@ class AttrMap
 
 class ElementTree
 {
-    xmlDocPtr doc_;
+    template<typename P, typename T>
+    friend P nodeFor__(const T &);
+
+    xmlDocPtr node_;
 
     public:
     ~ElementTree();
@@ -117,6 +135,9 @@ class ElementTree
 
 class Element
 {
+    template<typename P, typename T>
+    friend P nodeFor__(const T &);
+
     xmlNodePtr node_;
 
     // Never defined.
@@ -127,16 +148,13 @@ class Element
     ~Element();
     Element(const Element &e);
     Element(xmlNodePtr node);
-
-    static Element from_name(const QName &qname);
     Element(const QName &qname);
-
-    #if __cplusplus >= 201103L
-    Element(Element &&e);
+    #ifdef ETREE_0X
+    Element(const QName &qname, kv_list attribs);
     #endif
 
-    size_t size() const;
     QName qname() const;
+    void qname(const QName &qname);
 
     string tag() const;
     void tag(const string &tag);
@@ -147,7 +165,9 @@ class Element
     AttrMap attrib() const;
     string get(const QName &qname, const string &default_="") const;
 
+    size_t size() const;
     Element operator[] (size_t i);
+
     bool isIndirectParent(const Element &e);
     void append(Element &e);
     void insert(size_t i, Element &e);
@@ -158,7 +178,6 @@ class Element
     Nullable<Element> getprev() const;
     ElementTree getroottree() const;
 
-    xmlNodePtr _node() const;
     string text() const;
     void text(const string &s);
     string tail() const;

@@ -5,15 +5,22 @@
  */
 
 #include <cassert>
+#include <cstring>
+
+#include <unistd.h>
+
+#include <fstream>
 
 #include <libxml/parser.h>
-#include <libxml/tree.h>
 #include <libxml/xmlsave.h>
 
 #include "element.hpp"
 
 
 namespace etree {
+
+using std::string;
+using std::ostream;
 
 
 /// -----------------------
@@ -45,7 +52,7 @@ Nullable<T>::Nullable(const Nullable<T> &val)
 }
 
 
-#if __cplusplus >= 201103L
+#ifdef ETREE_0X
 template<typename T>
 Nullable<T>::Nullable(T &&val)
     : set_(true)
@@ -94,7 +101,6 @@ const T &Nullable<T>::operator *() const
 
 // Instantiations.
 template class Nullable<Element>;
-template class Nullable<std::string>;
 
 
 /// ----------------------------------------
@@ -103,14 +109,16 @@ template class Nullable<std::string>;
 
 static xmlDocPtr ref(xmlDocPtr doc)
 {
-    assert(doc);
+    // Relies on NULL (aka. initial state of _private) being (intptr_t)0, which
+    // isn't true on some weird archs.
+    assert(doc && (sizeof(void *) >= sizeof(intptr_t)));
     (*reinterpret_cast<intptr_t *>(&(doc->_private)))++;
     return doc;
 }
 
 static void unref(xmlDocPtr doc)
 {
-    assert(doc);
+    assert(doc && (sizeof(void *) >= sizeof(intptr_t)));
     assert(doc->_private);
     if(! --*reinterpret_cast<intptr_t *>(&(doc->_private))) {
         xmlFreeDoc(doc);
@@ -141,7 +149,20 @@ static void unref(xmlNodePtr node)
 /// -------------------------
 
 
-static const xmlChar *c_str(const std::string &s)
+#ifdef ETREE_0X
+static void attrs_from_list_(Element &elem, kv_list &attribs)
+{
+    std::cout << "LOL!" << std::endl;
+    AttrMap attrs = elem.attrib();
+    for(auto &kv : attribs) {
+        std::cout << "APPEND: " << kv.first << " V " << kv.second << "\n" << std::endl;
+        attrs.set(kv.first, kv.second);
+    }
+}
+#endif
+
+
+static const xmlChar *c_str(const string &s)
 {
     return (const xmlChar *) (s.empty() ? 0 : s.c_str());
 }
@@ -177,7 +198,8 @@ static void _removeText(xmlNodePtr node)
     }
 }
 
-static void _setNodeText(xmlNodePtr node, const std::string &s)
+
+static void _setNodeText(xmlNodePtr node, const string &s)
 {
     _removeText(node->children);
     // TODO: CDATA
@@ -192,7 +214,8 @@ static void _setNodeText(xmlNodePtr node, const std::string &s)
     }
 }
 
-static void _setTailText(xmlNodePtr node, const std::string &s)
+
+static void _setTailText(xmlNodePtr node, const string &s)
 {
     _removeText(node->next);
     if(s.size()) {
@@ -203,9 +226,9 @@ static void _setTailText(xmlNodePtr node, const std::string &s)
 }
 
 
-static std::string _collectText(xmlNodePtr node)
+static string _collectText(xmlNodePtr node)
 {
-    std::string result;
+    string result;
     while(node) {
         result += (const char *) node->content;
         node = _textNodeOrSkip(node);
@@ -214,18 +237,29 @@ static std::string _collectText(xmlNodePtr node)
 }
 
 
-static const xmlNsPtr findNs_(xmlNodePtr node, const std::string &ns)
+static const xmlNsPtr findNs_(xmlNodePtr node, const string &uri,
+                              bool create=false)
 {
-    if(! ns.size()) {
-        return 0;
+    if(uri.empty()) {
+        return 0; // TODO: return default namespace
     }
-    xmlNsPtr p = node->nsDef;
-    while(p) {
-        if(ns == (const char *) p->href) {
-            return p;
+
+    for(xmlNodePtr cur = node; cur != 0; cur = cur->parent) {
+        for(xmlNsPtr ns = node->nsDef; ns != 0; ns = ns->next) {
+            if(uri == reinterpret_cast<const char *>(ns->href)) {
+                return ns;
+            }
         }
     }
+
     throw missing_namespace_error();
+}
+
+
+template<typename P, typename T>
+P nodeFor__(const T &e)
+{
+    return e.node_;
 }
 
 
@@ -234,11 +268,11 @@ static const xmlNsPtr findNs_(xmlNodePtr node, const std::string &ns)
 /// ---------------
 
 
-void QName::from_string(const std::string &qname)
+void QName::from_string(const string &qname)
 {
     if(qname.size() > 0 && qname[0] == '{') {
         size_t e = qname.find('}');
-        if(e == std::string::npos) {
+        if(e == string::npos) {
             throw qname_error();
         } else if(qname.size() - 1 == e) {
             throw qname_error();
@@ -255,7 +289,23 @@ void QName::from_string(const std::string &qname)
 }
 
 
-QName::QName(const std::string &ns, const std::string &tag)
+string QName::tostring() const
+{
+    if(ns_.empty()) {
+        return tag_;
+    }
+
+    string qname(2 + ns_.size() + tag_.size(), '\0');
+    int p = 0;
+    qname[p++] = '{';
+    qname.replace(p, ns_.size(), ns_);
+    qname[p += ns_.size()] = '}';
+    qname.replace(p + 1, tag_.size(), tag_);
+    return qname;
+}
+
+
+QName::QName(const string &ns, const string &tag)
     : ns_(ns)
     , tag_(tag)
 {
@@ -269,7 +319,7 @@ QName::QName(const QName &other)
 }
 
 
-QName::QName(const std::string &qname)
+QName::QName(const string &qname)
 {
     from_string(qname);
 }
@@ -281,13 +331,13 @@ QName::QName(const char *qname)
 }
 
 
-const std::string &QName::tag() const
+const string &QName::tag() const
 {
     return tag_;
 }
 
 
-const std::string &QName::ns() const
+const string &QName::ns() const
 {
     return ns_;
 }
@@ -319,9 +369,9 @@ QName AttrIterator::key()
 }
 
 
-std::string AttrIterator::value()
+string AttrIterator::value()
 {
-    std::string out;
+    string out;
     xmlChar *s = ::xmlNodeListGetString(node_->doc,
                                         node_->children, 1);
     if(s) {
@@ -366,10 +416,10 @@ bool AttrMap::has(const QName &qname) const
 }
 
 
-std::string AttrMap::get(const QName &qname,
-                         const std::string &default_) const
+string AttrMap::get(const QName &qname,
+                         const string &default_) const
 {
-    std::string out(default_);
+    string out(default_);
     xmlChar *s = ::xmlGetNsProp(node_, c_str(qname.tag()), c_str(qname.ns()));
 
     if(s) {
@@ -380,7 +430,7 @@ std::string AttrMap::get(const QName &qname,
 }
 
 
-void AttrMap::set(const QName &qname, const std::string &s)
+void AttrMap::set(const QName &qname, const string &s)
 {
     ::xmlSetNsProp(node_,
        findNs_(node_, qname.ns()), c_str(qname.tag()), c_str(s));
@@ -406,12 +456,12 @@ std::vector<QName> AttrMap::keys() const
 
 ElementTree::~ElementTree()
 {
-    unref(doc_);
+    unref(node_);
 }
 
 
 ElementTree::ElementTree(xmlDocPtr doc)
-    : doc_(doc)
+    : node_(ref(doc))
 {
 }
 
@@ -432,47 +482,60 @@ Element::Element(const Element &e)
 }
 
 
-#if __cplusplus >= 201103L
-Element::Element(Element &&e)
-    : node_(e.node_)
-{
-    e.node_ = 0;
-}
-#endif
-
-
 Element::Element(xmlNodePtr node)
-    : node_(node)
+    : node_(ref(node))
 {
 }
 
 
-Element::Element(const QName &qname)
+static xmlNodePtr node_from_qname(const QName &qname)
 {
     xmlDocPtr doc = ::xmlNewDoc(0);
     if(! doc) {
         throw memory_error();
     }
 
-    node_ = ::xmlNewDocNode(doc, 0,
+    xmlNodePtr node = ::xmlNewDocNode(doc, 0,
         reinterpret_cast<const xmlChar *>(qname.tag().c_str()), 0);
-    if(! node_) {
+    if(! node) {
         ::xmlFreeDoc(doc);
         throw memory_error();
     }
 
-    ::xmlDocSetRootElement(doc, node_);
-    ref(node_);
+    ::xmlDocSetRootElement(doc, node);
+    ref(node);
 
     if(qname.ns().size()) {
-        xmlNsPtr ns = ::xmlNewNs(node_, (xmlChar *)qname.ns().c_str(), 0);
+        xmlNsPtr ns = ::xmlNewNs(node, (xmlChar *)qname.ns().c_str(), 0);
         if(ns == 0) {
-            unref(node_);
+            unref(node);
             throw memory_error();
         }
-        ::xmlSetNs(node_, ns);
+        ::xmlSetNs(node, ns);
+    }
+
+    return node;
+}
+
+
+Element::Element(const QName &qname)
+    : node_(node_from_qname(qname))
+{
+}
+
+
+#ifdef ETREE_0X
+Element::Element(const QName &qname, kv_list attribs)
+    : node_(node_from_qname(qname))
+{
+    try {
+        attrs_from_list_(*this, attribs);
+    } catch(...) {
+        unref(node_);
+        throw;
     }
 }
+#endif
 
 
 size_t Element::size() const
@@ -487,18 +550,41 @@ QName Element::qname() const
 }
 
 
-std::string Element::tag() const
+void Element::qname(const QName &qname)
+{
+    ns(qname.ns());
+    tag(qname.tag());
+}
+
+
+string Element::tag() const
 {
     return reinterpret_cast<const char *>(node_->name);
 }
 
 
-std::string Element::ns() const
+void Element::tag(const string &s)
+{
+    ::xmlNodeSetName(node_, c_str(s));
+}
+
+
+string Element::ns() const
 {
     if(node_->nsDef) {
         return reinterpret_cast<const char *>(node_->nsDef->href);
     }
     return "";
+}
+
+
+void Element::ns(const string &ns)
+{
+    if(ns.empty()) {
+        node_->ns = 0;
+    } else {
+        
+    }
 }
 
 
@@ -508,7 +594,7 @@ AttrMap Element::attrib() const
 }
 
 
-std::string Element::get(const QName &qname, const std::string &default_) const
+string Element::get(const QName &qname, const string &default_) const
 {
     return attrib().get(qname, default_);
 }
@@ -526,7 +612,7 @@ Element Element::operator[] (size_t i)
             throw out_of_bounds_error();
         }
     }
-    return Element(ref(cur));
+    return Element(cur);
 }
 
 
@@ -546,8 +632,8 @@ bool Element::isIndirectParent(const Element &e)
 
 void Element::append(Element &e)
 {
-    std::cout << "appending " << e.node_;
-    std::cout << " to " << node_ << std::endl;
+    std::cout << "appending " << e;
+    std::cout << " to " << *this << std::endl;
     if(isIndirectParent(e)) {
         throw cyclical_tree_error();
     }
@@ -595,35 +681,29 @@ Nullable<Element> Element::getparent() const
 
 ElementTree Element::getroottree() const
 {
-    return ElementTree(ref(node_->doc));
+    return ElementTree(node_->doc);
 }
 
 
-xmlNodePtr Element::_node() const
-{
-    return node_;
-}
-
-
-std::string Element::text() const
+string Element::text() const
 {
     return _collectText(node_->children);
 }
 
 
-void Element::text(const std::string &s)
+void Element::text(const string &s)
 {
     _setNodeText(node_, s);
 }
 
 
-std::string Element::tail() const
+string Element::tail() const
 {
     return _collectText(node_->next);
 }
 
 
-void Element::tail(const std::string &s)
+void Element::tail(const string &s)
 {
     _setTailText(node_, s);
 }
@@ -636,7 +716,7 @@ void Element::tail(const std::string &s)
 
 static int writeCallback(void *ctx, const char *buffer, int len)
 {
-    std::string *s = static_cast<std::string *>(ctx);
+    string *s = static_cast<string *>(ctx);
     s->append(buffer, len);
     return len;
 }
@@ -648,13 +728,13 @@ static int closeCallback(void *ctx)
 }
 
 
-std::string tostring(const Element &e)
+string tostring(const Element &e)
 {
-    std::string out;
+    string out;
     xmlSaveCtxtPtr ctx = ::xmlSaveToIO(writeCallback, closeCallback,
         static_cast<void *>(&out), 0, 0);
 
-    int ret = ::xmlSaveTree(ctx, e._node());
+    int ret = ::xmlSaveTree(ctx, nodeFor__<xmlNodePtr, Element>(e));
     ::xmlSaveClose(ctx);
     if(ret == -1) {
         throw serialization_error();
@@ -675,21 +755,49 @@ Element SubElement(Element &parent, const QName &qname)
 }
 
 
-Element fromstring(const std::string &s)
+#ifdef ETREE_0X
+Element SubElement(Element &parent, const QName &qname, kv_list attribs)
 {
-    xmlDocPtr doc = ::xmlReadMemory(s.data(), s.size(), 0, 0, 0);
+    Element elem = SubElement(parent, qname);
+    attrs_from_list_(elem, attribs);
+    return elem;
+}
+#endif
+
+
+static Element fromstring_internal(const char *s, size_t size)
+{
+    xmlDocPtr doc = ::xmlReadMemory(s, size, 0, 0, 0);
     if(! (doc && doc->children)) {
         ::xmlFreeDoc(doc); // NULL ok.
         throw parse_error();
     }
 
-    return Element(ref(doc->children));
+    return Element(doc->children);
 }
 
 
-Element XML(const std::string &s)
+Element fromstring(const char *s)
 {
-    return fromstring(s);
+    return fromstring_internal(s, ::strlen(s));
+}
+
+
+Element fromstring(const string &s)
+{
+    return fromstring_internal(s.data(), s.size());
+}
+
+
+Element XML(const char *s)
+{
+    return fromstring_internal(s, ::strlen(s));
+}
+
+
+Element XML(const string &s)
+{
+    return fromstring_internal(s.data(), s.size());
 }
 
 
@@ -703,7 +811,7 @@ static int DUMMY_close(void *ignored)
 }
 
 
-int istream_read___(void *strm, char *buffer, int len)
+int istream_read__(void *strm, char *buffer, int len)
 {
     std::istream &is = *static_cast<std::istream *>(strm);
 
@@ -715,6 +823,13 @@ int istream_read___(void *strm, char *buffer, int len)
 }
 
 
+int fd_read__(void *strm, char *buffer, int len)
+{
+    int &fd = *static_cast<int *>(strm);
+    return ::read(fd, buffer, len);
+}
+
+
 template<int(*fn)(void *, char *, int), typename T>
 static ElementTree parse_internal(T obj)
 {
@@ -723,13 +838,26 @@ static ElementTree parse_internal(T obj)
     if(! doc) {
         throw parse_error();
     }
-    return ElementTree(ref(doc));
+    return ElementTree(doc);
 }
 
 
 ElementTree parse(std::istream &is)
 {
-    return parse_internal<istream_read___>(&is);
+    return parse_internal<istream_read__>(&is);
+}
+
+
+ElementTree parse(const string &path)
+{
+    std::ifstream is(path.c_str(), std::ios_base::binary);
+    return parse(is);
+}
+
+
+ElementTree parse(int fd)
+{
+    return parse_internal<fd_read__>(&fd);
 }
 
 
@@ -738,22 +866,23 @@ ElementTree parse(std::istream &is)
 /// -----------------
 
 
-std::ostream &operator<< (std::ostream &out, const ElementTree &tree)
+ostream &operator<< (ostream &out, const ElementTree &tree)
 {
-    out << "<ElementTree>";
+    out << "<ElementTree at " << nodeFor__<xmlDocPtr, ElementTree>(tree) << ">";
     return out;
 }
 
 
-std::ostream &operator<< (std::ostream &out, const Element &elem)
+ostream &operator<< (ostream &out, const Element &elem)
 {
-    out << "<Element " << elem.tag() << " with " << elem.size();
-    out << " children>";
+    out << "<Element " << elem.qname().tostring() << " at ";
+    out << nodeFor__<xmlNodePtr, Element>(elem);
+    out << " with " << elem.size() << " children>";
     return out;
 }
 
 
-std::ostream& operator<< (std::ostream& out, const QName& qname)
+ostream& operator<< (ostream& out, const QName& qname)
 {
     if(qname.ns().size()) {
         out << "{" << qname.ns() << "}";
