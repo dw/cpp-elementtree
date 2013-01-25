@@ -18,6 +18,7 @@ namespace etree {
 namespace feed {
 
 
+class Helpers;
 class Format;
 class Entry;
 class Feed;
@@ -31,13 +32,14 @@ Feed parse(int fd);
 
 class Entry
 {
-    protected:
-    Element node_;
-    Entry(Element node);
+    friend Entry makeEntry_(const Format &format, Element elem);
+
+    const Format &format_;
+    Element elem_;
+
+    Entry(const Format &format, Element elem);
 
     public:
-    virtual ~Entry();
-
     std::string author() const;
     void author(std::string author);
 
@@ -48,10 +50,12 @@ class Entry
 
 class Feed
 {
+    friend Feed makeFeed_(const Format &, Element);
+
     protected:
-    Element node_;
+    Element elem_;
     const Format &format_;
-    Feed(const Format &format, Element node);
+    Feed(const Format &format, Element elem);
 
     public:
     Feed(const Feed &feed);

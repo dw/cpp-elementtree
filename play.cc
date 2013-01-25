@@ -4,11 +4,13 @@
 #include <fstream>
 
 #include "element.hpp"
+#include "feed.hpp"
 #include "util.hpp"
 
 
 using namespace std;
 using namespace etree;
+using namespace etree::feed;
 
 
 int main2(void)
@@ -105,10 +107,20 @@ void main5()
 }
 
 
+void main6()
+{
+    std::string rss = get_file_contents("red.rss");
+    Feed f = etree::feed::fromstring(rss);
+    cout << f.title() << endl;
+    auto items = f.entries();
+    cout << items.size() << endl;
+}
+
+
 int main(void)
 {
     try {
-        main5();
+        main6();
     } catch(std::exception &e) {
         cout << "EEK! " << e.what() << endl;
         abort();
