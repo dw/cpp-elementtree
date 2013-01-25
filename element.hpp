@@ -1,4 +1,3 @@
-
 #ifndef ETREE_ELEMENT_H
 #define ETREE_ELEMENT_H
 
@@ -7,9 +6,10 @@
  * License: http://opensource.org/licenses/MIT
  */
 
-#include <string>
 #include <iostream>
+#include <map>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #if __cplusplus >= 201103L
@@ -22,6 +22,7 @@
 // libxml forwards.
 struct _xmlNode;
 struct _xmlDoc;
+struct _xmlXPathCompExpr;
 
 
 namespace etree {
@@ -37,8 +38,6 @@ class QName;
 Element SubElement(Element &parent, const QName &qname);
 Element fromstring(const char *s);
 Element fromstring(const string &s);
-Element XML(const char *s);
-Element XML(const string &s);
 string tostring(const Element &e);
 ElementTree parse(std::istream &is);
 ElementTree parse(const string &path);
@@ -91,7 +90,25 @@ class QName {
     string tostring() const;
     const string &tag() const;
     const string &ns() const;
-    bool operator=(const QName &other);
+    bool operator==(const QName &other);
+};
+
+
+class XPath {
+    _xmlXPathCompExpr *expr_;
+    string s_;
+
+    public:
+    ~XPath();
+    XPath(const char *s);
+    XPath(const string &s);
+    XPath(const XPath &other);
+    const string &expr() const;
+    XPath &operator =(const XPath &other);
+
+    Nullable<Element> find(const Element &e) const;
+    string findtext(const Element &e) const;
+    std::vector<Element> findall(const Element &e) const;
 };
 
 
@@ -145,7 +162,6 @@ class Element
 
     // Never defined.
     Element();
-    void operator=(const Element&);
 
     public:
     ~Element();
@@ -170,6 +186,14 @@ class Element
 
     size_t size() const;
     Element operator[] (size_t i);
+    Element &operator=(const Element&);
+
+    Nullable<Element> child(const QName &qn) const;
+    std::vector<Element> children(const QName &qn) const;
+
+    Nullable<Element> find(const XPath &expr) const;
+    string findtext(const XPath &expr) const;
+    std::vector<Element> findall(const XPath &expr) const;
 
     bool isIndirectParent(const Element &e);
     void append(Element &e);
@@ -196,6 +220,7 @@ class Element
 EXCEPTION(cyclical_tree_error)
 EXCEPTION(element_error)
 EXCEPTION(internal_error)
+EXCEPTION(invalid_xpath_error)
 EXCEPTION(memory_error)
 EXCEPTION(missing_namespace_error)
 EXCEPTION(missing_value_error)
@@ -205,6 +230,11 @@ EXCEPTION(qname_error)
 EXCEPTION(serialization_error)
 
 #undef EXCEPTION
+
+struct xml_error : public std::runtime_error
+{
+    xml_error(const char *s) : std::runtime_error(s) {}
+};
 
 
 } // namespace
