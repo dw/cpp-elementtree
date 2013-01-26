@@ -47,9 +47,9 @@ returned by the API is in UTF-8 format wrapped in a std::string.
 ### Thread safety
 
 The library and underlying libxml2 implementation are thread safe in that
-determistic behavior is guaranteed only so long as library objects objects
-aren't shared among threads. This is due to the library internally performing
-unlocked reference counting using the underlying libxml2 DOM structures.
+determistic behavior is guaranteed only so long as library objects aren't
+shared among threads. This is due to the library internally performing unlocked
+reference counting using the underlying libxml2 DOM structures.
 
 It is only possible to achieve thread safe behaviour if a single thread at a
 time is considered owner for all live objects referencing a given document. For
