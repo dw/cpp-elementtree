@@ -24,7 +24,7 @@ various places to specify attribute lists:
             {"first-attribute",          "first-value"},
             {"{urn:some-namepace}attr2", "second-value"}
         });
-        SubElement(msg, "system-load").text = get_system_load();
+        SubElement(msg, "system-load").text(get_system_load());
         return msg;
     }
 
