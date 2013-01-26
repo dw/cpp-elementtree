@@ -107,9 +107,9 @@ Element make_status_msg()
 <h3>Building</h3>
 <p>cpp-ElementTree consists of two files: <code><a class="el" href="element_8hpp_source.html">element.hpp</a></code> and <code>element.cpp</code>. The implementation file must be linked against libxml2 somehow during the build.</p>
 <p>The <code>etree::feed</code> implementation relies on various POSIX-related time parsing functions that aren't found on Windows. In order to avoid a large external dependency (e.g. Boost), <code>etree::feed</code> is UNIX-only for the time being.</p>
-<h2>Horrors</h2>
+<h3>Horrors</h3>
 <ul>
-<li>Given the option of repeatedly heap-allocating potentially very short-lived proxy objects, or casting a <code>void *</code> for use as an integer, the latter path was chosen. <code>ref()</code> and <code>unref()</code> in <code>element.cpp</code> are suitable readable as a result.</li>
+<li>Given the option of repeatedly heap-allocating potentially very short-lived proxy objects, or casting a <code>void *</code> for use as an integer, the latter path was chosen. <code>ref()</code> and <code>unref()</code> in <code>element.cpp</code> are suitably readable as a result.</li>
 </ul>
 <ul>
 <li>The Nullable implementation currently uses placement-new for the purposes of entertainment. The resulting object is most probably misaligned, and buggy in other ways yet unknown. The <code>char[]</code> buffer should be replaced with a typed member variable. </li>
