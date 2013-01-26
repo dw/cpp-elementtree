@@ -20,7 +20,7 @@ various places to specify attribute lists:
     
     Element make_status_msg()
     {
-        Element msg = Element("status", {
+        Element msg("status", {
             {"first-attribute",          "first-value"},
             {"{urn:some-namepace}attr2", "second-value"}
         });
