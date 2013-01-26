@@ -9,7 +9,7 @@ It attempts to closely mimic the lxml Python library's <a
 href="http://lxml.de/tutorial.html">ElementTree</a> interface and all the perks
 that entails (e.g. uniform namespace and text handling), while making use of
 some modern C++ design ideas, such as automatic memory and ownership
-management. It is intended to work *wihout surprises*, in other words all
+management. It is intended to work *without surprises*, in other words all
 libxml2 management quirks should be hidden.
 
 When built with a C++11 compiler, uniform initializer lists may be used in
