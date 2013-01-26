@@ -648,6 +648,18 @@ ElementTree::ElementTree(xmlDocPtr doc)
 }
 
 
+Element ElementTree::getroot() const
+{
+    xmlNodePtr cur;
+    for(cur = node_->children; cur; cur = cur->next) {
+        if(cur->type == XML_ELEMENT_NODE) {
+            return Element(cur);
+        }
+    }
+    throw memory_error();
+}
+
+
 /// -----------------
 /// Element functions
 /// -----------------
@@ -1011,7 +1023,7 @@ static Element fromstring_internal(const char *s, size_t size)
         throw parse_error();
     }
 
-    return Element(doc->children);
+    return ElementTree(doc).getroot();
 }
 
 

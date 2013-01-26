@@ -37,6 +37,7 @@ struct Format
     NameList itemLinkPath;
     NameList itemDescrPath;
     NameList itemPubDatePath;
+    NameList itemGuidPath;
 };
 
 
@@ -70,7 +71,8 @@ static const Format formats_[] = {
         /* itemTitlePath */         {"title"},
         /* itemLinkPath */          {"link"},
         /* itemDescrPath */         {"description"},
-        /* itemPubDatePath */       {"pubDate"}
+        /* itemPubDatePath */       {"pubDate"},
+        /* itemGuidPath */          {"guid"}
     }
 };
 
@@ -95,9 +97,7 @@ Feed makeFeed_(const Format &format, Element elem)
 
 static Element getChild_(Element &parent, const QName &qn)
 {
-    cout << "looking for " << qn << " in " << parent << "\n";
     Nullable<Element> maybe = parent.child(qn);
-    cout << "found? " << bool(maybe) << "\n";
     return maybe ? *maybe : SubElement(parent, qn);
 }
 
@@ -169,6 +169,18 @@ std::string Item::description() const
 void Item::description(const std::string &s)
 {
     setText_(elem_, format_.itemDescrPath, s);
+}
+
+
+std::string Item::guid() const
+{
+    return getText_(elem_, format_.itemGuidPath);
+}
+
+
+void Item::guid(const std::string &s)
+{
+    setText_(elem_, format_.itemGuidPath, s);
 }
 
 

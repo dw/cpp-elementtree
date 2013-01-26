@@ -65,6 +65,9 @@ class Item
 
     time_t created() const;
     void created(time_t created);
+
+    std::string guid() const;
+    void guid(const std::string &s);
 };
 
 

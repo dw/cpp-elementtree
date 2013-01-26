@@ -150,6 +150,7 @@ class ElementTree
     ~ElementTree();
     ElementTree();
     ElementTree(_xmlDoc *doc);
+    Element getroot() const;
 };
 
 

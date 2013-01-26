@@ -119,6 +119,7 @@ void main6()
     cout << endl;
     for(auto &item : items) {
         cout << item.title() << endl;
+        cout << " + " << item.guid() << endl;
         cout << "   " << item.link() << endl;
         time_t c = item.created();
         cout << "   " << ctime(&c) << endl;
