@@ -113,6 +113,7 @@ void main6()
 {
     std::string rss = get_file_contents("red.rss");
     Feed f = etree::feed::fromstring(rss);
+    cout << f.format() << endl;
     cout << f.title() << endl;
     auto items = f.items();
     cout << items.size() << endl;

@@ -31,6 +31,7 @@ Feed parse(int fd);
 
 // Internal.
 bool parseRfc822Date_(std::string, time_t &out);
+void stripWs_(std::string &s);
 
 
 class Item
@@ -83,6 +84,8 @@ class Feed
     public:
     Feed(const Feed &feed);
     ~Feed();
+
+    const std::string &format() const;
 
     std::string title() const;
     void title(const std::string &s);

@@ -41,44 +41,6 @@ struct Format
 };
 
 
-static bool rss20Identify_(const Element &e)
-{
-    return e.tag() == "rss" && e.get("version", "2.0") == "2.0";
-}
-
-
-static Item::content_type rss20GetDescrType_(const Element &e)
-{
-    return Item::CTYPE_HTML;
-}
-
-
-static void rss20SetDescrType_(Element &e, Item::content_type type)
-{
-}
-
-
-static const Format formats_[] = {
-    {
-        "RSS 2.0",
-        /* identifyFunc*/           rss20Identify_,
-        /* GetDescrTypeFunc */      rss20GetDescrType_,
-        /* SetDescrTypeFunc */      rss20SetDescrType_,
-        /* titlePath */             {"channel", "title"},
-        /* linkPath */              {"channel", "link"},
-        /* descrPath */             {"channel", "description"},
-        /* itemsPath */             {"channel", "item"},
-        /* itemTitlePath */         {"title"},
-        /* itemLinkPath */          {"link"},
-        /* itemDescrPath */         {"description"},
-        /* itemPubDatePath */       {"pubDate"},
-        /* itemGuidPath */          {"guid"}
-    }
-};
-
-static const int formatsCount_ = sizeof formats_ / sizeof formats_[0];
-
-
 /// ----------------
 /// Helper functions
 /// ----------------
@@ -122,6 +84,86 @@ static void setText_(Element cur, const NameList &names, const std::string &s)
     }
     cur.text(s);
 }
+
+
+static bool rss20Identify_(const Element &e)
+{
+    return e.tag() == "rss" && e.get("version", "2.0") == "2.0";
+}
+
+
+#define ATOM_NS "{http://www.w3.org/2005/Atom}"
+static bool atomIdentify_(const Element &e)
+{
+    return e.qname() == QName(ATOM_NS "feed");
+}
+
+
+static Item::content_type rss20GetDescrType_(const Element &e)
+{
+    return Item::CTYPE_HTML;
+}
+
+
+static void rss20SetDescrType_(Element &e, Item::content_type type)
+{
+}
+
+
+static Item::content_type atomGetDescrType_(const Element &e)
+{
+    Nullable<Element> content = e.child(ATOM_NS "content");
+    if(content) {
+        std::string type = (*content).get(ATOM_NS "type");
+        if(type == "html" || type == "xhtml") {
+            return Item::CTYPE_HTML;
+        }
+    }
+    return Item::CTYPE_TEXT;
+}
+
+
+static void atomSetDescrType_(Element &e, Item::content_type type)
+{
+    const char *s = (type == Item::CTYPE_HTML) ? "html" : "text";
+    getChild_(e, ATOM_NS "content").attrib().set(ATOM_NS "type", s);
+}
+
+
+static const Format formats_[] = {
+    {
+        "RSS 2.0",
+        /* identifyFunc*/           rss20Identify_,
+        /* GetDescrTypeFunc */      rss20GetDescrType_,
+        /* SetDescrTypeFunc */      rss20SetDescrType_,
+        /* titlePath */             {"channel", "title"},
+        /* linkPath */              {"channel", "link"},
+        /* descrPath */             {"channel", "description"},
+        /* itemsPath */             {"channel", "item"},
+        /* itemTitlePath */         {"title"},
+        /* itemLinkPath */          {"link"},
+        /* itemDescrPath */         {"description"},
+        /* itemPubDatePath */       {"pubDate"},
+        /* itemGuidPath */          {"guid"}
+    },
+    {
+        "ATOM",
+        /* identifyFunc*/           atomIdentify_,
+        /* GetDescrTypeFunc */      atomGetDescrType_,
+        /* SetDescrTypeFunc */      atomSetDescrType_,
+        /* titlePath */             {ATOM_NS "title"},
+        /* linkPath */              {ATOM_NS "link"},
+        /* descrPath */             {ATOM_NS "description"},
+        /* itemsPath */             {ATOM_NS "entry"},
+        /* itemTitlePath */         {ATOM_NS "title"},
+        /* itemLinkPath */          {ATOM_NS "link"},
+        /* itemDescrPath */         {ATOM_NS "content"},
+        /* itemPubDatePath */       {ATOM_NS "published"},
+        /* itemGuidPath */          {ATOM_NS "id"}
+    }
+};
+
+static const int formatsCount_ = sizeof formats_ / sizeof formats_[0];
 
 
 
@@ -217,6 +259,12 @@ Feed::Feed(const Feed &feed)
 
 Feed::~Feed()
 {
+}
+
+
+const std::string &Feed::format() const
+{
+    return format_.name;
 }
 
 

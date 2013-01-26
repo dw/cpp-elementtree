@@ -765,8 +765,8 @@ void Element::tag(const string &s)
 
 string Element::ns() const
 {
-    if(node_->nsDef) {
-        return reinterpret_cast<const char *>(node_->nsDef->href);
+    if(node_->ns) {
+        return reinterpret_cast<const char *>(node_->ns->href);
     }
     return "";
 }

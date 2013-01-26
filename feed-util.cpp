@@ -35,7 +35,7 @@ static struct tzinfo {
 static const int tzOffsetsCount_ = sizeof tzOffsets_ / sizeof tzOffsets_[0];
 
 
-static void stripWs_(std::string &s)
+void stripWs_(std::string &s)
 {
     int start, end;
     for(start = 0; isspace(s[start]) && start < s.size(); start++);
