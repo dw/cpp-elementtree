@@ -66,11 +66,11 @@ functions that aren't found on Windows. In order to avoid a large external
 dependency (e.g. Boost), ``etree::feed`` is UNIX-only for the time being.
 
 
-## Horrors
+### Horrors
 
  * Given the option of repeatedly heap-allocating potentially very short-lived
    proxy objects, or casting a ``void *`` for use as an integer, the latter
-   path was chosen. ``ref()`` and ``unref()`` in ``element.cpp`` are suitable
+   path was chosen. ``ref()`` and ``unref()`` in ``element.cpp`` are suitably
    readable as a result.
 
  * The Nullable implementation currently uses placement-new for the purposes of
