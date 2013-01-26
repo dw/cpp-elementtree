@@ -15,7 +15,8 @@ libxml2 management quirks should be hidden.
 When built with a C++11 compiler, uniform initializer lists may be used in
 various places to specify attribute lists:
 
-    using namespace etree;
+    using etree::Element;
+    using etree::SubElement;
     
     Element make_status_msg()
     {
