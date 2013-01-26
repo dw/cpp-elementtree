@@ -103,7 +103,7 @@ Element make_status_msg()
 <h3>Text handing</h3>
 <p>All text passed to or from the API is assumed to be in UTF-8 format. Text returned by the API is in UTF-8 format wrapped in a std::string.</p>
 <h3>Thread safety</h3>
-<p>The library and underlying libxml2 implementation are thread safe in that determistic behavior is guaranteed only so long as library objects objects aren't shared among threads. This is due to the library internally performing unlocked reference counting using the underlying libxml2 DOM structures.</p>
+<p>The library and underlying libxml2 implementation are thread safe in that determistic behavior is guaranteed only so long as library objects aren't shared among threads. This is due to the library internally performing unlocked reference counting using the underlying libxml2 DOM structures.</p>
 <p>It is only possible to achieve thread safe behaviour if a single thread at a time is considered owner for all live objects referencing a given document. For a thread to pass an object to another thread, it must relinquish all remaining references it holds on that document beforehand.</p>
 <h3>Building</h3>
 <p>cpp-ElementTree consists of two files: <code><a class="el" href="element_8hpp_source.html">element.hpp</a></code> and <code>element.cpp</code>. The implementation file must be linked against libxml2 somehow during the build.</p>
