@@ -133,6 +133,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a84ca5bcc8ae545ca5ffadfda09ba85bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1_element.html">Element</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceetree.html#a84ca5bcc8ae545ca5ffadfda09ba85bc">fromstring</a> (const string &amp;s)</td></tr>
 <tr class="memdesc:a84ca5bcc8ae545ca5ffadfda09ba85bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse an XML document from a STL string and return a reference to its root node.  <a href="#a84ca5bcc8ae545ca5ffadfda09ba85bc"></a><br/></td></tr>
 <tr class="separator:a84ca5bcc8ae545ca5ffadfda09ba85bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb4f259c381975b3d44ec9398d83215a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceetree.html#abb4f259c381975b3d44ec9398d83215a">isTransitiveParent</a> (const <a class="el" href="classetree_1_1_element.html">Element</a> &amp;parent, const <a class="el" href="classetree_1_1_element.html">Element</a> &amp;child)</td></tr>
+<tr class="memdesc:abb4f259c381975b3d44ec9398d83215a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if <b>parent</b> is an indirect parent of <b>child</b>.  <a href="#abb4f259c381975b3d44ec9398d83215a"></a><br/></td></tr>
+<tr class="separator:abb4f259c381975b3d44ec9398d83215a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d17eb18b6670eb95b3070935588e3d5"><td class="memItemLeft" align="right" valign="top">std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceetree.html#a2d17eb18b6670eb95b3070935588e3d5">operator&lt;&lt;</a> (std::ostream &amp;out, const <a class="el" href="classetree_1_1_element_tree.html">ElementTree</a> &amp;elem)</td></tr>
 <tr class="memdesc:a2d17eb18b6670eb95b3070935588e3d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate a human-readable description of an element tree.  <a href="#a2d17eb18b6670eb95b3070935588e3d5"></a><br/></td></tr>
 <tr class="separator:a2d17eb18b6670eb95b3070935588e3d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -211,6 +214,42 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Root <a class="el" href="classetree_1_1_element.html" title="Represents a reference to a single XML element.">Element</a>. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="abb4f259c381975b3d44ec9398d83215a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool etree::isTransitiveParent </td>
+          <td>(</td>
+          <td class="paramtype">const Element &amp;&#160;</td>
+          <td class="paramname"><em>parent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Element &amp;&#160;</td>
+          <td class="paramname"><em>child</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return true if <b>parent</b> is an indirect parent of <b>child</b>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parent</td><td>Potential parent. </td></tr>
+    <tr><td class="paramname">child</td><td>Potential child. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if <code>child</code> descends from <code>parent</code>. </dd></dl>
 
 </div>
 </div>

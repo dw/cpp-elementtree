@@ -159,9 +159,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3e4655b8e6bfda2424a58328ba76c11b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#a3e4655b8e6bfda2424a58328ba76c11b">insert</a> (size_t i, <a class="el" href="classetree_1_1_element.html">Element</a> &amp;e)</td></tr>
 <tr class="memdesc:a3e4655b8e6bfda2424a58328ba76c11b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert an element as a child of this element at a specific position.  <a href="#a3e4655b8e6bfda2424a58328ba76c11b"></a><br/></td></tr>
 <tr class="separator:a3e4655b8e6bfda2424a58328ba76c11b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a46b097e799b3a04d00082919623b7bed"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#a46b097e799b3a04d00082919623b7bed">isIndirectParent</a> (const <a class="el" href="classetree_1_1_element.html">Element</a> &amp;e)</td></tr>
-<tr class="memdesc:a46b097e799b3a04d00082919623b7bed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if <b>e</b> is an indirect parent of <b>this</b> element.  <a href="#a46b097e799b3a04d00082919623b7bed"></a><br/></td></tr>
-<tr class="separator:a46b097e799b3a04d00082919623b7bed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3548a3a72bc93371efc8088e54be415"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af3548a3a72bc93371efc8088e54be415"></a>
 string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#af3548a3a72bc93371efc8088e54be415">ns</a> () const </td></tr>
 <tr class="memdesc:af3548a3a72bc93371efc8088e54be415"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the element's namespace URI, or the empty string if it has none. <br/></td></tr>
@@ -525,32 +522,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a class="anchor" id="a46b097e799b3a04d00082919623b7bed"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool etree::Element::isIndirectParent </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classetree_1_1_element.html">Element</a> &amp;&#160;</td>
-          <td class="paramname"><em>e</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Return true if <b>e</b> is an indirect parent of <b>this</b> element. </p>
-<p>In other words, return true if this element is a transitive child of <b>e</b>.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">e</td><td>Potential parent. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if <b>e</b> is our indirect parent. </dd></dl>
 
 </div>
 </div>
