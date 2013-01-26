@@ -91,7 +91,7 @@ Element make_status_msg()
         {"first-attribute",          "first-value"},
         {"{urn:some-namepace}attr2", "second-value"}
     });
-    SubElement(msg, "system-load").text = get_system_load();
+    SubElement(msg, "system-load").text(get_system_load());
     return msg;
 }
 </pre><p>The <code>etree::feed</code> namespace includes an incomplete RSS/ATOM feed parser/generator. It is a work in progress, but can already parse some basic pieces.</p>
