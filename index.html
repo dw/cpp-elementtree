@@ -79,7 +79,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">cpp-ElementTree Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>This libxml2 wrapper is intended as a small experiment in C++ interface design and various tricks relating to C++11, while still being useful for practical purposes.</p>
+<div class="textblock"><p>This libxml2 wrapper is intended as a small experiment in C++ interface design and various tricks relating to C++11, while still being useful.</p>
 <p>It attempts to closely mimic the lxml Python library's <a href="http://lxml.de/tutorial.html">ElementTree</a> interface and all the perks that entails (e.g. uniform namespace and text handling), while making use of some modern C++ design ideas, such as automatic memory and ownership management. It is intended to work <em>wihout surprises</em>, in other words all libxml2 management quirks should be hidden.</p>
 <p>When built with a C++11 compiler, uniform initializer lists may be used in various places to specify attribute lists: </p>
 <pre class="fragment">using namespace etree;
@@ -94,7 +94,7 @@ Element make_status_msg()
     return msg;
 }
 </pre><p>The <code>etree::feed</code> namespace includes an incomplete RSS/ATOM feed parser/generator. It is a work in progress, but can already parse some basic pieces.</p>
-<p>Mostly complete API docs can be found here:</p>
+<p>Partially useful API docs can be found here:</p>
 <ul>
 <li><a href="http://dw.github.com/cpp-elementtree/namespaceetree.html">etree namespace</a></li>
 <li><a href="http://dw.github.com/cpp-elementtree/namespaceetreefeed.html">etree::feed namespace</a></li>
@@ -102,11 +102,18 @@ Element make_status_msg()
 <h3>Text handing</h3>
 <p>All text passed to or from the API is assumed to be in UTF-8 format. Text returned by the API is in UTF-8 format wrapped in a std::string.</p>
 <h3>Thread safety</h3>
-<p>The library and underlying libxml2 implementation is thread safe, only in that determistic behavior is guaranteed so long as library objects objects aren't shared among threads. This is due to the library internally performing unlocked reference counting using the underlying libxml2 DOM structures.</p>
+<p>The library and underlying libxml2 implementation are thread safe in that determistic behavior is guaranteed only so long as library objects objects aren't shared among threads. This is due to the library internally performing unlocked reference counting using the underlying libxml2 DOM structures.</p>
 <p>It is only possible to achieve thread safe behaviour if a single thread at a time is considered owner for all live objects referencing a given document. For a thread to pass an object to another thread, it must relinquish all remaining references it holds on that document beforehand.</p>
 <h3>Building</h3>
 <p>cpp-ElementTree consists of two files: <code><a class="el" href="element_8hpp_source.html">element.hpp</a></code> and <code>element.cpp</code>. The implementation file must be linked against libxml2 somehow during the build.</p>
-<p>The <code>etree::feed</code> implementation relies on various POSIX-related time parsing functions that aren't found on Windows. In order to avoid a large external dependency (e.g. Boost), <code>etree::feed</code> is UNIX-only for the time being. </p>
+<p>The <code>etree::feed</code> implementation relies on various POSIX-related time parsing functions that aren't found on Windows. In order to avoid a large external dependency (e.g. Boost), <code>etree::feed</code> is UNIX-only for the time being.</p>
+<h2>Horrors</h2>
+<ul>
+<li>Given the option of repeatedly heap-allocating potentially very short-lived proxy objects, or casting a <code>void *</code> for use as an integer, the latter path was chosen. <code>ref()</code> and <code>unref()</code> in <code>element.cpp</code> are suitable readable as a result.</li>
+</ul>
+<ul>
+<li>The Nullable implementation currently uses placement-new for the purposes of entertainment. The resulting object is most probably misaligned, and buggy in other ways yet unknown. The <code>char[]</code> buffer should be replaced with a typed member variable. </li>
+</ul>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
