@@ -28,9 +28,9 @@ using std::string;
 using std::ostream;
 
 
-/// -----------------------
-/// Nullable implementation
-/// -----------------------
+// -----------------------
+// Nullable implementation
+// -----------------------
 
 template<typename T>
 Nullable<T>::Nullable()
@@ -71,8 +71,7 @@ template<typename T>
 Nullable<T>::~Nullable()
 {
     if(set_) {
-        T &val = *reinterpret_cast<T *>(val_);
-        val.~T();
+        reinterpret_cast<T *>(val_)->~T();
     }
 }
 
@@ -109,9 +108,9 @@ template class Nullable<Element>;
 template class Nullable<string>;
 
 
-/// ----------------------------------------
-/// libxml2 DOM reference counting functions
-/// ----------------------------------------
+// ----------------------------------------
+// libxml2 DOM reference counting functions
+// ----------------------------------------
 
 /*
  * Note: it looks possible to only refcount on the parent document, however
@@ -158,32 +157,31 @@ static void unref(xmlNodePtr node)
 }
 
 
-/// -------------------------
-/// Internal helper functions
-/// -------------------------
+// -------------------------
+// Internal helper functions
+// -------------------------
 
-const char *to_char(const xmlChar *s)
+const char *toChar_(const xmlChar *s)
 {
     return reinterpret_cast<const char *>(s);
 }
 
-char *to_char(xmlChar *s)
+char *toChar_(xmlChar *s)
 {
     return reinterpret_cast<char *>(s);
 }
 
-const xmlChar *to_xmlchar(const char *s)
+const xmlChar *toXmlChar_(const char *s)
 {
     return reinterpret_cast<const xmlChar *>(s);
 }
 
-xmlChar *to_xmlchar(char *s)
+xmlChar *toXmlChar_(char *s)
 {
     return reinterpret_cast<xmlChar *>(s);
 }
 
-
-static void maybe_throw()
+static void maybeThrow_()
 {
     xmlErrorPtr error = ::xmlGetLastError();
     if(error) {
@@ -207,7 +205,7 @@ static void attrs_from_list_(Element &elem, kv_list &attribs)
 
 static const xmlChar *c_str(const string &s)
 {
-    return (const xmlChar *) (s.empty() ? 0 : s.c_str());
+    return toXmlChar_(s.empty() ? 0 : s.c_str());
 }
 
 
@@ -290,7 +288,7 @@ static xmlNsPtr makeNs_(xmlNodePtr node, const string &uri)
     xmlNsPtr ns;
 
     for(int i = 0; i <= 1000; i++) {
-        ::snprintf(to_char(prefix), sizeof prefix, "ns%d", i);
+        ::snprintf(toChar_(prefix), sizeof prefix, "ns%d", i);
         ns = ::xmlSearchNs(node->doc, node, prefix);
         if(! ns) {
             break;
@@ -302,7 +300,7 @@ static xmlNsPtr makeNs_(xmlNodePtr node, const string &uri)
         throw internal_error();
     }
 
-    ns = ::xmlNewNs(node, to_xmlchar(uri.c_str()), prefix);
+    ns = ::xmlNewNs(node, toXmlChar_(uri.c_str()), prefix);
     if(! ns) {
         throw memory_error();
     }
@@ -320,7 +318,7 @@ static xmlNsPtr getNs_(xmlNodePtr node, xmlNodePtr target, const string &uri)
     xmlNodePtr doc_node = reinterpret_cast<xmlNodePtr>(node->doc);
     for(xmlNodePtr cur = node; cur && cur != doc_node; cur = cur->parent) {
         for(xmlNsPtr ns = node->nsDef; ns != 0; ns = ns->next) {
-            if(uri == to_char(ns->href)) {
+            if(uri == toChar_(ns->href)) {
                 return ns;
             }
         }
@@ -337,12 +335,12 @@ P nodeFor__(const T &e)
 }
 
 
-/// ---------------
-/// QName functions
-/// ---------------
+// ---------------
+// QName functions
+// ---------------
 
 
-void QName::from_string(const string &qname)
+void QName::fromString_(const string &qname)
 {
     if(qname.size() > 0 && qname[0] == '{') {
         size_t e = qname.find('}');
@@ -395,13 +393,13 @@ QName::QName(const QName &other)
 
 QName::QName(const string &qname)
 {
-    from_string(qname);
+    fromString_(qname);
 }
 
 
 QName::QName(const char *qname)
 {
-    from_string(qname);
+    fromString_(qname);
 }
 
 
@@ -423,14 +421,14 @@ bool QName::operator==(const QName &other)
 }
 
 
-/// ---------------
-/// XPath functions
-/// ---------------
+// ---------------
+// XPath functions
+// ---------------
 
 static xmlXPathCompExprPtr compileOrThrow(const string &s)
 {
-    xmlXPathCompExprPtr expr = ::xmlXPathCompile(to_xmlchar(s.c_str()));
-    maybe_throw();
+    xmlXPathCompExprPtr expr = ::xmlXPathCompile(toXmlChar_(s.c_str()));
+    maybeThrow_();
     return expr;
 }
 
@@ -531,9 +529,9 @@ std::vector<Element> XPath::findall(const Element &e) const
 }
 
 
-/// -----------------
-/// AttrMap iterators
-/// -----------------
+// -----------------
+// AttrMap iterators
+// -----------------
 
 AttrIterator::AttrIterator(xmlNodePtr node)
     : node_(node)
@@ -545,9 +543,9 @@ QName AttrIterator::key()
 {
     const char *ns = "";
     if(node_->nsDef) {
-        ns = to_char(node_->nsDef->href);
+        ns = toChar_(node_->nsDef->href);
     }
-    return QName(ns, to_char(node_->name));
+    return QName(ns, toChar_(node_->name));
 }
 
 
@@ -557,7 +555,7 @@ string AttrIterator::value()
     xmlChar *s = ::xmlNodeListGetString(node_->doc,
                                         node_->children, 1);
     if(s) {
-        out = to_char(s);
+        out = toChar_(s);
         ::xmlFree(s);
     }
 
@@ -576,9 +574,9 @@ bool AttrIterator::next()
 }
 
 
-/// -----------------
-/// AttrMap functions
-/// -----------------
+// -----------------
+// AttrMap functions
+// -----------------
 
 AttrMap::AttrMap(xmlNodePtr node)
     : node_(ref(node))
@@ -605,8 +603,8 @@ string AttrMap::get(const QName &qname,
     xmlChar *s = ::xmlGetNsProp(node_, c_str(qname.tag()), c_str(qname.ns()));
 
     if(s) {
-        out = reinterpret_cast<const char *>(s);
-        ::xmlFree(reinterpret_cast<void *>(s));
+        out = toChar_(s);
+        ::xmlFree(s);
     }
     return out;
 }
@@ -615,7 +613,7 @@ string AttrMap::get(const QName &qname,
 void AttrMap::set(const QName &qname, const string &s)
 {
     ::xmlSetNsProp(node_,
-       getNs_(node_, node_, qname.ns()), c_str(qname.tag()), c_str(s));
+        getNs_(node_, node_, qname.ns()), c_str(qname.tag()), c_str(s));
 }
 
 
@@ -632,9 +630,9 @@ std::vector<QName> AttrMap::keys() const
 }
 
 
-/// ---------------------
-/// ElementTree functions
-/// ---------------------
+// ---------------------
+// ElementTree functions
+// ---------------------
 
 ElementTree::~ElementTree()
 {
@@ -660,9 +658,9 @@ Element ElementTree::getroot() const
 }
 
 
-/// -----------------
-/// Element functions
-/// -----------------
+// -----------------
+// Element functions
+// -----------------
 
 Element::~Element()
 {
@@ -690,7 +688,7 @@ static xmlNodePtr node_from_qname(const QName &qname)
     }
 
     xmlNodePtr node = ::xmlNewDocNode(doc, 0,
-        reinterpret_cast<const xmlChar *>(qname.tag().c_str()), 0);
+        toXmlChar_(qname.tag().c_str()), 0);
     if(! node) {
         ::xmlFreeDoc(doc);
         throw memory_error();
@@ -753,12 +751,13 @@ void Element::qname(const QName &qname)
 
 string Element::tag() const
 {
-    return reinterpret_cast<const char *>(node_->name);
+    return toChar_(node_->name);
 }
 
 
 void Element::tag(const string &s)
 {
+    assert(! s.empty());
     ::xmlNodeSetName(node_, c_str(s));
 }
 
@@ -766,7 +765,7 @@ void Element::tag(const string &s)
 string Element::ns() const
 {
     if(node_->ns) {
-        return reinterpret_cast<const char *>(node_->ns->href);
+        return toChar_(node_->ns->href);
     }
     return "";
 }
@@ -774,7 +773,11 @@ string Element::ns() const
 
 void Element::ns(const string &ns)
 {
-    node_->ns = getNs_(node_, node_, ns);
+    if(ns.empty()) {
+        node_->ns = NULL;
+    } else {
+        node_->ns = getNs_(node_, node_, ns);
+    }
 }
 
 
@@ -803,6 +806,12 @@ Element Element::operator[] (size_t i)
         }
     }
     return Element(cur);
+}
+
+
+bool Element::operator==(const Element &e)
+{
+    return node_ == e.node_;
 }
 
 
@@ -958,9 +967,9 @@ void Element::tail(const string &s)
 }
 
 
-/// -------------------------
-/// tostring() implementation
-/// -------------------------
+// -------------------------
+// tostring() implementation
+// -------------------------
 
 
 static int writeCallback(void *ctx, const char *buffer, int len)
@@ -992,9 +1001,9 @@ string tostring(const Element &e)
 }
 
 
-/// ----------------
-/// Helper functions
-/// ----------------
+// ----------------
+// Helper functions
+// ----------------
 
 Element SubElement(Element &parent, const QName &qname)
 {
@@ -1019,7 +1028,7 @@ static Element fromstring_internal(const char *s, size_t size)
     xmlDocPtr doc = ::xmlReadMemory(s, size, 0, 0, 0);
     if(! (doc && doc->children)) {
         ::xmlFreeDoc(doc); // NULL ok.
-        maybe_throw();
+        maybeThrow_();
         throw parse_error();
     }
 
@@ -1039,17 +1048,17 @@ Element fromstring(const string &s)
 }
 
 
-/// ----------------------
-/// parse() implementation
-/// ----------------------
+// ----------------------
+// parse() implementation
+// ----------------------
 
-static int DUMMY_close(void *ignored)
+static int dummyClose_(void *ignored)
 {
     return 0;
 }
 
 
-int istream_read__(void *strm, char *buffer, int len)
+int istreamRead__(void *strm, char *buffer, int len)
 {
     std::istream &is = *static_cast<std::istream *>(strm);
 
@@ -1061,7 +1070,7 @@ int istream_read__(void *strm, char *buffer, int len)
 }
 
 
-int fd_read__(void *strm, char *buffer, int len)
+int fdRead__(void *strm, char *buffer, int len)
 {
     int &fd = *static_cast<int *>(strm);
     return ::read(fd, buffer, len);
@@ -1069,12 +1078,12 @@ int fd_read__(void *strm, char *buffer, int len)
 
 
 template<int(*fn)(void *, char *, int), typename T>
-static ElementTree parse_internal(T obj)
+static ElementTree parseInternal_(T obj)
 {
-    xmlDocPtr doc = ::xmlReadIO(fn, DUMMY_close,
+    xmlDocPtr doc = ::xmlReadIO(fn, dummyClose_,
                                 static_cast<void *>(obj), 0, 0, 0);
     if(! doc) {
-        maybe_throw();
+        maybeThrow_();
         throw parse_error();
     }
     return ElementTree(doc);
@@ -1083,7 +1092,7 @@ static ElementTree parse_internal(T obj)
 
 ElementTree parse(std::istream &is)
 {
-    return parse_internal<istream_read__>(&is);
+    return parseInternal_<istreamRead__>(&is);
 }
 
 
@@ -1096,13 +1105,13 @@ ElementTree parse(const string &path)
 
 ElementTree parse(int fd)
 {
-    return parse_internal<fd_read__>(&fd);
+    return parseInternal_<fdRead__>(&fd);
 }
 
 
-/// -----------------
-/// iostreams support
-/// -----------------
+// -----------------
+// iostreams support
+// -----------------
 
 
 ostream &operator<< (ostream &out, const ElementTree &tree)
