@@ -20,7 +20,7 @@ namespace feed {
 
 class Helpers;
 class Format;
-class Entry;
+class Item;
 class Feed;
 
 Feed fromstring(const std::string &s);
@@ -29,17 +29,37 @@ Feed parse(std::istream &is);
 Feed parse(const std::string &path);
 Feed parse(int fd);
 
+// Internal.
+bool parseRfc822Date_(std::string, time_t &out);
 
-class Entry
+
+class Item
 {
-    friend Entry makeEntry_(const Format &format, Element elem);
+    friend Item makeItem_(const Format &format, Element elem);
 
     const Format &format_;
     Element elem_;
 
-    Entry(const Format &format, Element elem);
+    Item(const Format &format, Element elem);
 
     public:
+    enum content_type {
+        CTYPE_TEXT,
+        CTYPE_HTML
+    };
+
+    std::string title() const;
+    void title(const std::string &s);
+
+    std::string link() const;
+    void link(const std::string &s);
+
+    std::string description() const;
+    void description(const std::string &s);
+
+    enum content_type description_type() const;
+    void description_type(enum content_type);
+
     std::string author() const;
     void author(std::string author);
 
@@ -79,7 +99,7 @@ class Feed
     time_t published() const;
     void published(time_t t);
 
-    std::vector<Entry> entries() const;
+    std::vector<Item> items() const;
 };
 
 

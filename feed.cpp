@@ -4,7 +4,7 @@
  * License: http://opensource.org/licenses/MIT
  */
 
-#include <time.h>
+#include <iostream>
 
 #include "feed.hpp"
 
@@ -13,49 +13,64 @@ namespace etree {
 namespace feed {
 
 using namespace etree;
+using namespace std;
+
 using std::string;
 
 
 typedef bool (*IdentifyFunc)(const Element &);
-typedef std::vector<QName> NameList;
+typedef Item::content_type (*GetTypeFunc)(const Element &);
+typedef void (*SetTypeFunc)(Element &, Item::content_type);
+typedef const std::vector<QName> NameList;
 
 struct Format
 {
     std::string name;
     IdentifyFunc identifyFunc;
+    GetTypeFunc getDescrTypeFunc;
+    SetTypeFunc setDescrTypeFunc;
     NameList titlePath;
     NameList linkPath;
     NameList descrPath;
-    NameList entriesPath;
+    NameList itemsPath;
     NameList itemTitlePath;
     NameList itemLinkPath;
     NameList itemDescrPath;
+    NameList itemPubDatePath;
 };
 
 
-static bool identifyRss20(const Element &e)
+static bool rss20Identify_(const Element &e)
 {
     return e.tag() == "rss" && e.get("version", "2.0") == "2.0";
 }
 
 
-static bool parseRfc822Date(const std::string &s)
+static Item::content_type rss20GetDescrType_(const Element &e)
 {
-    
+    return Item::CTYPE_HTML;
+}
+
+
+static void rss20SetDescrType_(Element &e, Item::content_type type)
+{
 }
 
 
 static const Format formats_[] = {
     {
         "RSS 2.0",
-        /* identifyFunc*/       identifyRss20,
-        /* titlePath */         {"channel", "title"},
-        /* linkPath */          {"channel", "link"},
-        /* descrPath */         {"channel", "description"},
-        /* entriesPath */       {"channel", "item"},
-        /* itemTitlePath */     {"title"},
-        /* itemLinkPath */      {"link"},
-        /* itemDescrPath */     {"descr"}
+        /* identifyFunc*/           rss20Identify_,
+        /* GetDescrTypeFunc */      rss20GetDescrType_,
+        /* SetDescrTypeFunc */      rss20SetDescrType_,
+        /* titlePath */             {"channel", "title"},
+        /* linkPath */              {"channel", "link"},
+        /* descrPath */             {"channel", "description"},
+        /* itemsPath */             {"channel", "item"},
+        /* itemTitlePath */         {"title"},
+        /* itemLinkPath */          {"link"},
+        /* itemDescrPath */         {"description"},
+        /* itemPubDatePath */       {"pubDate"}
     }
 };
 
@@ -66,9 +81,9 @@ static const int formatsCount_ = sizeof formats_ / sizeof formats_[0];
 /// Helper functions
 /// ----------------
 
-Entry makeEntry_(const Format &format, Element elem)
+Item makeItem_(const Format &format, Element elem)
 {
-    return Entry(format, elem);
+    return Item(format, elem);
 }
 
 
@@ -77,42 +92,6 @@ Feed makeFeed_(const Format &format, Element elem)
     return Feed(format, elem);
 }
 
-
-
-/// ---------------
-/// Entry functions
-/// ---------------
-
-Entry::Entry(const Format &format, Element elem)
-    : format_(format)
-    , elem_(elem)
-{
-}
-
-
-/// --------------
-/// Feed functions
-/// --------------
-
-Feed::Feed(const Format &format, Element elem)
-    : format_(format)
-    , elem_(elem)
-{
-}
-
-
-Feed::Feed(const Feed &feed)
-    : format_(feed.format_)
-    , elem_(feed.elem_)
-{
-}
-
-
-Feed::~Feed()
-{
-}
-#include <iostream>
-using namespace std;
 
 static Element getChild_(Element &parent, const QName &qn)
 {
@@ -142,6 +121,90 @@ static void setText_(Element cur, const NameList &names, const std::string &s)
         cur = getChild_(cur, names[i]);
     }
     cur.text(s);
+}
+
+
+
+/// ---------------
+/// Item functions
+/// ---------------
+
+Item::Item(const Format &format, Element elem)
+    : format_(format)
+    , elem_(elem)
+{
+}
+
+
+std::string Item::title() const
+{
+    return getText_(elem_, format_.itemTitlePath);
+}
+
+
+void Item::title(const std::string &s)
+{
+    setText_(elem_, format_.itemTitlePath, s);
+}
+
+
+std::string Item::link() const
+{
+    return getText_(elem_, format_.itemLinkPath);
+}
+
+
+void Item::link(const std::string &s)
+{
+    setText_(elem_, format_.itemLinkPath, s);
+}
+
+
+std::string Item::description() const
+{
+    return getText_(elem_, format_.itemDescrPath);
+}
+
+
+void Item::description(const std::string &s)
+{
+    setText_(elem_, format_.itemDescrPath, s);
+}
+
+
+time_t Item::created() const
+{
+    std::string s = getText_(elem_, format_.itemPubDatePath);
+    if(s.size()) {
+        time_t out;
+        if(parseRfc822Date_(s, out)) {
+            return out;
+        }
+    }
+    return 0;
+}
+
+
+/// --------------
+/// Feed functions
+/// --------------
+
+Feed::Feed(const Format &format, Element elem)
+    : format_(format)
+    , elem_(elem)
+{
+}
+
+
+Feed::Feed(const Feed &feed)
+    : format_(feed.format_)
+    , elem_(feed.elem_)
+{
+}
+
+
+Feed::~Feed()
+{
 }
 
 
@@ -181,20 +244,20 @@ void Feed::description(const std::string &s)
 }
 
 
-std::vector<Entry> Feed::entries() const
+std::vector<Item> Feed::items() const
 {
     Element cur = elem_;
-    const NameList &names = format_.entriesPath;
+    const NameList &names = format_.itemsPath;
 
     for(int i = 0; i < (names.size() - 1); i++) {
         cur = getChild_(cur, names[i]);
     }
 
     std::vector<Element> elems = cur.children(names.back());
-    std::vector<Entry> out;
+    std::vector<Item> out;
     for(int i = 0; i < elems.size(); i++) {
         Element &elem = elems[i];
-        out.push_back(makeEntry_(format_, elem));
+        out.push_back(makeItem_(format_, elem));
     }
     return out;
 }

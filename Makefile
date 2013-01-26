@@ -13,9 +13,9 @@ LDFLAGS += -liconv
 LDFLAGS += -lz
 LDFLAGS += -lxml2
 
-play: play.cc element.cpp feed.cpp
+play: play.cc element.cpp feed.cpp feed-time.cpp
 element.cpp: element.hpp
 feed.cpp: feed.hpp
 
 clean:
-	rm -f play
+	rm -f play *.o *.a

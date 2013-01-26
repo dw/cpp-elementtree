@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <time.h>
+
 #include "element.hpp"
 #include "feed.hpp"
 #include "util.hpp"
@@ -112,8 +114,18 @@ void main6()
     std::string rss = get_file_contents("red.rss");
     Feed f = etree::feed::fromstring(rss);
     cout << f.title() << endl;
-    auto items = f.entries();
+    auto items = f.items();
     cout << items.size() << endl;
+    cout << endl;
+    for(auto &item : items) {
+        cout << item.title() << endl;
+        cout << "   " << item.link() << endl;
+        time_t c = item.created();
+        cout << "   " << ctime(&c) << endl;
+        cout << "   " << item.description() << endl;
+        cout << endl;
+    }
+    cout << endl;
 }
 
 
