@@ -146,6 +146,17 @@ std::ostream &operator<< (std::ostream &out, const Element &elem);
 std::ostream &operator<< (std::ostream &out, const QName &qname);
 
 /**
+ * Return true if <strong>parent</strong> is an indirect parent of
+ * <strong>child</strong>.
+ *
+ * @param parent        Potential parent.
+ * @param child         Potential child.
+ * @returns             True if \c child descends from \c parent.
+ */
+bool isTransitiveParent(const Element &parent, const Element &child);
+
+
+/**
  * Lightweight wrapper to add nullable semantics to another type. This template
  * is presently only implemented for the Element type, attempting to
  * instantiate it with other types will fail.
@@ -584,16 +595,6 @@ class Element
      * @returns         Matching elements.
      */
     vector<Element> findall(const XPath &expr) const;
-
-    /**
-     * Return true if <strong>e</strong> is an indirect parent of
-     * <strong>this</strong> element. In other words, return true if this
-     * element is a transitive child of <strong>e</strong>.
-     *
-     * @param e         Potential parent.
-     * @returns         True if <strong>e</strong> is our indirect parent.
-     */
-    bool isIndirectParent(const Element &e);
 
     /**
      * Append an element to this element.

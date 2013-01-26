@@ -190,6 +190,21 @@ static void maybeThrow_()
 }
 
 
+bool isTransitiveParent(const Element &parent, const Element &child)
+{
+    xmlNodePtr parentNode = nodeFor__<xmlNodePtr>(parent);
+    xmlNodePtr childNode = nodeFor__<xmlNodePtr>(child);
+
+    while(childNode) {
+        if(parentNode == childNode) {
+            return true;
+        }
+        childNode = childNode->parent;
+    }
+    return false;
+}
+
+
 #ifdef ETREE_0X
 static void attrs_from_list_(Element &elem, kv_list &attribs)
 {
@@ -872,25 +887,11 @@ std::vector<Element> Element::findall(const XPath &expr) const
 }
 
 
-bool Element::isIndirectParent(const Element &e)
-{
-    xmlNodePtr other = e.node_;
-    xmlNodePtr parent = node_->parent;
-    while(parent) {
-        if(parent == other) {
-            return true;
-        }
-        parent = parent->parent;
-    }
-    return false;
-}
-
-
 void Element::append(Element &e)
 {
     std::cout << "appending " << e;
     std::cout << " to " << *this << std::endl;
-    if(isIndirectParent(e)) {
+    if(isTransitiveParent(e, *this)) {
         throw cyclical_tree_error();
     }
     ::xmlUnlinkNode(e.node_);
