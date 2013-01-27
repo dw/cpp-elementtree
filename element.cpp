@@ -206,7 +206,7 @@ bool isTransitiveParent(const Element &parent, const Element &child)
 
 
 #ifdef ETREE_0X
-static void attrs_from_list_(Element &elem, kv_list &attribs)
+static void attrsFromList_(Element &elem, kv_list &attribs)
 {
     std::cout << "LOL!" << std::endl;
     AttrMap attrs = elem.attrib();
@@ -736,7 +736,7 @@ Element::Element(const QName &qname, kv_list attribs)
     : node_(node_from_qname(qname))
 {
     try {
-        attrs_from_list_(*this, attribs);
+        attrsFromList_(*this, attribs);
     } catch(...) {
         unref(node_);
         throw;
@@ -1018,13 +1018,13 @@ Element SubElement(Element &parent, const QName &qname)
 Element SubElement(Element &parent, const QName &qname, kv_list attribs)
 {
     Element elem = SubElement(parent, qname);
-    attrs_from_list_(elem, attribs);
+    attrsFromList_(elem, attribs);
     return elem;
 }
 #endif
 
 
-static Element fromstring_internal(const char *s, size_t size)
+static Element fromstringInternal_(const char *s, size_t size)
 {
     xmlDocPtr doc = ::xmlReadMemory(s, size, 0, 0, 0);
     if(! (doc && doc->children)) {
@@ -1039,13 +1039,13 @@ static Element fromstring_internal(const char *s, size_t size)
 
 Element fromstring(const char *s)
 {
-    return fromstring_internal(s, ::strlen(s));
+    return fromstringInternal_(s, ::strlen(s));
 }
 
 
 Element fromstring(const string &s)
 {
-    return fromstring_internal(s.data(), s.size());
+    return fromstringInternal_(s.data(), s.size());
 }
 
 
