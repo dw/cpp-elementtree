@@ -122,9 +122,9 @@ void main6()
         cout << item.title() << endl;
         cout << " + " << item.guid() << endl;
         cout << "   " << item.link() << endl;
-        time_t c = item.created();
+        time_t c = item.published();
         cout << "   " << ctime(&c) << endl;
-        cout << "   " << item.description() << endl;
+        cout << "   " << item.content() << endl;
         cout << endl;
     }
     cout << endl;

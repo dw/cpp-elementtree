@@ -1,6 +1,6 @@
 
 CXX = clang++-mp-3.3
-LIBXML2_ROOT ?= /usr/local/libxml2
+LIBXML2_ROOT ?= /opt/local
 
 CXXFLAGS += -I$(LIBXML2_ROOT)/include/libxml2
 CXXFLAGS += -g

@@ -67,7 +67,7 @@ static time_t parseRfc822Tz_(const char *token)
 }
 
 
-bool parseRfc822Date_(std::string s, time_t &out)
+time_t parseRfc822Date_(std::string s)
 {
     static const char *formats[] = {
         "%d %b %Y %H:%M:%S",
@@ -93,12 +93,12 @@ bool parseRfc822Date_(std::string s, time_t &out)
 
     ::setlocale(LC_TIME, oldLocale.empty() ? NULL : oldLocale.c_str());
     if(! npos) {
-        return false;
+        return 0;
     }
 
-    out = mktime(&tm);
+    time_t out = mktime(&tm);
     if(out == -1) {
-        return false;
+        return 0;
     }
 
     /* GMT time, with no daylight savings time correction. (Usually,
@@ -106,7 +106,7 @@ bool parseRfc822Date_(std::string s, time_t &out)
     out -= parseRfc822Tz_(npos);
     time_t t2 = mktime(gmtime(&out));
     out -= (t2 - out);
-    return true;
+    return out;
 }
 
 

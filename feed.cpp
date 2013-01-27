@@ -1,9 +1,9 @@
-
 /*
  * Copyright David Wilson, 2013.
  * License: http://opensource.org/licenses/MIT
  */
 
+#include <cassert>
 #include <iostream>
 
 #include "feed.hpp"
@@ -13,49 +13,15 @@ namespace etree {
 namespace feed {
 
 using namespace etree;
-using namespace std;
 
 using std::string;
 
-
-typedef bool (*IdentifyFunc)(const Element &);
-typedef Item::content_type (*GetTypeFunc)(const Element &);
-typedef void (*SetTypeFunc)(Element &, Item::content_type);
 typedef const std::vector<QName> NameList;
 
-struct Format
-{
-    std::string name;
-    IdentifyFunc identifyFunc;
-    GetTypeFunc getDescrTypeFunc;
-    SetTypeFunc setDescrTypeFunc;
-    NameList titlePath;
-    NameList linkPath;
-    NameList descrPath;
-    NameList itemsPath;
-    NameList itemTitlePath;
-    NameList itemLinkPath;
-    NameList itemDescrPath;
-    NameList itemPubDatePath;
-    NameList itemGuidPath;
-};
 
-
-/// ----------------
-/// Helper functions
-/// ----------------
-
-Item makeItem_(const Format &format, Element elem)
-{
-    return Item(format, elem);
-}
-
-
-Feed makeFeed_(const Format &format, Element elem)
-{
-    return Feed(format, elem);
-}
-
+// ----------------
+// Helper functions
+// ----------------
 
 static Element getChild_(Element &parent, const QName &qn)
 {
@@ -64,7 +30,7 @@ static Element getChild_(Element &parent, const QName &qn)
 }
 
 
-static std::string getText_(const Element cur, const NameList &names)
+static string getText_(const Element cur, const NameList &names)
 {
     for(int i = 0; i < names.size(); i++) {
         Nullable<Element> maybe = cur.child(names[i]);
@@ -77,7 +43,7 @@ static std::string getText_(const Element cur, const NameList &names)
 }
 
 
-static void setText_(Element cur, const NameList &names, const std::string &s)
+static void setText_(Element cur, const NameList &names, const string &s)
 {
     for(int i = 0; i < names.size(); i++) {
         cur = getChild_(cur, names[i]);
@@ -86,250 +52,470 @@ static void setText_(Element cur, const NameList &names, const std::string &s)
 }
 
 
-static bool rss20Identify_(const Element &e)
+static std::vector<Item> itemsFromPath_(const ItemFormat &format,
+    const Element &elem, const NameList &names)
 {
-    return e.tag() == "rss" && e.get("version", "2.0") == "2.0";
-}
+    std::vector<Item> out;
 
-
-#define ATOM_NS "{http://www.w3.org/2005/Atom}"
-static bool atomIdentify_(const Element &e)
-{
-    return e.qname() == QName(ATOM_NS "feed");
-}
-
-
-static Item::content_type rss20GetDescrType_(const Element &e)
-{
-    return Item::CTYPE_HTML;
-}
-
-
-static void rss20SetDescrType_(Element &e, Item::content_type type)
-{
-}
-
-
-static Item::content_type atomGetDescrType_(const Element &e)
-{
-    Nullable<Element> content = e.child(ATOM_NS "content");
-    if(content) {
-        std::string type = (*content).get(ATOM_NS "type");
-        if(type == "html" || type == "xhtml") {
-            return Item::CTYPE_HTML;
-        }
-    }
-    return Item::CTYPE_TEXT;
-}
-
-
-static void atomSetDescrType_(Element &e, Item::content_type type)
-{
-    const char *s = (type == Item::CTYPE_HTML) ? "html" : "text";
-    getChild_(e, ATOM_NS "content").attrib().set(ATOM_NS "type", s);
-}
-
-
-static const Format formats_[] = {
-    {
-        "RSS 2.0",
-        /* identifyFunc*/           rss20Identify_,
-        /* GetDescrTypeFunc */      rss20GetDescrType_,
-        /* SetDescrTypeFunc */      rss20SetDescrType_,
-        /* titlePath */             {"channel", "title"},
-        /* linkPath */              {"channel", "link"},
-        /* descrPath */             {"channel", "description"},
-        /* itemsPath */             {"channel", "item"},
-        /* itemTitlePath */         {"title"},
-        /* itemLinkPath */          {"link"},
-        /* itemDescrPath */         {"description"},
-        /* itemPubDatePath */       {"pubDate"},
-        /* itemGuidPath */          {"guid"}
-    },
-    {
-        "ATOM",
-        /* identifyFunc*/           atomIdentify_,
-        /* GetDescrTypeFunc */      atomGetDescrType_,
-        /* SetDescrTypeFunc */      atomSetDescrType_,
-        /* titlePath */             {ATOM_NS "title"},
-        /* linkPath */              {ATOM_NS "link"},
-        /* descrPath */             {ATOM_NS "description"},
-        /* itemsPath */             {ATOM_NS "entry"},
-        /* itemTitlePath */         {ATOM_NS "title"},
-        /* itemLinkPath */          {ATOM_NS "link"},
-        /* itemDescrPath */         {ATOM_NS "content"},
-        /* itemPubDatePath */       {ATOM_NS "published"},
-        /* itemGuidPath */          {ATOM_NS "id"}
-    }
-};
-
-static const int formatsCount_ = sizeof formats_ / sizeof formats_[0];
-
-
-
-/// ---------------
-/// Item functions
-/// ---------------
-
-Item::Item(const Format &format, Element elem)
-    : format_(format)
-    , elem_(elem)
-{
-}
-
-
-std::string Item::title() const
-{
-    return getText_(elem_, format_.itemTitlePath);
-}
-
-
-void Item::title(const std::string &s)
-{
-    setText_(elem_, format_.itemTitlePath, s);
-}
-
-
-std::string Item::link() const
-{
-    return getText_(elem_, format_.itemLinkPath);
-}
-
-
-void Item::link(const std::string &s)
-{
-    setText_(elem_, format_.itemLinkPath, s);
-}
-
-
-std::string Item::description() const
-{
-    return getText_(elem_, format_.itemDescrPath);
-}
-
-
-void Item::description(const std::string &s)
-{
-    setText_(elem_, format_.itemDescrPath, s);
-}
-
-
-std::string Item::guid() const
-{
-    return getText_(elem_, format_.itemGuidPath);
-}
-
-
-void Item::guid(const std::string &s)
-{
-    setText_(elem_, format_.itemGuidPath, s);
-}
-
-
-time_t Item::created() const
-{
-    std::string s = getText_(elem_, format_.itemPubDatePath);
-    if(s.size()) {
-        time_t out;
-        if(parseRfc822Date_(s, out)) {
+    Element cur = const_cast<Element&>(elem);
+    for(int i = 0; i < (names.size() - 1); i++) {
+        Nullable<Element> maybe = cur.child(names[i]);
+        if(! maybe) {
             return out;
         }
-    }
-    return 0;
-}
-
-
-/// --------------
-/// Feed functions
-/// --------------
-
-Feed::Feed(const Format &format, Element elem)
-    : format_(format)
-    , elem_(elem)
-{
-}
-
-
-Feed::Feed(const Feed &feed)
-    : format_(feed.format_)
-    , elem_(feed.elem_)
-{
-}
-
-
-Feed::~Feed()
-{
-}
-
-
-const std::string &Feed::format() const
-{
-    return format_.name;
-}
-
-
-std::string Feed::title() const
-{
-    return getText_(elem_, format_.titlePath);
-}
-
-
-void Feed::title(const std::string &s)
-{
-    setText_(elem_, format_.titlePath, s);
-}
-
-
-std::string Feed::link() const
-{
-    return getText_(elem_, format_.linkPath);
-}
-
-
-void Feed::link(const std::string &s)
-{
-    setText_(elem_, format_.linkPath, s);
-}
-
-
-std::string Feed::description() const
-{
-    return getText_(elem_, format_.descrPath);
-}
-
-
-void Feed::description(const std::string &s)
-{
-    setText_(elem_, format_.descrPath, s);
-}
-
-
-std::vector<Item> Feed::items() const
-{
-    Element cur = elem_;
-    const NameList &names = format_.itemsPath;
-
-    for(int i = 0; i < (names.size() - 1); i++) {
-        cur = getChild_(cur, names[i]);
+        cur = *maybe;
     }
 
-    std::vector<Element> elems = cur.children(names.back());
-    std::vector<Item> out;
-    for(int i = 0; i < elems.size(); i++) {
-        Element &elem = elems[i];
-        out.push_back(makeItem_(format_, elem));
+    for(auto &elem : cur.children(names.back())) {
+        out.push_back(Item(format, elem));
     }
     return out;
 }
 
 
-Feed fromstring(const std::string &s)
+class FeedFormat
+{
+    public:
+    virtual bool identify(const Element &e) const = 0;
+    virtual enum feed_format format() const = 0;
+    virtual string title(const Element &) const = 0;
+    virtual void title(Element &, const string &) const = 0;
+    virtual string link(const Element &) const = 0;
+    virtual void link(Element &, const string &) const = 0;
+    virtual string description(const Element &) const = 0;
+    virtual void description(Element &, const string &) const = 0;
+    virtual string icon(const Element &) const = 0;
+    virtual void icon(Element &, const string &) const = 0;
+    virtual time_t published(const Element &) const = 0;
+    virtual void published(Element &, time_t) const = 0;
+    virtual std::vector<Item> items(const Element &) const = 0;
+};
+
+
+class ItemFormat
+{
+    public:
+    virtual string title(const Element &) const = 0;
+    virtual void title(Element &, const string &) const = 0;
+    virtual string link(const Element &) const = 0;
+    virtual void link(Element &, const string &) const = 0;
+    virtual string content(const Element &) const = 0;
+    virtual void content(Element &, const string &) const = 0;
+    virtual enum content_type type(const Element &) const = 0;
+    virtual void type(Element &, enum content_type) const = 0;
+    virtual string author(const Element &) const = 0;
+    virtual void author(Element &, const string &) const = 0;
+    virtual string guid(const Element &) const = 0;
+    virtual void guid(Element &, const string &) const = 0;
+    virtual time_t published(const Element &) const = 0;
+    virtual void published(Element &, time_t) const = 0;
+};
+
+
+// -------------------
+// Item implementation
+// -------------------
+
+Item::Item(const ItemFormat &format, const Element &elem)
+    : format_(format), elem_(elem) {}
+
+Item::Item(const Item &other)
+    : format_(other.format_)
+    , elem_(other.elem_) {}
+
+string Item::title() const              { return format_.title(elem_); }
+void Item::title(const string &s)       { format_.title(elem_, s); }
+string Item::link() const               { return format_.link(elem_); }
+void Item::link(const string &s)        { format_.link(elem_, s); }
+string Item::content() const            { return format_.content(elem_); }
+void Item::content(const string &s)     { format_.content(elem_, s); }
+content_type Item::type() const         { return format_.type(elem_); }
+void Item::type(content_type type)      { format_.type(elem_, type); }
+string Item::author() const             { return format_.author(elem_); }
+void Item::author(const string &s)      { format_.author(elem_, s); }
+string Item::guid() const               { return format_.guid(elem_); }
+void Item::guid(const string &s)        { format_.guid(elem_, s); }
+time_t Item::published() const          { return format_.published(elem_); }
+void Item::published(time_t published)  { format_.published(elem_, published); }
+
+
+// -------------------
+// Feed implementation
+// -------------------
+
+Feed::Feed(const FeedFormat &format, const Element &elem)
+    : format_(format), elem_(elem) {}
+
+Feed::Feed(const Feed &other)
+    : format_(other.format_)
+    , elem_(other.elem_) {}
+
+enum feed_format Feed::format() const   { return format_.format(); }
+string Feed::title() const              { return format_.title(elem_); }
+void Feed::title(const string &s)       { format_.title(elem_, s); }
+string Feed::link() const               { return format_.link(elem_); }
+void Feed::link(const string &s)        { format_.link(elem_, s); }
+string Feed::description() const        { return format_.description(elem_); }
+void Feed::description(const string &s) { format_.description(elem_, s); }
+time_t Feed::published() const          { return format_.published(elem_); }
+void Feed::published(time_t published)  { format_.published(elem_, published); }
+std::vector<Item> Feed::items() const   { return format_.items(elem_); }
+
+
+// -------------------
+// Atom implementation
+// -------------------
+
+#define ATOM_NS "{http://www.w3.org/2005/Atom}"
+
+static const QName kAtomContentTag{ATOM_NS "content"};
+static const QName kAtomRootTag = ATOM_NS "feed";
+static const QName kAtomTypeAttr{ATOM_NS "type"};
+static const NameList kAtomContentPath{kAtomContentTag};
+static const NameList kAtomAuthorPath{ATOM_NS "author", ATOM_NS "name"};
+static const NameList kAtomGuidPath{ATOM_NS "id"};
+static const NameList kAtomItemsPath{ATOM_NS "entry"};
+static const NameList kAtomLinkPath{ATOM_NS "link"};
+static const NameList kAtomPublishedPath{ATOM_NS "published"};
+static const NameList kAtomTitlePath{ATOM_NS "title"};
+
+
+class AtomItemFormat
+    : public ItemFormat
+{
+    public:
+    static AtomItemFormat instance;
+
+    string title(const Element &e) const
+    {
+        return getText_(e, kAtomTitlePath);
+    }
+
+    void title(Element &e, const string &s) const
+    {
+        setText_(e, kAtomTitlePath, s);
+    }
+
+    string link(const Element &e) const
+    {
+        return getText_(e, kAtomLinkPath);
+    }
+
+    void link(Element &e, const string &s) const
+    {
+        setText_(e, kAtomLinkPath, s);
+    }
+
+    string content(const Element &e) const
+    {
+        return getText_(e, kAtomContentPath);
+    }
+
+    void content(Element &e, const string &s) const
+    {
+        setText_(e, kAtomContentPath, s);
+    }
+
+    enum content_type type(const Element &e) const
+    {
+        Nullable<Element> content = e.child(kAtomContentTag);
+        if(content) {
+            string type = (*content).get(kAtomTypeAttr);
+            if(type == "html" || type == "xhtml") {
+                return CTYPE_HTML;
+            }
+        }
+        return CTYPE_TEXT;
+    }
+
+    void type(Element &e, enum content_type type) const
+    {
+        const char *s = (type == CTYPE_HTML) ? "html" : "text";
+        getChild_(e, kAtomContentTag).attrib().set(kAtomTypeAttr, s);
+    }
+
+    string author(const Element &e) const
+    {
+        return getText_(e, kAtomAuthorPath);
+    }
+
+    void author(Element &e, const string &s) const
+    {
+        setText_(e, kAtomAuthorPath, s);
+    }
+
+    string guid(const Element &e) const
+    {
+        return getText_(e, kAtomGuidPath);
+    }
+
+    void guid(Element &e, const string &s) const
+    {
+        setText_(e, kAtomGuidPath, s);
+    }
+
+    time_t published(const Element &e) const
+    {
+        assert(0);
+    }
+
+    void published(Element &e, time_t) const
+    {
+        assert(0);
+    }
+};
+
+
+struct AtomFeedFormat
+    : public FeedFormat
+{
+    public:
+    static AtomFeedFormat instance;
+
+    bool identify(const Element &e) const
+    {
+        return e.qname() == kAtomRootTag;
+    }
+
+    enum feed_format format() const
+    {
+        return FORMAT_ATOM;
+    }
+
+    string title(const Element &e) const
+    {
+        return getText_(e, kAtomTitlePath);
+    }
+
+    void title(Element &e, const string &s) const
+    {
+        setText_(e, kAtomTitlePath, s);
+    }
+
+    string link(const Element &e) const
+    {
+        return getText_(e, kAtomLinkPath);
+    }
+
+    void link(Element &e, const string &s) const
+    {
+        setText_(e, kAtomLinkPath, s);
+    }
+
+    string icon(const Element &e) const
+    {
+        return "";
+    }
+
+    void icon(Element &e, const string &s) const
+    {
+    }
+
+    string description(const Element &e) const
+    {
+        return getText_(e, kAtomContentPath);
+    }
+
+    void description(Element &e, const string &s) const
+    {
+        setText_(e, kAtomContentPath, s);
+    }
+
+    time_t published(const Element &e) const
+    {
+        assert(0);
+    }
+
+    void published(Element &e, time_t) const
+    {
+        assert(0);
+    }
+
+    std::vector<Item> items(const Element &e) const {
+        return itemsFromPath_(AtomItemFormat::instance, e, kAtomItemsPath);
+    }
+};
+
+
+// ------------------------
+// Rss20Feed implementation
+// ------------------------
+
+static const NameList kRssContentPath{"channel", "description"};
+static const NameList kRssItemCreatedPath{"pubDate"};
+static const NameList kRssItemDescrPath{"description"};
+static const NameList kRssItemGuidPath{"guid"};
+static const NameList kRssItemLinkPath{"link"};
+static const NameList kRssItemTitlePath{"title"};
+static const NameList kRssItemsPath{"channel", "item"};
+static const NameList kRssLinkPath{"channel", "link"};
+static const NameList kRssTitlePath{"channel", "title"};
+
+
+class Rss20ItemFormat
+    : public ItemFormat
+{
+    public:
+    static Rss20ItemFormat instance;
+
+    string title(const Element &e) const
+    {
+        return getText_(e, kRssTitlePath);
+    }
+
+    void title(Element &e, const string &s) const
+    {
+        setText_(e, kRssTitlePath, s);
+    }
+
+    string link(const Element &e) const
+    {
+        return getText_(e, kRssLinkPath);
+    }
+
+    void link(Element &e, const string &s) const
+    {
+        setText_(e, kRssLinkPath, s);
+    }
+
+    string content(const Element &e) const
+    {
+        return getText_(e, kRssContentPath);
+    }
+
+    void content(Element &e, const string &s) const
+    {
+        setText_(e, kRssContentPath, s);
+    }
+
+    enum content_type type(const Element &e) const
+    {
+        return CTYPE_HTML;
+    }
+
+    void type(Element &e, enum content_type type) const
+    {
+        assert(type == CTYPE_HTML);
+    }
+
+    string author(const Element &e) const
+    {
+        return "";
+    }
+
+    void author(Element &e, const string &s) const
+    {
+    }
+
+    string guid(const Element &e) const
+    {
+        return getText_(e, kRssItemGuidPath);
+    }
+
+    void guid(Element &e, const string &s) const
+    {
+        setText_(e, kRssItemGuidPath, s);
+    }
+
+    time_t published(const Element &e) const
+    {
+        return parseRfc822Date_(getText_(e, kRssItemCreatedPath));
+    }
+
+    void published(Element &e, time_t) const
+    {
+        assert(0);
+    }
+};
+
+
+class Rss20FeedFormat
+    : public FeedFormat
+{
+    public:
+    static Rss20FeedFormat instance;
+
+    bool identify(const Element &e) const
+    {
+        return e.tag() == "rss" && e.get("version", "2.0") == "2.0";
+    }
+
+    enum feed_format format() const
+    {
+        return FORMAT_RSS20;
+    }
+
+    string title(const Element &e) const
+    {
+        return getText_(e, kRssTitlePath);
+    }
+
+    void title(Element &e, const string &s) const
+    {
+        setText_(e, kRssTitlePath, s);
+    }
+
+    string link(const Element &e) const
+    {
+        return getText_(e, kRssLinkPath);
+    }
+
+    void link(Element &e, const string &s) const
+    {
+        setText_(e, kRssLinkPath, s);
+    }
+
+    string description(const Element &e) const
+    {
+        return getText_(e, kRssContentPath);
+    }
+
+    void description(Element &e, const string &s) const
+    {
+        setText_(e, kRssContentPath, s);
+    }
+
+    string icon(const Element &e) const
+    {
+        return "";
+    }
+
+    void icon(Element &e, const string &s) const
+    {
+    }
+
+    time_t published(const Element &e) const
+    {
+        return parseRfc822Date_(getText_(e, kRssItemCreatedPath));
+    }
+
+    void published(Element &e, time_t) const
+    {
+        assert(0);
+    }
+
+    std::vector<Item> items(const Element &e) const {
+        return itemsFromPath_(Rss20ItemFormat::instance, e, kRssItemsPath);
+    }
+};
+
+
+AtomItemFormat AtomItemFormat::instance;
+Rss20ItemFormat Rss20ItemFormat::instance;
+AtomFeedFormat AtomFeedFormat::instance;
+Rss20FeedFormat Rss20FeedFormat::instance;
+static const std::vector<const FeedFormat *> formats_ = {
+    &AtomFeedFormat::instance,
+    &Rss20FeedFormat::instance
+};
+
+
+Feed fromstring(const string &s)
 {
     Element elem = etree::fromstring(s);
-    for(unsigned i = 0; i < formatsCount_; i++) {
-        const Format &format = formats_[i];
-        if(format.identifyFunc(elem)) {
-            return makeFeed_(format, elem);
+    for(auto &format : formats_) {
+        if(format->identify(elem)) {
+            return Feed(*format, elem);
         }
     }
     throw memory_error();
