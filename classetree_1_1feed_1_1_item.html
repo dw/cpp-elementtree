@@ -72,7 +72,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Friends</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerator</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -83,27 +83,247 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespaceetree.html">etree</a></li><li class="navelem"><b>feed</b></li><li class="navelem"><a class="el" href="classetree_1_1feed_1_1_item.html">Item</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceetree.html">etree</a></li><li class="navelem"><a class="el" href="namespaceetree_1_1feed.html">feed</a></li><li class="navelem"><a class="el" href="classetree_1_1feed_1_1_item.html">Item</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#friends">Friends</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classetree_1_1feed_1_1_item-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">etree::feed::Item Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Represent a single feed item.  
+ <a href="classetree_1_1feed_1_1_item.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="feed_8hpp_source.html">feed.hpp</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
-Friends</h2></td></tr>
-<tr class="memitem:a9294d56b65284cb857a74c544b2324af"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9294d56b65284cb857a74c544b2324af"></a>
-<a class="el" href="classetree_1_1feed_1_1_item.html">Item</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#a9294d56b65284cb857a74c544b2324af">makeItem_</a> (const Format &amp;format, <a class="el" href="classetree_1_1_element.html">Element</a> elem)</td></tr>
-<tr class="memdesc:a9294d56b65284cb857a74c544b2324af"><td class="mdescLeft">&#160;</td><td class="mdescRight"><hr/>
- <h2>Helper functions</h2>
-<br/></td></tr>
-<tr class="separator:a9294d56b65284cb857a74c544b2324af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:af30b87fcd7cefc161eaa494731f8b07b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af30b87fcd7cefc161eaa494731f8b07b"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#af30b87fcd7cefc161eaa494731f8b07b">author</a> () const </td></tr>
+<tr class="memdesc:af30b87fcd7cefc161eaa494731f8b07b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the item author name, or the empty string. <br/></td></tr>
+<tr class="separator:af30b87fcd7cefc161eaa494731f8b07b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a711cb82823669ff3be41b13997b8d88a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#a711cb82823669ff3be41b13997b8d88a">author</a> (const std::string &amp;author)</td></tr>
+<tr class="memdesc:a711cb82823669ff3be41b13997b8d88a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the item author name.  <a href="#a711cb82823669ff3be41b13997b8d88a"></a><br/></td></tr>
+<tr class="separator:a711cb82823669ff3be41b13997b8d88a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeccdf62f992fbd279638834d45970bc9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aeccdf62f992fbd279638834d45970bc9"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#aeccdf62f992fbd279638834d45970bc9">content</a> () const </td></tr>
+<tr class="memdesc:aeccdf62f992fbd279638834d45970bc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the item content, or the empty string. <br/></td></tr>
+<tr class="separator:aeccdf62f992fbd279638834d45970bc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfdf4a5dfbdf54a6e1bb66f281eb6dde"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#adfdf4a5dfbdf54a6e1bb66f281eb6dde">content</a> (const std::string &amp;s)</td></tr>
+<tr class="memdesc:adfdf4a5dfbdf54a6e1bb66f281eb6dde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the item content.  <a href="#adfdf4a5dfbdf54a6e1bb66f281eb6dde"></a><br/></td></tr>
+<tr class="separator:adfdf4a5dfbdf54a6e1bb66f281eb6dde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d2b2ca9c33da76e45ae8e322b51f43b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2d2b2ca9c33da76e45ae8e322b51f43b"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#a2d2b2ca9c33da76e45ae8e322b51f43b">guid</a> () const </td></tr>
+<tr class="memdesc:a2d2b2ca9c33da76e45ae8e322b51f43b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the item GUID, often this is simply the item URL. <br/></td></tr>
+<tr class="separator:a2d2b2ca9c33da76e45ae8e322b51f43b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31a4aa7f8c4d7ecd465145a03c376a66"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#a31a4aa7f8c4d7ecd465145a03c376a66">guid</a> (const std::string &amp;s)</td></tr>
+<tr class="memdesc:a31a4aa7f8c4d7ecd465145a03c376a66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the item GUID.  <a href="#a31a4aa7f8c4d7ecd465145a03c376a66"></a><br/></td></tr>
+<tr class="separator:a31a4aa7f8c4d7ecd465145a03c376a66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac79680ecf7bae116adc0766c1a180ed9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac79680ecf7bae116adc0766c1a180ed9"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#ac79680ecf7bae116adc0766c1a180ed9">link</a> () const </td></tr>
+<tr class="memdesc:ac79680ecf7bae116adc0766c1a180ed9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the item link URL, or the empty string. <br/></td></tr>
+<tr class="separator:ac79680ecf7bae116adc0766c1a180ed9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acee44e2c29e4903fa8691065a9f9e03b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#acee44e2c29e4903fa8691065a9f9e03b">link</a> (const std::string &amp;s)</td></tr>
+<tr class="memdesc:acee44e2c29e4903fa8691065a9f9e03b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the item link URL.  <a href="#acee44e2c29e4903fa8691065a9f9e03b"></a><br/></td></tr>
+<tr class="separator:acee44e2c29e4903fa8691065a9f9e03b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab20e019b65fd4e8392bf85373d3c1bad"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab20e019b65fd4e8392bf85373d3c1bad"></a>
+time_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#ab20e019b65fd4e8392bf85373d3c1bad">published</a> () const </td></tr>
+<tr class="memdesc:ab20e019b65fd4e8392bf85373d3c1bad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the item's published date as a UNIX timestamp. <br/></td></tr>
+<tr class="separator:ab20e019b65fd4e8392bf85373d3c1bad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0683aedcb802e7fd77833ede9a32d3c2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#a0683aedcb802e7fd77833ede9a32d3c2">published</a> (time_t published)</td></tr>
+<tr class="memdesc:a0683aedcb802e7fd77833ede9a32d3c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the item's published date as a UNIX timestamp.  <a href="#a0683aedcb802e7fd77833ede9a32d3c2"></a><br/></td></tr>
+<tr class="separator:a0683aedcb802e7fd77833ede9a32d3c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00de1356ae1bf7578be214dec01375d6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a00de1356ae1bf7578be214dec01375d6"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#a00de1356ae1bf7578be214dec01375d6">title</a> () const </td></tr>
+<tr class="memdesc:a00de1356ae1bf7578be214dec01375d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the item title. <br/></td></tr>
+<tr class="separator:a00de1356ae1bf7578be214dec01375d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a833b08155b1767fc6ee3f798d5f18730"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#a833b08155b1767fc6ee3f798d5f18730">title</a> (const std::string &amp;s)</td></tr>
+<tr class="memdesc:a833b08155b1767fc6ee3f798d5f18730"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the item title.  <a href="#a833b08155b1767fc6ee3f798d5f18730"></a><br/></td></tr>
+<tr class="separator:a833b08155b1767fc6ee3f798d5f18730"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ca62d2bc22be31493b66224704e56c3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7ca62d2bc22be31493b66224704e56c3"></a>
+enum <a class="el" href="namespaceetree_1_1feed.html#a6e62e8519e23dff25a60512a413dc228">content_type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#a7ca62d2bc22be31493b66224704e56c3">type</a> () const </td></tr>
+<tr class="memdesc:a7ca62d2bc22be31493b66224704e56c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the item content's content type. <br/></td></tr>
+<tr class="separator:a7ca62d2bc22be31493b66224704e56c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa757ca95883620c6b2d607dbc72ad4b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#aa757ca95883620c6b2d607dbc72ad4b2">type</a> (enum <a class="el" href="namespaceetree_1_1feed.html#a6e62e8519e23dff25a60512a413dc228">content_type</a>)</td></tr>
+<tr class="memdesc:aa757ca95883620c6b2d607dbc72ad4b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the item content's content type.  <a href="#aa757ca95883620c6b2d607dbc72ad4b2"></a><br/></td></tr>
+<tr class="separator:aa757ca95883620c6b2d607dbc72ad4b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Represent a single feed item. </p>
+<p>Use Feed::makeItem() to make an instance. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a711cb82823669ff3be41b13997b8d88a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::feed::Item::author </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>author</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the item author name. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>New author name. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="adfdf4a5dfbdf54a6e1bb66f281eb6dde"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::feed::Item::content </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the item content. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>New content. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a31a4aa7f8c4d7ecd465145a03c376a66"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::feed::Item::guid </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the item GUID. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>New item GUID. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="acee44e2c29e4903fa8691065a9f9e03b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::feed::Item::link </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the item link URL. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>New link. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a0683aedcb802e7fd77833ede9a32d3c2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::feed::Item::published </td>
+          <td>(</td>
+          <td class="paramtype">time_t&#160;</td>
+          <td class="paramname"><em>published</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the item's published date as a UNIX timestamp. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">created</td><td>Published date. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a833b08155b1767fc6ee3f798d5f18730"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::feed::Item::title </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the item title. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>New title. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aa757ca95883620c6b2d607dbc72ad4b2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::feed::Item::type </td>
+          <td>(</td>
+          <td class="paramtype">enum&#160;</td>
+          <td class="paramname"><em>content_type</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the item content's content type. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">content_type</td><td>New content type. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li><a class="el" href="feed_8hpp_source.html">feed.hpp</a></li>
 <li>feed.cpp</li>

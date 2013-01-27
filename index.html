@@ -65,7 +65,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Friends</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerator</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -94,7 +94,7 @@ Element make_status_msg()
     SubElement(msg, "system-load").text(get_system_load());
     return msg;
 }
-</pre><p>The <code>etree::feed</code> namespace includes an incomplete RSS/ATOM feed parser/generator. It is a work in progress, but can already parse some basic pieces.</p>
+</pre><p>The <code><a class="el" href="namespaceetree_1_1feed.html" title="RSS/ATOM feed parser implementation.">etree::feed</a></code> namespace includes an incomplete RSS/ATOM feed parser/generator. It is a work in progress, but can already parse some basic pieces.</p>
 <p>Partially useful API docs can be found here:</p>
 <ul>
 <li><a href="http://dw.github.com/cpp-elementtree/namespaceetree.html">etree namespace</a></li>
@@ -107,7 +107,7 @@ Element make_status_msg()
 <p>It is only possible to achieve thread safe behaviour if a single thread at a time is considered owner for all live objects referencing a given document. For a thread to pass an object to another thread, it must relinquish all remaining references it holds on that document beforehand.</p>
 <h3>Building</h3>
 <p>cpp-ElementTree consists of two files: <code><a class="el" href="element_8hpp_source.html">element.hpp</a></code> and <code>element.cpp</code>. The implementation file must be linked against libxml2 somehow during the build.</p>
-<p>The <code>etree::feed</code> implementation relies on various POSIX-related time parsing functions that aren't found on Windows. In order to avoid a large external dependency (e.g. Boost), <code>etree::feed</code> is UNIX-only for the time being.</p>
+<p>The <code><a class="el" href="namespaceetree_1_1feed.html" title="RSS/ATOM feed parser implementation.">etree::feed</a></code> implementation relies on various POSIX-related time parsing functions that aren't found on Windows. In order to avoid a large external dependency (e.g. Boost), <code><a class="el" href="namespaceetree_1_1feed.html" title="RSS/ATOM feed parser implementation.">etree::feed</a></code> is UNIX-only for the time being.</p>
 <h3>Horrors</h3>
 <ul>
 <li>Given the option of repeatedly heap-allocating potentially very short-lived proxy objects, or casting a <code>void *</code> for use as an integer, the latter path was chosen. <code>ref()</code> and <code>unref()</code> in <code>element.cpp</code> are suitably readable as a result.</li>
