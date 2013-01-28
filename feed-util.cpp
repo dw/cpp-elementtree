@@ -10,6 +10,25 @@ namespace etree {
 namespace feed {
 
 
+class c_locale_scope
+{
+    c_locale_scope(const c_locale_scope &);
+    std::string old_;
+
+    public:
+    c_locale_scope()
+    {
+        old_ = ::setlocale(LC_TIME, NULL);
+        setlocale(LC_TIME, "C");
+    }
+
+    ~c_locale_scope()
+    {
+        ::setlocale(LC_TIME, old_.empty() ? NULL : old_.c_str());
+    }
+};
+
+
 // liferea/src/date.c.
 static struct tzinfo {
     const char *name;
@@ -44,7 +63,7 @@ void stripWs_(std::string &s)
 }
 
 
-static time_t parseRfc822Tz_(const char *token)
+static time_t parseTz_(const char *token)
 {
     int offset = 0;
 
@@ -76,22 +95,19 @@ time_t parseRfc822Date_(std::string s)
         "%d %b %y %T"
     };
     static const int formatsCount = sizeof formats / sizeof formats[0];
-
-    std::string oldLocale(::setlocale(LC_TIME, NULL));
-    setlocale(LC_TIME, "C");
+    c_locale_scope locale;
 
     stripWs_(s);
     s = s.substr(s.find(' ') + 1);
+    char *npos = NULL;
 
     tm tm;
     ::memset(reinterpret_cast<void *>(&tm), 0, sizeof tm);
 
-    char *npos = NULL;
     for(int i = 0; i < formatsCount && !npos; i++) {
         npos = strptime(s.c_str(), formats[i], &tm);
     }
 
-    ::setlocale(LC_TIME, oldLocale.empty() ? NULL : oldLocale.c_str());
     if(! npos) {
         return 0;
     }
@@ -103,9 +119,26 @@ time_t parseRfc822Date_(std::string s)
 
     /* GMT time, with no daylight savings time correction. (Usually,
      * there is no daylight savings time since the input is GMT.) */
-    out -= parseRfc822Tz_(npos);
+    out -= parseTz_(npos);
     time_t t2 = mktime(gmtime(&out));
     out -= (t2 - out);
+    return out;
+}
+
+
+time_t parseIso8601Date_(std::string s)
+{
+    c_locale_scope locale;
+    tm tm;
+    const char *endpos = ::strptime(s.c_str(), "%Y-%m-%dT%H:%M:%S", &tm);
+    if(endpos == 0) {
+        return 0;
+    }
+
+    time_t out = mktime(&tm);
+    if(*endpos != 'z' && *endpos != 'Z') {
+        out -= parseTz_(endpos);
+    }
     return out;
 }
 
