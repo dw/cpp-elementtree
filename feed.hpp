@@ -35,48 +35,12 @@ void stripWs_(std::string &s);
 
 
 /**
- * Parse a feed from a STL string and return a reference.
+ * Wrap an Element containing a feed and return a reference.
  *
- * @param s     Serialized feed.
+ * @param elem  Parsed feed as an Element.
  * @returns     Feed reference.
  */
-Feed fromstring(const std::string &s);
-
-
-/**
- * Serialize a feed to XML and return it as a STL string.
- *
- * @param feed  Feed to serialize.
- * @returns     Feed serialized as XML.
- */
-std::string tostring(Feed &feed);
-
-
-/**
- * Parse a feed from a STL istream and return a reference.
- *
- * @param is    Source istream.
- * @returns     Feed reference.
- */
-Feed parse(std::istream &is);
-
-
-/**
- * Parse a feed stored in the filesystem and return a reference.
- *
- * @param path  Filesystem path.
- * @returns     Feed reference.
- */
-Feed parse(const std::string &path);
-
-
-/**
- * Parse a feed from a file descriptor and return a reference.
- *
- * @param fd    File descripto.
- * @returns     Feed reference.
- */
-Feed parse(int fd);
+Feed fromelement(Element elem);
 
 
 /**
@@ -204,6 +168,8 @@ class Item
      * @param created       Published date.
      */
     void published(time_t published);
+
+    Element element() const;
 };
 
 
@@ -238,6 +204,8 @@ class Feed
     void icon(std::string s);
 
     std::vector<Item> items() const;
+
+    Element element() const;
 };
 
 

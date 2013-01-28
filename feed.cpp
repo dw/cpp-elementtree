@@ -159,6 +159,7 @@ void Feed::link(const string &s)        { format_.link(elem_, s); }
 string Feed::description() const        { return format_.description(elem_); }
 void Feed::description(const string &s) { format_.description(elem_, s); }
 std::vector<Item> Feed::items() const   { return format_.items(elem_); }
+Element Feed::element() const           { return elem_; }
 
 
 // -------------------
@@ -550,9 +551,9 @@ static const std::vector<const FeedFormat *> formats_ = {
 };
 
 
-Feed fromstring(const string &s)
+
+Feed fromelement(Element elem)
 {
-    Element elem = etree::fromstring(s);
     for(auto &format : formats_) {
         if(format->identify(elem)) {
             return Feed(*format, elem);

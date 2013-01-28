@@ -4,6 +4,12 @@ LIBXML2_ROOT ?= /opt/local
 GOOGLETEST_ROOT ?= /opt/local
 
 # LDFLAGS += -arch i386
+ifdef RELEASE
+CXXFLAGS += -O2
+CXXFLAGS += -DNDEBUG
+else
+CXXFLAGS += -g
+endif
 
 CXXFLAGS += -I$(GOOGLETEST_ROOT)/include
 CXXFLAGS += -DGTEST_HAS_TR1_TUPLE=0
@@ -11,7 +17,6 @@ CXXFLAGS += -DGTEST_USE_OWN_TR1_TUPLE
 CXXFLAGS += -DGTEST_HAS_RTTI=0
 
 CXXFLAGS += -I$(LIBXML2_ROOT)/include/libxml2
-CXXFLAGS += -g
 CXXFLAGS += -std=c++0x
 CXXFLAGS += -fno-rtti
 CXXFLAGS += -stdlib=libc++
