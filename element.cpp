@@ -919,6 +919,12 @@ void Element::remove(Element &e)
 }
 
 
+void Element::remove()
+{
+    ::xmlUnlinkNode(node_);
+}
+
+
 Nullable<Element> Element::getnext() const
 {
     if(node_->next) {

@@ -637,6 +637,15 @@ class Element
     void remove(Element &e);
 
     /**
+     * Remove *this* element from its parent, if any.
+     *
+     * The element is moved to an empty document of its own. For this reason,
+     * calling remove() followed by insert() or append() is suboptimal; you
+     * should call insert() or append() directly.
+     */
+    void remove();
+
+    /**
      * Return the next sibling element, if any.
      */
     Nullable<Element> getnext() const;
