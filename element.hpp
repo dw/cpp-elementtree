@@ -242,6 +242,7 @@ class Nullable {
  */
 typedef Nullable<Element> NullableElement;
 
+
 /**
  * Canonical representation for a name-namespace pair, without namespace
  * prefix, in James Clark's <a
@@ -739,14 +740,5 @@ struct xml_error : public std::runtime_error
 
 
 } // namespace
-
-
-
-extern int don;
-#define ifdon(x) if(don) { x }
-#define debug(x) ifdon(std::cout << __PRETTY_FUNCTION__ << ": " << x << "\n";)
-#define tdebug(x) debug(this << ": " << x)
-#define pdebug(p, x) debug(p << ": " << x)
-#define ttrace tdebug("")
 
 #endif

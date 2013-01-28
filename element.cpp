@@ -35,7 +35,6 @@ template<typename T>
 Nullable<T>::Nullable()
     : set_(false)
 {
-    tdebug("set=0")
 }
 
 
@@ -43,7 +42,6 @@ template<typename T>
 Nullable<T>::Nullable(const T &val)
     : set_(true)
 {
-    tdebug("set=1")
     new (reinterpret_cast<T *>(val_)) T(val);
 }
 
@@ -52,7 +50,6 @@ template<typename T>
 Nullable<T>::Nullable(const Nullable<T> &val)
     : set_(val.set_)
 {
-    tdebug("set=" << val.set_)
     if(set_) {
         new (reinterpret_cast<T *>(val_)) T(*val);
     }
@@ -64,7 +61,6 @@ template<typename T>
 Nullable<T>::Nullable(T &&val)
     : set_(true)
 {
-    tdebug("Nullable(T&&)")
     new (reinterpret_cast<T *>(val_)) T(val);
 }
 #endif
@@ -73,7 +69,6 @@ Nullable<T>::Nullable(T &&val)
 template<typename T>
 Nullable<T>::~Nullable()
 {
-    tdebug("set=" << set_)
     if(set_) {
         reinterpret_cast<T *>(val_)->~T();
     }
@@ -158,7 +153,6 @@ static void unref(xmlDocPtr doc)
 
 static xmlNodePtr ref(xmlNodePtr node)
 {
-    debug("ref(" << node << ")")
     assert(node);
     if(! (*reinterpret_cast<intptr_t *>(&(node->_private)))++) {
         ref(node->doc);
@@ -168,7 +162,6 @@ static xmlNodePtr ref(xmlNodePtr node)
 
 static void unref(xmlNodePtr node)
 {
-    debug("unref(" << node << ")")
     assert(node);
     assert(node->_private);
     if(! --*reinterpret_cast<intptr_t *>(&(node->_private))) {
@@ -713,7 +706,6 @@ Element ElementTree::getroot() const
 
 Element::~Element()
 {
-    pdebug(node_, "")
     unref(node_);
 }
 
@@ -721,14 +713,12 @@ Element::~Element()
 Element::Element(const Element &e)
     : node_(ref(e.node_))
 {
-    pdebug(node_, "")
 }
 
 
 Element::Element(xmlNodePtr node)
     : node_(ref(node))
 {
-    pdebug(node_, "")
 }
 
 

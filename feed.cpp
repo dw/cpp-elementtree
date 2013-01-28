@@ -224,13 +224,14 @@ class AtomItemFormat
             &kAtomSummaryTag
         };
 
+        Nullable<Element> out;
         for(auto &tag : tags) {
-            Nullable<Element> out = e.child(*tag);
+            out = e.child(*tag);
             if(out) {
-                return out;
+                break;
             }
         }
-        return Nullable<Element>();
+        return out;
     }
 
     string content(const Element &e) const
