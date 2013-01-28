@@ -30,6 +30,7 @@ class ItemFormat;
 
 // Internal.
 time_t parseRfc822Date_(std::string);
+time_t parseIso8601Date_(std::string s);
 void stripWs_(std::string &s);
 
 
@@ -185,6 +186,14 @@ class Item
     void guid(const std::string &s);
 
     /**
+     * Return the item's GUID as it appeared in the original source feed, or
+     * the present GUID if no original GUID is found.
+     *
+     * \note Used to recover GUIDs from the Google Reader API.
+     */
+    std::string originalGuid() const;
+
+    /**
      * Return the item's published date as a UNIX timestamp.
      */
     time_t published() const;
@@ -227,9 +236,6 @@ class Feed
 
     std::string icon() const;
     void icon(std::string s);
-
-    time_t published() const;
-    void published(time_t t);
 
     std::vector<Item> items() const;
 };

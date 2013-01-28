@@ -8,6 +8,7 @@
 
 #include "feed.hpp"
 
+using namespace std;
 
 namespace etree {
 namespace feed {
@@ -86,8 +87,6 @@ class FeedFormat
     virtual void description(Element &, const string &) const = 0;
     virtual string icon(const Element &) const = 0;
     virtual void icon(Element &, const string &) const = 0;
-    virtual time_t published(const Element &) const = 0;
-    virtual void published(Element &, time_t) const = 0;
     virtual std::vector<Item> items(const Element &) const = 0;
 };
 
@@ -107,6 +106,7 @@ class ItemFormat
     virtual void author(Element &, const string &) const = 0;
     virtual string guid(const Element &) const = 0;
     virtual void guid(Element &, const string &) const = 0;
+    virtual string originalGuid(const Element &) const = 0;
     virtual time_t published(const Element &) const = 0;
     virtual void published(Element &, time_t) const = 0;
 };
@@ -135,6 +135,7 @@ string Item::author() const             { return format_.author(elem_); }
 void Item::author(const string &s)      { format_.author(elem_, s); }
 string Item::guid() const               { return format_.guid(elem_); }
 void Item::guid(const string &s)        { format_.guid(elem_, s); }
+string Item::originalGuid() const       { return format_.originalGuid(elem_); }
 time_t Item::published() const          { return format_.published(elem_); }
 void Item::published(time_t published)  { format_.published(elem_, published); }
 
@@ -157,8 +158,6 @@ string Feed::link() const               { return format_.link(elem_); }
 void Feed::link(const string &s)        { format_.link(elem_, s); }
 string Feed::description() const        { return format_.description(elem_); }
 void Feed::description(const string &s) { format_.description(elem_, s); }
-time_t Feed::published() const          { return format_.published(elem_); }
-void Feed::published(time_t published)  { format_.published(elem_, published); }
 std::vector<Item> Feed::items() const   { return format_.items(elem_); }
 
 
@@ -166,16 +165,22 @@ std::vector<Item> Feed::items() const   { return format_.items(elem_); }
 // Atom implementation
 // -------------------
 
+#define READER_NS "{http://www.google.com/schemas/reader/atom/}"
 #define ATOM_NS "{http://www.w3.org/2005/Atom}"
 
 static const QName kAtomContentTag{ATOM_NS "content"};
+static const QName kAtomSummaryTag{ATOM_NS "summary"};
+static const QName kAtomLinkTag = ATOM_NS "link";
 static const QName kAtomRootTag = ATOM_NS "feed";
-static const QName kAtomTypeAttr{ATOM_NS "type"};
+static const QName kAtomRelAttr = "rel";
+static const QName kAtomTypeAttr = "type";
+static const QName kAtomOriginalGuidAttr = READER_NS "original-id";
+static const NameList kAtomSummaryPath{kAtomSummaryTag};
 static const NameList kAtomContentPath{kAtomContentTag};
 static const NameList kAtomAuthorPath{ATOM_NS "author", ATOM_NS "name"};
 static const NameList kAtomGuidPath{ATOM_NS "id"};
 static const NameList kAtomItemsPath{ATOM_NS "entry"};
-static const NameList kAtomLinkPath{ATOM_NS "link"};
+static const NameList kAtomLinkPath{kAtomLinkTag};
 static const NameList kAtomPublishedPath{ATOM_NS "published"};
 static const NameList kAtomTitlePath{ATOM_NS "title"};
 
@@ -198,7 +203,13 @@ class AtomItemFormat
 
     string link(const Element &e) const
     {
-        return getText_(e, kAtomLinkPath);
+        for(auto &elem : e.children(kAtomLinkTag)) {
+            if(elem.get(kAtomRelAttr) == "alternate"
+                && elem.get(kAtomTypeAttr) == "text/html") {
+                return elem.get("href");
+            }
+        }
+        return "";
     }
 
     void link(Element &e, const string &s) const
@@ -206,13 +217,34 @@ class AtomItemFormat
         setText_(e, kAtomLinkPath, s);
     }
 
+    Nullable<Element> getContentTag_(const Element &e) const
+    {
+        static const std::vector<const QName *> tags = {
+            &kAtomContentTag,
+            &kAtomSummaryTag
+        };
+
+        for(auto &tag : tags) {
+            Nullable<Element> out = e.child(*tag);
+            if(out) {
+                return out;
+            }
+        }
+        return Nullable<Element>();
+    }
+
     string content(const Element &e) const
     {
-        return getText_(e, kAtomContentPath);
+        Nullable<Element> content = getContentTag_(e);
+        return content ? (*content).text() : "";
     }
 
     void content(Element &e, const string &s) const
     {
+        Nullable<Element> content;
+        while((content = getContentTag_(e))) {
+            (*content).remove();
+        }
         setText_(e, kAtomContentPath, s);
     }
 
@@ -254,9 +286,21 @@ class AtomItemFormat
         setText_(e, kAtomGuidPath, s);
     }
 
+    string originalGuid(const Element &e) const
+    {
+        Nullable<Element> idElem = e.child(ATOM_NS "id");
+        if(idElem) {
+            string out = (*idElem).get(kAtomOriginalGuidAttr);
+            if(out.size()) {
+                return out;
+            }
+        }
+        return guid(e);
+    }
+
     time_t published(const Element &e) const
     {
-        assert(0);
+        return parseIso8601Date_(getText_(e, kAtomPublishedPath));
     }
 
     void published(Element &e, time_t) const
@@ -321,16 +365,6 @@ struct AtomFeedFormat
         setText_(e, kAtomContentPath, s);
     }
 
-    time_t published(const Element &e) const
-    {
-        assert(0);
-    }
-
-    void published(Element &e, time_t) const
-    {
-        assert(0);
-    }
-
     std::vector<Item> items(const Element &e) const {
         return itemsFromPath_(AtomItemFormat::instance, e, kAtomItemsPath);
     }
@@ -342,7 +376,7 @@ struct AtomFeedFormat
 // ------------------------
 
 static const NameList kRssContentPath{"channel", "description"};
-static const NameList kRssItemCreatedPath{"pubDate"};
+static const NameList kRssItemPublishedPath{"pubDate"};
 static const NameList kRssItemDescrPath{"description"};
 static const NameList kRssItemGuidPath{"guid"};
 static const NameList kRssItemLinkPath{"link"};
@@ -417,9 +451,14 @@ class Rss20ItemFormat
         setText_(e, kRssItemGuidPath, s);
     }
 
+    string originalGuid(const Element &e) const
+    {
+        return guid(e);
+    }
+
     time_t published(const Element &e) const
     {
-        return parseRfc822Date_(getText_(e, kRssItemCreatedPath));
+        return parseRfc822Date_(getText_(e, kRssItemPublishedPath));
     }
 
     void published(Element &e, time_t) const
@@ -486,7 +525,7 @@ class Rss20FeedFormat
 
     time_t published(const Element &e) const
     {
-        return parseRfc822Date_(getText_(e, kRssItemCreatedPath));
+        return parseRfc822Date_(getText_(e, kRssItemPublishedPath));
     }
 
     void published(Element &e, time_t) const
