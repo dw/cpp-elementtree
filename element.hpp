@@ -176,7 +176,7 @@ bool isTransitiveParent(const Element &parent, const Element &child);
 template<typename T>
 class Nullable {
     /// Storage for contained type. This hack needs removed.
-    char val_[sizeof(T)];
+    unsigned char val_[sizeof(T)];
 
     /// True if val_ contains a value.
     bool set_;
@@ -207,7 +207,7 @@ class Nullable {
      *
      * @param val       Value to copy.
      */
-    Nullable(T &&val);
+    //Nullable(T &&val);
     #endif
 
     /**
@@ -735,5 +735,13 @@ struct xml_error : public std::runtime_error
 
 } // namespace
 
+
+
+extern int don;
+#define ifdon(x) if(don) { x }
+#define debug(x) ifdon(std::cout << __PRETTY_FUNCTION__ << ": " << x << "\n";)
+#define tdebug(x) debug(this << ": " << x)
+#define pdebug(p, x) debug(p << ": " << x)
+#define ttrace tdebug("")
 
 #endif

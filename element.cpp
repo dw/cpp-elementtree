@@ -21,7 +21,6 @@
 
 #include "element.hpp"
 
-
 namespace etree {
 
 using std::string;
@@ -36,6 +35,7 @@ template<typename T>
 Nullable<T>::Nullable()
     : set_(false)
 {
+    tdebug("set=0")
 }
 
 
@@ -43,6 +43,7 @@ template<typename T>
 Nullable<T>::Nullable(const T &val)
     : set_(true)
 {
+    tdebug("set=1")
     new (reinterpret_cast<T *>(val_)) T(val);
 }
 
@@ -51,6 +52,7 @@ template<typename T>
 Nullable<T>::Nullable(const Nullable<T> &val)
     : set_(val.set_)
 {
+    tdebug("set=" << val.set_)
     if(set_) {
         new (reinterpret_cast<T *>(val_)) T(*val);
     }
@@ -58,18 +60,22 @@ Nullable<T>::Nullable(const Nullable<T> &val)
 
 
 #ifdef ETREE_0X
+/*
 template<typename T>
 Nullable<T>::Nullable(T &&val)
     : set_(true)
 {
+    tdebug("Nullable(T&&)")
     new (reinterpret_cast<T *>(val_)) T(val);
 }
+*/
 #endif
 
 
 template<typename T>
 Nullable<T>::~Nullable()
 {
+    tdebug("set=" << set_)
     if(set_) {
         reinterpret_cast<T *>(val_)->~T();
     }
@@ -140,6 +146,7 @@ static void unref(xmlDocPtr doc)
 
 static xmlNodePtr ref(xmlNodePtr node)
 {
+    debug("ref(" << node << ")")
     assert(node);
     if(! (*reinterpret_cast<intptr_t *>(&(node->_private)))++) {
         ref(node->doc);
@@ -149,6 +156,7 @@ static xmlNodePtr ref(xmlNodePtr node)
 
 static void unref(xmlNodePtr node)
 {
+    debug("unref(" << node << ")")
     assert(node);
     assert(node->_private);
     if(! --*reinterpret_cast<intptr_t *>(&(node->_private))) {
@@ -350,6 +358,20 @@ P nodeFor__(const T &e)
 }
 
 
+static bool qnameEquals_(const QName &qn, xmlNsPtr ns, const xmlChar *name)
+{
+    if(ns) {
+        if(qn.ns() != toChar_(ns->href)) {
+            return false;
+        }
+    } else if(qn.ns().size()) {
+        return false;
+    }
+
+    return qn.tag() == toChar_(name);
+}
+
+
 // ---------------
 // QName functions
 // ---------------
@@ -532,7 +554,7 @@ std::vector<Element> XPath::findall(const Element &e) const
         for(int i = 0; i < set->nodeNr; i++) {
             xmlNodePtr node = set->nodeTab[i];
             if(node->type == XML_ELEMENT_NODE) {
-                out.push_back(Element(set->nodeTab[i]));
+                out.push_back(set->nodeTab[i]);
             }
         }
     }
@@ -557,8 +579,8 @@ AttrIterator::AttrIterator(xmlNodePtr node)
 QName AttrIterator::key()
 {
     const char *ns = "";
-    if(node_->nsDef) {
-        ns = toChar_(node_->nsDef->href);
+    if(node_->ns) {
+        ns = toChar_(node_->ns->href);
     }
     return QName(ns, toChar_(node_->name));
 }
@@ -679,6 +701,7 @@ Element ElementTree::getroot() const
 
 Element::~Element()
 {
+    pdebug(node_, "")
     unref(node_);
 }
 
@@ -686,16 +709,18 @@ Element::~Element()
 Element::Element(const Element &e)
     : node_(ref(e.node_))
 {
+    pdebug(node_, "")
 }
 
 
 Element::Element(xmlNodePtr node)
     : node_(ref(node))
 {
+    pdebug(node_, "")
 }
 
 
-static xmlNodePtr node_from_qname(const QName &qname)
+static xmlNodePtr nodeFromQname_(const QName &qname)
 {
     xmlDocPtr doc = ::xmlNewDoc(0);
     if(! doc) {
@@ -726,14 +751,14 @@ static xmlNodePtr node_from_qname(const QName &qname)
 
 
 Element::Element(const QName &qname)
-    : node_(node_from_qname(qname))
+    : node_(nodeFromQname_(qname))
 {
 }
 
 
 #ifdef ETREE_0X
 Element::Element(const QName &qname, kv_list attribs)
-    : node_(node_from_qname(qname))
+    : node_(nodeFromQname_(qname))
 {
     try {
         attrsFromList_(*this, attribs);
@@ -844,9 +869,8 @@ Nullable<Element> Element::child(const QName &qn) const
 {
     for(xmlNodePtr cur = node_->children; cur; cur = cur->next) {
         if(cur->type == XML_ELEMENT_NODE) {
-            Element elem = Element(cur);
-            if(elem.qname() == qn) {
-                return elem;
+            if(qnameEquals_(qn, cur->ns, cur->name)) {
+                return Element(cur);
             }
         }
     }
@@ -859,9 +883,8 @@ std::vector<Element> Element::children(const QName &qn) const
     std::vector<Element> out;
     for(xmlNodePtr cur = node_->children; cur; cur = cur->next) {
         if(cur->type == XML_ELEMENT_NODE) {
-            Element elem = Element(cur);
-            if(elem.qname() == qn) {
-                out.push_back(elem);
+            if(qnameEquals_(qn, cur->ns, cur->name)) {
+                out.push_back(cur);
             }
         }
     }
