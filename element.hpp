@@ -207,13 +207,18 @@ class Nullable {
      *
      * @param val       Value to copy.
      */
-    //Nullable(T &&val);
+    Nullable(T &&val);
     #endif
 
     /**
      * Destroy the contained value if this Nullable is set.
      */
     ~Nullable();
+
+    /**
+     * Copy the instance and its contained value, if any.
+     */
+    Nullable<T> &operator=(const Nullable<T> &other);
 
     /**
      * Evaluate to true if this Nullable is set.

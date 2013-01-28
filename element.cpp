@@ -60,7 +60,6 @@ Nullable<T>::Nullable(const Nullable<T> &val)
 
 
 #ifdef ETREE_0X
-/*
 template<typename T>
 Nullable<T>::Nullable(T &&val)
     : set_(true)
@@ -68,7 +67,6 @@ Nullable<T>::Nullable(T &&val)
     tdebug("Nullable(T&&)")
     new (reinterpret_cast<T *>(val_)) T(val);
 }
-*/
 #endif
 
 
@@ -79,6 +77,20 @@ Nullable<T>::~Nullable()
     if(set_) {
         reinterpret_cast<T *>(val_)->~T();
     }
+}
+
+
+template<typename T>
+Nullable<T> &Nullable<T>::operator=(const Nullable<T> &other)
+{
+    if(this != &other) {
+        this->~Nullable();
+        set_ = other.set_;
+        if(set_) {
+            new (reinterpret_cast<T *>(val_)) T(*other);
+        }
+    }
+    return *this;
 }
 
 
