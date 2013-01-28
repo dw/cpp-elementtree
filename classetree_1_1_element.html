@@ -187,6 +187,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:afcca584486ba7becdf9b2a499b557877"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#afcca584486ba7becdf9b2a499b557877">remove</a> (<a class="el" href="classetree_1_1_element.html">Element</a> &amp;e)</td></tr>
 <tr class="memdesc:afcca584486ba7becdf9b2a499b557877"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a child element.  <a href="#afcca584486ba7becdf9b2a499b557877"></a><br/></td></tr>
 <tr class="separator:afcca584486ba7becdf9b2a499b557877"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6da5e137f1ad1c2122fd057486f5f6b7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#a6da5e137f1ad1c2122fd057486f5f6b7">remove</a> ()</td></tr>
+<tr class="memdesc:a6da5e137f1ad1c2122fd057486f5f6b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove <em>this</em> element from its parent, if any.  <a href="#a6da5e137f1ad1c2122fd057486f5f6b7"></a><br/></td></tr>
+<tr class="separator:a6da5e137f1ad1c2122fd057486f5f6b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4edcaf4a6503f31e103387aa946cd17"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae4edcaf4a6503f31e103387aa946cd17"></a>
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#ae4edcaf4a6503f31e103387aa946cd17">size</a> () const </td></tr>
 <tr class="memdesc:ae4edcaf4a6503f31e103387aa946cd17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of children this element has. <br/></td></tr>
@@ -597,13 +600,31 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </div><div class="memdoc">
 
 <p>Remove a child element. </p>
-<p>The child is moved to an empty document of its own. For this reason, calling <a class="el" href="classetree_1_1_element.html#afcca584486ba7becdf9b2a499b557877" title="Remove a child element.">remove()</a> followed by <a class="el" href="classetree_1_1_element.html#a3e4655b8e6bfda2424a58328ba76c11b" title="Insert an element as a child of this element at a specific position.">insert()</a> or <a class="el" href="classetree_1_1_element.html#ace55e480a1a77524d83d21f8ee7112de" title="Append an element to this element.">append()</a> is suboptimal; you should call <a class="el" href="classetree_1_1_element.html#a3e4655b8e6bfda2424a58328ba76c11b" title="Insert an element as a child of this element at a specific position.">insert()</a> or <a class="el" href="classetree_1_1_element.html#ace55e480a1a77524d83d21f8ee7112de" title="Append an element to this element.">append()</a> directly.</p>
+<p>The child is moved to an empty document of its own. For this reason, calling <a class="el" href="classetree_1_1_element.html#a6da5e137f1ad1c2122fd057486f5f6b7" title="Remove this element from its parent, if any.">remove()</a> followed by <a class="el" href="classetree_1_1_element.html#a3e4655b8e6bfda2424a58328ba76c11b" title="Insert an element as a child of this element at a specific position.">insert()</a> or <a class="el" href="classetree_1_1_element.html#ace55e480a1a77524d83d21f8ee7112de" title="Append an element to this element.">append()</a> is suboptimal; you should call <a class="el" href="classetree_1_1_element.html#a3e4655b8e6bfda2424a58328ba76c11b" title="Insert an element as a child of this element at a specific position.">insert()</a> or <a class="el" href="classetree_1_1_element.html#ace55e480a1a77524d83d21f8ee7112de" title="Append an element to this element.">append()</a> directly.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">e</td><td><a class="el" href="classetree_1_1_element.html" title="Represents a reference to a single XML element.">Element</a> </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a class="anchor" id="a6da5e137f1ad1c2122fd057486f5f6b7"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::Element::remove </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Remove <em>this</em> element from its parent, if any. </p>
+<p>The element is moved to an empty document of its own. For this reason, calling <a class="el" href="classetree_1_1_element.html#a6da5e137f1ad1c2122fd057486f5f6b7" title="Remove this element from its parent, if any.">remove()</a> followed by <a class="el" href="classetree_1_1_element.html#a3e4655b8e6bfda2424a58328ba76c11b" title="Insert an element as a child of this element at a specific position.">insert()</a> or <a class="el" href="classetree_1_1_element.html#ace55e480a1a77524d83d21f8ee7112de" title="Append an element to this element.">append()</a> is suboptimal; you should call <a class="el" href="classetree_1_1_element.html#a3e4655b8e6bfda2424a58328ba76c11b" title="Insert an element as a child of this element at a specific position.">insert()</a> or <a class="el" href="classetree_1_1_element.html#ace55e480a1a77524d83d21f8ee7112de" title="Append an element to this element.">append()</a> directly. </p>
 
 </div>
 </div>

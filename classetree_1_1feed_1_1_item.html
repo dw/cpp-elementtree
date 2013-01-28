@@ -130,6 +130,9 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <tr class="memitem:acee44e2c29e4903fa8691065a9f9e03b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#acee44e2c29e4903fa8691065a9f9e03b">link</a> (const std::string &amp;s)</td></tr>
 <tr class="memdesc:acee44e2c29e4903fa8691065a9f9e03b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the item link URL.  <a href="#acee44e2c29e4903fa8691065a9f9e03b"></a><br/></td></tr>
 <tr class="separator:acee44e2c29e4903fa8691065a9f9e03b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acac72b078e722199223dc9333b6aa8ae"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#acac72b078e722199223dc9333b6aa8ae">originalGuid</a> () const </td></tr>
+<tr class="memdesc:acac72b078e722199223dc9333b6aa8ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the item's GUID as it appeared in the original source feed, or the present GUID if no original GUID is found.  <a href="#acac72b078e722199223dc9333b6aa8ae"></a><br/></td></tr>
+<tr class="separator:acac72b078e722199223dc9333b6aa8ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab20e019b65fd4e8392bf85373d3c1bad"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab20e019b65fd4e8392bf85373d3c1bad"></a>
 time_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#ab20e019b65fd4e8392bf85373d3c1bad">published</a> () const </td></tr>
 <tr class="memdesc:ab20e019b65fd4e8392bf85373d3c1bad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the item's published date as a UNIX timestamp. <br/></td></tr>
@@ -249,6 +252,24 @@ enum <a class="el" href="namespaceetree_1_1feed.html#a6e62e8519e23dff25a60512a41
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a class="anchor" id="acac72b078e722199223dc9333b6aa8ae"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">string etree::feed::Item::originalGuid </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return the item's GUID as it appeared in the original source feed, or the present GUID if no original GUID is found. </p>
+<dl class="section note"><dt>Note</dt><dd>Used to recover GUIDs from the Google Reader API. </dd></dl>
 
 </div>
 </div>
