@@ -109,25 +109,33 @@ void main5()
 }
 
 
+
 void main6()
 {
+    ofstream of("/dev/null");
+    ostream &os = cout; //of;
+
     std::string rss = get_file_contents("red.rss");
     Feed f = etree::feed::fromstring(rss);
-    cout << f.format() << endl;
-    cout << f.title() << endl;
     auto items = f.items();
-    cout << items.size() << endl;
-    cout << endl;
+    os << f.format() << endl;
+    os << f.title() << endl;
+    os << items.size() << endl;
+    os << endl;
     for(auto &item : items) {
-        cout << item.title() << endl;
-        cout << " + " << item.guid() << endl;
-        cout << "   " << item.link() << endl;
+        os << item.title() << endl;
+        os << " + " << item.guid();
+        if(item.guid() != item.originalGuid()) {
+            os << " " << item.originalGuid();
+        }
+        os << endl;
+        os << "   " << item.link() << endl;
         time_t c = item.published();
-        cout << "   " << ctime(&c) << endl;
-        cout << "   " << item.content() << endl;
-        cout << endl;
+        os << "   " << ctime(&c) << endl;
+        os << "   " << item.content().substr(0, 80) << endl;
+        os << endl;
     }
-    cout << endl;
+    os << endl;
 }
 
 
