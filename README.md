@@ -36,6 +36,7 @@ Partially useful API docs can be found here:
 
  * <a href="http://dw.github.com/cpp-elementtree/namespaceetree.html">etree namespace</A>
  * <a href="http://dw.github.com/cpp-elementtree/namespaceetree_1_1feed.html">etree::feed namespace</a>
+ * <a href="http://dw.github.com/cpp-elementtree/namespaceetree_1_1html.html">etree::html namespace</a>
 
 
 ### Text handing

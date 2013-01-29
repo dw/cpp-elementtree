@@ -12,12 +12,13 @@ else
 CXXFLAGS += -g
 endif
 
-CXXFLAGS += -I$(LIBXML2_ROOT)/include/libxml2
 CXXFLAGS += -I$(XAPIAN_ROOT)/include
+CXXFLAGS += -I$(LIBXML2_ROOT)/include/libxml2
 CXXFLAGS += -std=c++0x
 CXXFLAGS += -fno-rtti
 CXXFLAGS += -stdlib=libc++
 
+LDFLAGS += -L$(XAPIAN_ROOT)/lib
 LDFLAGS += -L$(LIBXML2_ROOT)/lib
 LDFLAGS += -L$(GOOGLETEST_ROOT)/lib
 #LDFLAGS += -liconv
