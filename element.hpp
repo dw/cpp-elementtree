@@ -36,6 +36,7 @@ class AttrMap;
 class Element;
 class ElementTree;
 class QName;
+class ChildIterator;
 
 #ifdef ETREE_0X
 typedef std::pair<string, string> kv_pair;
@@ -214,6 +215,12 @@ class Nullable {
      * Destroy the contained value if this Nullable is set.
      */
     ~Nullable();
+
+    /**
+     * Return true if both nullables are empty, or both nullables contain the
+     * same value.
+     */
+    bool operator==(const Nullable<T> &other);
 
     /**
      * Copy the instance and its contained value, if any.
@@ -711,7 +718,36 @@ class Element
      * @param s     New tail part.
      */
     void tail(const string &s);
+
+    ChildIterator begin();
+    ChildIterator end();
 };
+
+
+class ChildIterator
+{
+    Nullable<Element> elem_;
+
+    public:
+    ChildIterator();
+    ChildIterator(const Element &);
+    ChildIterator(const ChildIterator &);
+    ChildIterator operator++(int);
+    ChildIterator operator++();
+    bool operator==(const ChildIterator &);
+    bool operator!=(const ChildIterator &);
+    Element &operator*();
+};
+
+
+template<typename Function>
+void visit(Element &elem, Function func)
+{
+    func(elem);
+    for(auto &child : elem) {
+        visit(child, func);
+    }
+}
 
 
 #define EXCEPTION(name)                                 \

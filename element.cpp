@@ -74,6 +74,14 @@ Nullable<T>::~Nullable()
     }
 }
 
+template<typename T>
+bool Nullable<T>::operator==(const Nullable<T> &other)
+{
+    if(set_ && (set_ == other.set_)) {
+        return **this == *other;
+    }
+    return set_ == other.set_;
+}
 
 template<typename T>
 Nullable<T> &Nullable<T>::operator=(const Nullable<T> &other)
@@ -87,7 +95,6 @@ Nullable<T> &Nullable<T>::operator=(const Nullable<T> &other)
     }
     return *this;
 }
-
 
 template<typename T>
 Nullable<T>::operator bool() const
@@ -700,6 +707,58 @@ Element ElementTree::getroot() const
 }
 
 
+
+// -------------------------
+// ChildIterator functions
+// -------------------------
+
+ChildIterator::ChildIterator()
+    : elem_()
+{
+}
+
+ChildIterator::ChildIterator(const Element &e)
+    : elem_(e)
+{
+}
+
+ChildIterator::ChildIterator(const ChildIterator &other)
+    : elem_(other.elem_)
+{
+}
+
+ChildIterator ChildIterator::operator++()
+{
+    if(! elem_) {
+        throw out_of_bounds_error();
+    }
+    elem_ = (*elem_).getnext();
+    return *this;
+}
+
+ChildIterator ChildIterator::operator++(int)
+{
+    ChildIterator tmp(*this);
+    operator++();
+    return tmp;
+}
+
+bool ChildIterator::operator==(const ChildIterator &other)
+{
+    return elem_ == other.elem_;
+}
+
+bool ChildIterator::operator!=(const ChildIterator &other)
+{
+    return !(elem_ == other.elem_);
+}
+
+Element &ChildIterator::operator*()
+{
+    return *elem_;
+}
+
+
 // -----------------
 // Element functions
 // -----------------
@@ -835,19 +894,30 @@ string Element::get(const QName &qname, const string &default_) const
 }
 
 
+
+static bool nextElement_(xmlNodePtr &p)
+{
+    for(; p; p = p->next) {
+        if(p->type == XML_ELEMENT_NODE) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 Element Element::operator[] (size_t i)
 {
     xmlNodePtr cur = node_->children;
-    while(i) {
-        if(cur->type == XML_ELEMENT_NODE) {
-            i--;
-        }
-        cur = cur->next;
-        if(! cur) {
+    for(;;) {
+        if(! nextElement_(cur)) {
             throw out_of_bounds_error();
         }
+        if(! i--) {
+            return cur;
+        }
+        cur = cur->next;
     }
-    return Element(cur);
 }
 
 
@@ -952,8 +1022,9 @@ void Element::remove()
 
 Nullable<Element> Element::getnext() const
 {
-    if(node_->next) {
-        return Nullable<Element>(ref(node_->next));
+    xmlNodePtr cur = node_->next;
+    if(nextElement_(cur)) {
+        return Element(cur);
     }
     return Nullable<Element>();
 }
@@ -996,6 +1067,22 @@ string Element::tail() const
 void Element::tail(const string &s)
 {
     _setTailText(node_, s);
+}
+
+
+ChildIterator Element::begin()
+{
+    xmlNodePtr cur = node_->children;
+    if(nextElement_(cur)) {
+        return ChildIterator(cur);
+    }
+    return ChildIterator();
+}
+
+
+ChildIterator Element::end()
+{
+    return ChildIterator();
 }
 
 
