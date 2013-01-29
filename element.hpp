@@ -119,6 +119,64 @@ ElementTree parse(const string &path);
  */
 ElementTree parse(int fd);
 
+
+/**
+ * ElementTree HTML namespace; public classes and functions are defined here.
+*/
+namespace html {
+    /**
+     * Parse an HTML document from a character array and return a reference to
+     * its root node.
+     *
+     * @param s             Document fragment as a string.
+     * @returns             Root Element.
+     */
+    Element fromstring(const char *s);
+
+    /**
+     * Parse an HTML document from a STL string and return a reference to its
+     * root node.
+     *
+     * @param s             Document fragment as a string.
+     * @returns             Root Element.
+     */
+    Element fromstring(const std::string &s);
+
+    /**
+     * Serialize an HTML element. See ElementTree::tostring() for another
+     * variant.
+     *
+     * @param e             Element to serialize.
+     * @returns             UTF-8 encoded string.
+     */
+    std::string tostring(const Element &e);
+
+    /**
+     * Parse an HTML document from a STL istream and return it.
+     *
+     * @param is            Input stream.
+     * @returns             ElementTree instance.
+     */
+    ElementTree parse(std::istream &is);
+
+    /**
+     * Parse an HTML document from the filesystem and return it.
+     *
+     * @param path          Path to file.
+     * @returns             ElementTree instance.
+     */
+    ElementTree parse(const std::string &path);
+
+    /**
+     * Parse an HTML document from a file descriptor and return it.
+     *
+     * @param fd            File descriptor number.
+     * @returns             ElementTree instance.
+     */
+    ElementTree parse(int fd);
+} // namespace etree::html
+
+
 /**
  * Generate a human-readable description of an element tree.
  *

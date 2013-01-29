@@ -4,14 +4,14 @@
  * License: http://opensource.org/licenses/MIT
  */
 
+#include <algorithm>
 #include <cassert>
 #include <cstdio> // snprintf().
 #include <cstring>
-
+#include <fstream>
 #include <unistd.h>
 
-#include <fstream>
-
+#include <libxml/HTMLparser.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xmlerror.h>
@@ -180,6 +180,16 @@ static void unref(xmlNodePtr node)
 // -------------------------
 // Internal helper functions
 // -------------------------
+
+static bool nextElement_(xmlNodePtr &p)
+{
+    for(; p; p = p->next) {
+        if(p->type == XML_ELEMENT_NODE) {
+            return true;
+        }
+    }
+    return false;
+}
 
 const char *toChar_(const xmlChar *s)
 {
@@ -697,15 +707,11 @@ ElementTree::ElementTree(xmlDocPtr doc)
 
 Element ElementTree::getroot() const
 {
-    xmlNodePtr cur;
-    for(cur = node_->children; cur; cur = cur->next) {
-        if(cur->type == XML_ELEMENT_NODE) {
-            return Element(cur);
-        }
-    }
-    throw memory_error();
+    xmlNodePtr cur = node_->children;
+    bool ok = nextElement_(cur);
+    assert(ok);
+    return Element(cur);
 }
-
 
 
 // -------------------------
@@ -891,18 +897,6 @@ AttrMap Element::attrib() const
 string Element::get(const QName &qname, const string &default_) const
 {
     return attrib().get(qname, default_);
-}
-
-
-
-static bool nextElement_(xmlNodePtr &p)
-{
-    for(; p; p = p->next) {
-        if(p->type == XML_ELEMENT_NODE) {
-            return true;
-        }
-    }
-    return false;
 }
 
 
@@ -1124,6 +1118,20 @@ string tostring(const Element &e)
 // Helper functions
 // ----------------
 
+static void ensureValidDoc_(xmlDocPtr doc)
+{
+    if(doc) {
+        if(doc->children) {
+            return;
+        }
+    }
+
+    ::xmlFreeDoc(doc); // NULL ok.
+    maybeThrow_();
+    throw parse_error();
+}
+
+
 Element SubElement(Element &parent, const QName &qname)
 {
     Element elem(qname);
@@ -1142,38 +1150,31 @@ Element SubElement(Element &parent, const QName &qname, kv_list attribs)
 #endif
 
 
-static Element fromstringInternal_(const char *s, size_t size)
-{
-    xmlDocPtr doc = ::xmlReadMemory(s, size, 0, 0, 0);
-    if(! (doc && doc->children)) {
-        ::xmlFreeDoc(doc); // NULL ok.
-        maybeThrow_();
-        throw parse_error();
-    }
+// -------------------------------------
+// fromstring() / parse() implementation
+// -------------------------------------
 
-    return ElementTree(doc).getroot();
-}
+struct StringBuf {
+    const char *s;
+    size_t remain;
+    StringBuf(const char *s, size_t remain) : s(s), remain(remain) {}
+};
 
-
-Element fromstring(const char *s)
-{
-    return fromstringInternal_(s, ::strlen(s));
-}
-
-
-Element fromstring(const string &s)
-{
-    return fromstringInternal_(s.data(), s.size());
-}
-
-
-// ----------------------
-// parse() implementation
-// ----------------------
 
 static int dummyClose_(void *ignored)
 {
     return 0;
+}
+
+
+int stringBufRead__(void *strm, char *buffer, int len)
+{
+    StringBuf &sb = *static_cast<StringBuf *>(strm);
+    size_t cnt = std::min(size_t(len), sb.remain);
+    ::memcpy(buffer, sb.s, cnt);
+    sb.s += cnt;
+    sb.remain -= cnt;
+    return cnt;
 }
 
 
@@ -1195,23 +1196,51 @@ int fdRead__(void *strm, char *buffer, int len)
     return ::read(fd, buffer, len);
 }
 
+typedef xmlDocPtr (*ReadIOFunc)(xmlInputReadCallback, 
+     xmlInputCloseCallback, void *, const char *, const char *, int);
+typedef int (*ReadCbFunc)(void *, char *, int);
 
-template<int(*fn)(void *, char *, int), typename T>
-static ElementTree parseInternal_(T obj)
+
+template<ReadIOFunc readIoFunc,
+         ReadCbFunc readCbFunc,
+         int options=0,
+         typename T>
+static ElementTree parse_(T obj)
 {
-    xmlDocPtr doc = ::xmlReadIO(fn, dummyClose_,
-                                static_cast<void *>(obj), 0, 0, 0);
-    if(! doc) {
-        maybeThrow_();
-        throw parse_error();
-    }
+    xmlDocPtr doc = readIoFunc(readCbFunc, dummyClose_,
+                               static_cast<void *>(obj), 0, 0, options);
+    ensureValidDoc_(doc);
     return ElementTree(doc);
+}
+
+
+static Element fromstring_(const char *s, size_t size)
+{
+    xmlDocPtr doc = ::xmlReadMemory(s, size, 0, 0, 0);
+    ensureValidDoc_(doc);
+    return ElementTree(doc).getroot();
+}
+
+
+Element fromstring(const char *s)
+{
+    StringBuf sb(s, ::strlen(s));
+    ElementTree doc = parse_<::xmlReadIO, stringBufRead__>(&sb);
+    return doc.getroot();
+}
+
+
+Element fromstring(const string &s)
+{
+    StringBuf sb(s.data(), s.size());
+    ElementTree doc = parse_<::xmlReadIO, stringBufRead__>(&sb);
+    return doc.getroot();
 }
 
 
 ElementTree parse(std::istream &is)
 {
-    return parseInternal_<istreamRead__>(&is);
+    return parse_<::xmlReadIO, istreamRead__>(&is);
 }
 
 
@@ -1224,8 +1253,55 @@ ElementTree parse(const string &path)
 
 ElementTree parse(int fd)
 {
-    return parseInternal_<fdRead__>(&fd);
+    return parse_<::xmlReadIO, fdRead__>(&fd);
 }
+
+
+// ---------------------
+// etree::html namespace
+// ---------------------
+
+namespace html {
+
+
+Element fromstring(const char *s)
+{
+    StringBuf sb(s, ::strlen(s));
+    ElementTree doc = parse_<::htmlReadIO, stringBufRead__,
+                             HTML_PARSE_RECOVER>(&sb);
+    return doc.getroot();
+}
+
+
+Element fromstring(const string &s)
+{
+    StringBuf sb(s.data(), s.size());
+    ElementTree doc = parse_<::htmlReadIO, stringBufRead__,
+                             HTML_PARSE_RECOVER>(&sb);
+    return doc.getroot();
+}
+
+
+ElementTree parse(std::istream &is)
+{
+    return parse_<::htmlReadIO, istreamRead__, HTML_PARSE_RECOVER>(&is);
+}
+
+
+ElementTree parse(const string &path)
+{
+    std::ifstream is(path.c_str(), std::ios_base::binary);
+    return etree::html::parse(is);
+}
+
+
+ElementTree parse(int fd)
+{
+    return parse_<::htmlReadIO, fdRead__, HTML_PARSE_RECOVER>(&fd);
+}
+
+
+} // namespace
 
 
 // -----------------
