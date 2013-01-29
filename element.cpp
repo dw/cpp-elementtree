@@ -1263,12 +1263,16 @@ ElementTree parse(int fd)
 
 namespace html {
 
+static const int options = (0
+    |HTML_PARSE_RECOVER
+    |HTML_PARSE_NOERROR
+    |HTML_PARSE_NOWARNING);
+
 
 Element fromstring(const char *s)
 {
     StringBuf sb(s, ::strlen(s));
-    ElementTree doc = parse_<::htmlReadIO, stringBufRead__,
-                             HTML_PARSE_RECOVER>(&sb);
+    ElementTree doc = parse_<::htmlReadIO, stringBufRead__, options>(&sb);
     return doc.getroot();
 }
 
@@ -1276,15 +1280,14 @@ Element fromstring(const char *s)
 Element fromstring(const string &s)
 {
     StringBuf sb(s.data(), s.size());
-    ElementTree doc = parse_<::htmlReadIO, stringBufRead__,
-                             HTML_PARSE_RECOVER>(&sb);
+    ElementTree doc = parse_<::htmlReadIO, stringBufRead__, options>(&sb);
     return doc.getroot();
 }
 
 
 ElementTree parse(std::istream &is)
 {
-    return parse_<::htmlReadIO, istreamRead__, HTML_PARSE_RECOVER>(&is);
+    return parse_<::htmlReadIO, istreamRead__, options>(&is);
 }
 
 
@@ -1297,7 +1300,7 @@ ElementTree parse(const string &path)
 
 ElementTree parse(int fd)
 {
-    return parse_<::htmlReadIO, fdRead__, HTML_PARSE_RECOVER>(&fd);
+    return parse_<::htmlReadIO, fdRead__, options>(&fd);
 }
 
 
