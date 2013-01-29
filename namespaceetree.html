@@ -99,12 +99,17 @@ Namespaces</h2></td></tr>
 <tr class="memitem:namespaceetree_1_1feed"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceetree_1_1feed.html">feed</a></td></tr>
 <tr class="memdesc:namespaceetree_1_1feed"><td class="mdescLeft">&#160;</td><td class="mdescRight">RSS/ATOM feed parser implementation. <br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespaceetree_1_1html"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceetree_1_1html.html">html</a></td></tr>
+<tr class="memdesc:namespaceetree_1_1html"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classetree_1_1_element_tree.html">ElementTree</a> HTML namespace; public classes and functions are defined here. <br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_attr_iterator.html">AttrIterator</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_attr_map.html">AttrMap</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_child_iterator.html">ChildIterator</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html">Element</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a reference to a single XML element.  <a href="classetree_1_1_element.html#details">More...</a><br/></td></tr>
@@ -383,7 +388,6 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Parse an XML document from a STL istream and return it. </p>
-<p>Parse a feed from a STL istream and return a reference.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">is</td><td>Input stream. </td></tr>
@@ -434,7 +438,6 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Parse an XML document from a file descriptor and return it. </p>
-<p>Parse a feed from a file descriptor and return a reference.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">fd</td><td>File descriptor number. </td></tr>
@@ -539,6 +542,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Serialize an element. </p>
+<p>Serialize an HTML element.</p>
 <p>See ElementTree::tostring() for another variant.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

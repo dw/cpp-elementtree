@@ -8,6 +8,7 @@ var searchData=
   ['format',['format',['../classetree_1_1feed_1_1_feed.html#aec88b413c9cfc27cb626b450ed8035fe',1,'etree::feed::Feed']]],
   ['format_5fatom',['FORMAT_ATOM',['../namespaceetree_1_1feed.html#ab3c8782985e645306a9e202c2ec1cc75ac92cbb9c07203b8387888f1e9f8ae576',1,'etree::feed']]],
   ['format_5frss20',['FORMAT_RSS20',['../namespaceetree_1_1feed.html#ab3c8782985e645306a9e202c2ec1cc75aa4fb055683208c15ebc920328e24aaa8',1,'etree::feed']]],
-  ['fromstring',['fromstring',['../namespaceetree.html#a4e405a65332836154198d2e60c7b5255',1,'etree::fromstring(const char *s)'],['../namespaceetree.html#a84ca5bcc8ae545ca5ffadfda09ba85bc',1,'etree::fromstring(const string &amp;s)'],['../namespaceetree_1_1feed.html#a478a644dcaf43b31e231af628e25fb55',1,'etree::feed::fromstring()']]],
+  ['fromelement',['fromelement',['../namespaceetree_1_1feed.html#a51c7059f51506f3076437d138d2dc919',1,'etree::feed']]],
+  ['fromstring',['fromstring',['../namespaceetree.html#a4e405a65332836154198d2e60c7b5255',1,'etree::fromstring(const char *s)'],['../namespaceetree.html#a84ca5bcc8ae545ca5ffadfda09ba85bc',1,'etree::fromstring(const string &amp;s)'],['../namespaceetree_1_1html.html#a1208b051e1ea0b29aed2f7425ecc38a2',1,'etree::html::fromstring(const char *s)'],['../namespaceetree_1_1html.html#ac4a3debc47d2ab3a95abf807dc9e9248',1,'etree::html::fromstring(const std::string &amp;s)']]],
   ['funcdeleter',['FuncDeleter',['../structetree_1_1_func_deleter.html',1,'etree']]]
 ];

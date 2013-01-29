@@ -121,21 +121,9 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a478a644dcaf43b31e231af628e25fb55"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1feed_1_1_feed.html">Feed</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceetree_1_1feed.html#a478a644dcaf43b31e231af628e25fb55">fromstring</a> (const std::string &amp;s)</td></tr>
-<tr class="memdesc:a478a644dcaf43b31e231af628e25fb55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a feed from a STL string and return a reference.  <a href="#a478a644dcaf43b31e231af628e25fb55"></a><br/></td></tr>
-<tr class="separator:a478a644dcaf43b31e231af628e25fb55"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a126372c5e6b9feec8f506d03c21387e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1feed_1_1_feed.html">Feed</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceetree_1_1feed.html#a126372c5e6b9feec8f506d03c21387e0">parse</a> (std::istream &amp;is)</td></tr>
-<tr class="memdesc:a126372c5e6b9feec8f506d03c21387e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a feed from a STL istream and return a reference.  <a href="#a126372c5e6b9feec8f506d03c21387e0"></a><br/></td></tr>
-<tr class="separator:a126372c5e6b9feec8f506d03c21387e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad0c52bf78d8c8c9dac07f51be32a0435"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1feed_1_1_feed.html">Feed</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceetree_1_1feed.html#ad0c52bf78d8c8c9dac07f51be32a0435">parse</a> (const std::string &amp;path)</td></tr>
-<tr class="memdesc:ad0c52bf78d8c8c9dac07f51be32a0435"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a feed stored in the filesystem and return a reference.  <a href="#ad0c52bf78d8c8c9dac07f51be32a0435"></a><br/></td></tr>
-<tr class="separator:ad0c52bf78d8c8c9dac07f51be32a0435"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a19ccfbee6dff8a78245a72c22a126835"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1feed_1_1_feed.html">Feed</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceetree_1_1feed.html#a19ccfbee6dff8a78245a72c22a126835">parse</a> (int fd)</td></tr>
-<tr class="memdesc:a19ccfbee6dff8a78245a72c22a126835"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a feed from a file descriptor and return a reference.  <a href="#a19ccfbee6dff8a78245a72c22a126835"></a><br/></td></tr>
-<tr class="separator:a19ccfbee6dff8a78245a72c22a126835"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd24141b94bad32df70c76c3b6d0b195"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceetree_1_1feed.html#acd24141b94bad32df70c76c3b6d0b195">tostring</a> (<a class="el" href="classetree_1_1feed_1_1_feed.html">Feed</a> &amp;feed)</td></tr>
-<tr class="memdesc:acd24141b94bad32df70c76c3b6d0b195"><td class="mdescLeft">&#160;</td><td class="mdescRight">Serialize a feed to XML and return it as a STL string.  <a href="#acd24141b94bad32df70c76c3b6d0b195"></a><br/></td></tr>
-<tr class="separator:acd24141b94bad32df70c76c3b6d0b195"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51c7059f51506f3076437d138d2dc919"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1feed_1_1_feed.html">Feed</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceetree_1_1feed.html#a51c7059f51506f3076437d138d2dc919">fromelement</a> (<a class="el" href="classetree_1_1_element.html">Element</a> elem)</td></tr>
+<tr class="memdesc:a51c7059f51506f3076437d138d2dc919"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wrap an <a class="el" href="classetree_1_1_element.html" title="Represents a reference to a single XML element.">Element</a> containing a feed and return a reference.  <a href="#a51c7059f51506f3076437d138d2dc919"></a><br/></td></tr>
+<tr class="separator:a51c7059f51506f3076437d138d2dc919"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>RSS/ATOM feed parser implementation. </p>
@@ -185,144 +173,28 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="a478a644dcaf43b31e231af628e25fb55"></a>
+<a class="anchor" id="a51c7059f51506f3076437d138d2dc919"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classetree_1_1feed_1_1_feed.html">Feed</a> etree::feed::fromstring </td>
+          <td class="memname"><a class="el" href="classetree_1_1feed_1_1_feed.html">Feed</a> etree::feed::fromelement </td>
           <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>s</em></td><td>)</td>
+          <td class="paramtype">Element&#160;</td>
+          <td class="paramname"><em>elem</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Parse a feed from a STL string and return a reference. </p>
+<p>Wrap an <a class="el" href="classetree_1_1_element.html" title="Represents a reference to a single XML element.">Element</a> containing a feed and return a reference. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">s</td><td>Serialized feed. </td></tr>
+    <tr><td class="paramname">elem</td><td>Parsed feed as an <a class="el" href="classetree_1_1_element.html" title="Represents a reference to a single XML element.">Element</a>. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classetree_1_1feed_1_1_feed.html" title="Represents a feed.">Feed</a> reference. </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a126372c5e6b9feec8f506d03c21387e0"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classetree_1_1feed_1_1_feed.html">Feed</a> etree::feed::parse </td>
-          <td>(</td>
-          <td class="paramtype">std::istream &amp;&#160;</td>
-          <td class="paramname"><em>is</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Parse a feed from a STL istream and return a reference. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">is</td><td>Source istream. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classetree_1_1feed_1_1_feed.html" title="Represents a feed.">Feed</a> reference.</dd></dl>
-<p>Parse a feed from a STL istream and return a reference.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">is</td><td>Input stream. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classetree_1_1_element_tree.html">ElementTree</a> instance. </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="ad0c52bf78d8c8c9dac07f51be32a0435"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classetree_1_1feed_1_1_feed.html">Feed</a> etree::feed::parse </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>path</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Parse a feed stored in the filesystem and return a reference. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">path</td><td>Filesystem path. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classetree_1_1feed_1_1_feed.html" title="Represents a feed.">Feed</a> reference. </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a19ccfbee6dff8a78245a72c22a126835"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classetree_1_1feed_1_1_feed.html">Feed</a> etree::feed::parse </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>fd</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Parse a feed from a file descriptor and return a reference. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">fd</td><td>File descripto. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classetree_1_1feed_1_1_feed.html" title="Represents a feed.">Feed</a> reference.</dd></dl>
-<p>Parse a feed from a file descriptor and return a reference.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">fd</td><td>File descriptor number. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classetree_1_1_element_tree.html">ElementTree</a> instance. </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="acd24141b94bad32df70c76c3b6d0b195"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::string etree::feed::tostring </td>
-          <td>(</td>
-          <td class="paramtype">Feed &amp;&#160;</td>
-          <td class="paramname"><em>feed</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Serialize a feed to XML and return it as a STL string. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">feed</td><td><a class="el" href="classetree_1_1feed_1_1_feed.html" title="Represents a feed.">Feed</a> to serialize. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classetree_1_1feed_1_1_feed.html" title="Represents a feed.">Feed</a> serialized as XML. </dd></dl>
 
 </div>
 </div>
