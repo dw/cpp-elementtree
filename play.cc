@@ -1,4 +1,7 @@
 
+#include <xapian.h>
+
+#include <condition_variable>
 #include <algorithm>
 #include <atomic>
 #include <mutex>
@@ -19,9 +22,22 @@
 #include "util.hpp"
 
 
-using namespace std;
+#define ARCHIVE "/Users/dmw/src/reader/archive"
+#define RASPBERRY_PI "/Users/dmw/src/reader/archive/http___www.raspberrypi.org__feed_rss2.xml.gz"
+
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
+using std::ofstream;
+using std::ostream;
+
 using namespace etree;
-using namespace etree::feed;
+using etree::feed::Feed;
+
+using std::chrono::milliseconds;
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
 
 
 int main2(void)
@@ -147,9 +163,6 @@ void main6()
 }
 
 
-using std::chrono::high_resolution_clock;
-using std::chrono::duration_cast;
-
 struct timer {
     typedef std::chrono::high_resolution_clock clock_type;
 
@@ -170,7 +183,7 @@ struct timer {
     {
         clock_type::time_point end = clock.now();
         clock_type::duration interv = end - start;
-        return duration_cast<std::chrono::milliseconds>(interv).count();
+        return duration_cast<milliseconds>(interv).count();
     }
 
     clock_type::duration::rep us()
@@ -204,16 +217,16 @@ void get_path_list(std::vector<std::string> &out, const char *dirname)
 }
 
 
-typedef std::lock_guard<std::mutex> mutex_guard;
+typedef std::unique_lock<std::mutex> mutex_lock;
 
 std::atomic_uint_fast64_t items;
 std::atomic_uint_fast64_t bytes;
 std::atomic_uint_fast64_t files;
 std::vector<std::string> paths;
-std::mutex paths_lock;
+std::mutex paths_mutex;
 
 
-void parse_one(std::string s)
+Element decompress(const std::string &s)
 {
     gzFile gfp = gzopen(s.c_str(), "r");
     assert(gfp);
@@ -229,12 +242,59 @@ void parse_one(std::string s)
         all.append(buf, 0, ret);
     }
     gzclose(gfp);
-
-    Feed feed = etree::feed::fromelement(fromstring(all));
-    items += feed.items().size();
     files++;
     bytes += all.size();
+    return fromstring(all);
 }
+
+
+void parse_one(const std::string &s)
+{
+    Feed feed = etree::feed::fromelement(decompress(s));
+    items += feed.items().size();
+}
+
+
+class Event
+{
+    std::condition_variable cond_;
+    std::mutex mutex_;
+    bool flag_;
+
+    Event(const Event &) = delete;
+    Event &operator=(Event &) = delete;
+
+    public:
+    Event() : cond_() , flag_(false) {}
+    bool is_set() { return flag_; }
+
+    void set() {
+        mutex_lock lock(mutex_);
+        flag_ = true;
+        cond_.notify_all();
+    }
+
+    void clear() {
+        mutex_lock lock(mutex_);
+        flag_ = false;
+    }
+
+    void wait() {
+        mutex_lock lock(mutex_);
+        if(! flag_) {
+            cond_.wait(lock, [&]() { return flag_; });
+        }
+    }
+
+    bool wait(unsigned int timeout) {
+        mutex_lock lock(mutex_);
+        return flag_ ? flag_ : cond_.wait_for(lock, milliseconds(timeout),
+            [&]() { return flag_; });
+    }
+};
+
+
+Event empty_event;
 
 
 void parse_thread()
@@ -242,8 +302,9 @@ void parse_thread()
     for(;;) {
         std::string path;
         {
-            mutex_guard guard(paths_lock);
+            mutex_lock lock(paths_mutex);
             if(paths.empty()) {
+                empty_event.set();
                 return;
             }
             path = paths.back();
@@ -256,32 +317,95 @@ void parse_thread()
 
 void main7()
 {
-    get_path_list(paths, "/Users/dmw/src/reader/archive");
+    int tcount = 2;
+
+    get_path_list(paths, ARCHIVE);
     cout << "path size: " << paths.size() << "\n";
 
     timer t;
-    std::chrono::milliseconds dura( 2000 );
 
-    std::thread t1(parse_thread);
-    std::thread t2(parse_thread);
+    std::vector<std::thread*> threads;
+    for(int i = 0; i < tcount; i++) {
+        std::thread *t1 = new std::thread(parse_thread);
+        threads.push_back(t1);
+    }
 
     auto pstat = [&t]() {
         unsigned long long ms = t.ms();
-        unsigned long long rate = bytes / max(1ULL, ms / 1000) / 1024;
+        unsigned long long rate = bytes / std::max(1ULL, ms / 1000) / 1024;
         cout << ms << "ms; done " << files << " files in "
             << bytes << " bytes (" << rate << " kb/sec); "
             << items << " total items\n";
     };
 
-    while(paths.size()) {
-        std::this_thread::sleep_for(dura);
+    while(! empty_event.wait(2000)) {
         pstat();
     }
 
     pstat();
     cout << "join..\n";
-    t1.join();
-    t2.join();
+    for(auto &th : threads) {
+        th->join();
+        delete th;
+    }
+}
+
+
+
+void prnt(const char *s, const Element &e)
+{
+    cout << s << " -- " << e.qname() << "\n";
+}
+
+void main8a()
+{
+    Element root = decompress(RASPBERRY_PI);
+
+    prnt("root", root);
+
+    cout << "size " << root.size()<<"\n";
+
+    Nullable<Element> next = root[0];
+    while(next) {
+        cout << "next: " << *next << "\n";
+        next = (*next).getnext();
+    }
+
+    return;
+    prnt("root[0]", root[0]);
+    prnt("root[1]", root[1]);
+    prnt("root[2]", root[2]);
+    prnt("root[3]", root[3]);
+    prnt("root[4]", root[4]);
+    prnt("root[169]", root[169]);
+    //prnt("root[170]", root[170]);
+}
+
+
+void main8b()
+{
+    Element root = decompress(RASPBERRY_PI);
+
+    auto it = root.begin();
+    cout << bool(it == root.end()) << "\n";
+    prnt("it[0]", *it);
+    it++;
+    prnt("it[1]", *it);
+    it++;
+    prnt("it[2]", *it);
+    it++;
+
+    return;
+
+}
+
+void main8()
+{
+    Element root = decompress(RASPBERRY_PI);
+
+    visit(root, [](Element &e) {
+        cout << "hehe: " << e.qname() << "\n";
+    });
 }
 
 
