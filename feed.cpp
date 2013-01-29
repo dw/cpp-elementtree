@@ -138,6 +138,7 @@ void Item::guid(const string &s)        { format_.guid(elem_, s); }
 string Item::originalGuid() const       { return format_.originalGuid(elem_); }
 time_t Item::published() const          { return format_.published(elem_); }
 void Item::published(time_t published)  { format_.published(elem_, published); }
+Element Item::element() const           { return elem_; }
 
 
 // -------------------
