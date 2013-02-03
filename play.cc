@@ -155,7 +155,7 @@ Element decompress_xml(const char *path)
 {
     std::string xml;
     decompress(path, xml);
-    return etree::fromstring(xml);
+    return etree::fromstring(xml.data());
 }
 
 
@@ -215,10 +215,19 @@ void main9()
 }
 
 
+void main10()
+{
+    std::string f = get_file_contents("a.gz");
+    std::string o;
+    assert(decompress_str(f, o));
+    cout << o << "\n";
+}
+
+
 int main(void)
 {
     try {
-        main9();
+        main10();
     } catch(std::exception &e) {
         cout << "EEK! " << e.what() << endl;
         abort();
