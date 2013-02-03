@@ -76,16 +76,7 @@ Element SubElement(Element &parent, const QName &qname, kv_list attribs);
  * @param s             XML document as a string.
  * @returns             Root Element.
  */
-Element fromstring(const char *s);
-
-/**
- * Parse an XML document from a STL string and return a reference to its root
- * node.
- *
- * @param s             XML document as a string.
- * @returns             Root Element.
- */
-Element fromstring(const string &s);
+Element fromstring(const char *s, size_t n=0);
 
 /**
  * Serialize an element. See ElementTree::tostring() for another variant.

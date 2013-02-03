@@ -1214,25 +1214,12 @@ static ElementTree parse_(T obj)
 }
 
 
-static Element fromstring_(const char *s, size_t size)
+Element fromstring(const char *s, size_t n)
 {
-    xmlDocPtr doc = ::xmlReadMemory(s, size, 0, 0, 0);
-    ensureValidDoc_(doc);
-    return ElementTree(doc).getroot();
-}
-
-
-Element fromstring(const char *s)
-{
-    StringBuf sb(s, ::strlen(s));
-    ElementTree doc = parse_<::xmlReadIO, stringBufRead__>(&sb);
-    return doc.getroot();
-}
-
-
-Element fromstring(const string &s)
-{
-    StringBuf sb(s.data(), s.size());
+    if(n == 0) {
+        n = ::strlen(s);
+    }
+    StringBuf sb(s, n);
     ElementTree doc = parse_<::xmlReadIO, stringBufRead__>(&sb);
     return doc.getroot();
 }
