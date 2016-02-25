@@ -57,4 +57,4 @@ pushdocs: noexist
 	git pull
 
 clean:
-	rm -rf test_element play *.o *.a output *.gcda *.gcno cov.info
+	rm -rf test_element play *.o *.a output *.gcda *.gcno cov.info docs *.dSYM
