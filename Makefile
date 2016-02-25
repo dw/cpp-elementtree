@@ -1,7 +1,11 @@
 
-CXX = clang++-mp-3.3
-LIBXML2_ROOT ?= /opt/local
-GOOGLETEST_ROOT ?= /opt/local
+UNAME = $(shell uname)
+
+CXX = c++
+
+ifeq ($(UNAME), Darwin)
+CXXFLAGS += -stdlib=libc++
+endif
 
 # LDFLAGS += -arch i386
 ifdef RELEASE
@@ -11,31 +15,30 @@ else
 CXXFLAGS += -g
 endif
 
-CXXFLAGS += -I$(LIBXML2_ROOT)/include/libxml2
+CXXFLAGS += $(shell pkg-config --cflags libxml-2.0)
 CXXFLAGS += -std=c++0x
 CXXFLAGS += -fno-rtti
 CXXFLAGS += -stdlib=libc++
 
-LDFLAGS += -L$(LIBXML2_ROOT)/lib
-LDFLAGS += -L$(GOOGLETEST_ROOT)/lib
+LDFLAGS += $(shell pkg-config --libs libxml-2.0)
 #LDFLAGS += -liconv
 LDFLAGS += -lz
 LDFLAGS += -lxml2
-
-GOOGLETEST_LDFLAGS += -lgtest -lgtest_main
-GOOGLETEST_CXXFLAGS += -I$(GOOGLETEST_ROOT)/include
-GOOGLETEST_CXXFLAGS += -DGTEST_HAS_TR1_TUPLE=0
-GOOGLETEST_CXXFLAGS += -DGTEST_USE_OWN_TR1_TUPLE
-GOOGLETEST_CXXFLAGS += -DGTEST_HAS_RTTI=0
 
 play: play.cc fileutil.cpp element.cpp feed.cpp feed-util.cpp
 
 element.cpp: element.hpp
 feed.cpp: feed.hpp
 
-test_element: LDFLAGS+=$(GOOGLETEST_LDFLAGS)
-test_element: CXXFLAGS+=$(GOOGLETEST_CXXFLAGS)
 test_element: test_element.cpp element.cpp
+
+coverage:
+	$(MAKE) clean
+	CXXFLAGS=--coverage $(MAKE) test_element
+	./test_element
+	lcov --directory . --base-directory . --gcov-tool ./llvm-gcov.sh --capture -o cov.info
+	genhtml cov.info -o output
+	open output/index.html
 
 noexist:
 
@@ -54,4 +57,4 @@ pushdocs: noexist
 	git pull
 
 clean:
-	rm -f play *.o *.a
+	rm -rf test_element play *.o *.a output *.gcda *.gcno cov.info
