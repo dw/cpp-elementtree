@@ -19,6 +19,7 @@
 
 
 // libxml forwards.
+struct _xmlAttr;
 struct _xmlNode;
 struct _xmlDoc;
 struct _xmlXPathCompExpr;
@@ -369,7 +370,7 @@ class QName {
      * @param other     Other QName.
      * @returns         True if equal.
      */
-    bool operator==(const QName &other);
+    bool operator==(const QName &other) const;
 };
 
 /**
@@ -448,15 +449,33 @@ class XPath {
 };
 
 
+class Attribute
+{
+    _xmlAttr *attr_;
+
+    public:
+    Attribute(_xmlAttr *attr);
+    string tag() const;
+    string ns() const;
+    QName qname() const;
+    string value() const;
+};
+
+
 class AttrIterator
 {
     _xmlNode *node_;
+    _xmlAttr *attr_;
 
     public:
-    AttrIterator(_xmlNode *elem);
-    QName key();
-    string value();
-    bool next();
+    ~AttrIterator();
+    AttrIterator();
+    AttrIterator(_xmlNode *elem, _xmlAttr *attr);
+
+    bool operator ==(const AttrIterator &other);
+    bool operator !=(const AttrIterator &other);
+    const Attribute operator *();
+    AttrIterator &operator++();
 };
 
 
@@ -468,10 +487,23 @@ class AttrMap
     ~AttrMap();
     AttrMap(_xmlNode *elem);
 
+    AttrIterator begin() const;
+    AttrIterator end() const;
+
     bool has(const QName &qname) const;
     string get(const QName &qname, const string &default_="") const;
     void set(const QName &qname, const string &s);
     vector<QName> keys() const;
+
+    /**
+     * Remove an attribute if it exists, returning true if deletion occured.
+     */
+    bool remove(const QName &qname);
+
+    /**
+     * Return the number of attributes the element has.
+     */
+    size_t size() const;
 };
 
 
@@ -789,6 +821,12 @@ class ChildIterator
 };
 
 
+/**
+ * Depth-first visit an element and all of its subelements.
+ *
+ * @param func
+ *      Function called as (void)func(Element&);
+ */
 template<typename Function>
 void visit(Element &elem, Function func)
 {
@@ -805,7 +843,6 @@ void visit(Element &elem, Function func)
     };
 
 EXCEPTION(cyclical_tree_error)
-EXCEPTION(element_error)
 EXCEPTION(internal_error)
 EXCEPTION(invalid_xpath_error)
 EXCEPTION(memory_error)

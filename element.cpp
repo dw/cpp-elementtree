@@ -39,6 +39,23 @@ static struct _atexit_libxml_cleanup {
 } _atexit_libxml_cleanup;
 
 
+// --------------------
+// const char * hashmap
+// --------------------
+
+struct eqstr
+{
+    bool operator()(const char *s) const
+    {
+        int h = 5381;
+        while(char c = *s++) {
+            h = ((h << 5) + h) + c;
+        }
+        return h;
+    }
+};
+
+
 // -----------------------
 // Nullable implementation
 // -----------------------
@@ -193,6 +210,15 @@ static void unref(xmlNodePtr node)
 // Internal helper functions
 // -------------------------
 
+template<typename Function>
+void visit(xmlNodePtr node, Function func)
+{
+    func(node);
+    for(xmlNodePtr child = node->children; child; child = child->next) {
+        visit(child, func);
+    }
+}
+
 static bool nextElement_(xmlNodePtr &p)
 {
     for(; p; p = p->next) {
@@ -231,6 +257,12 @@ static void maybeThrow_()
     }
 }
 
+template<typename P, typename T>
+P nodeFor__(const T &e)
+{
+    return e.node_;
+}
+
 
 bool isTransitiveParent(const Element &parent, const Element &child)
 {
@@ -250,10 +282,8 @@ bool isTransitiveParent(const Element &parent, const Element &child)
 #ifdef ETREE_0X
 static void attrsFromList_(Element &elem, kv_list &attribs)
 {
-    std::cout << "LOL!" << std::endl;
     AttrMap attrs = elem.attrib();
     for(auto &kv : attribs) {
-        std::cout << "APPEND: " << kv.first << " V " << kv.second << "\n" << std::endl;
         attrs.set(kv.first, kv.second);
     }
 }
@@ -385,13 +415,6 @@ static xmlNsPtr getNs_(xmlNodePtr node, xmlNodePtr target, const string &uri)
 }
 
 
-template<typename P, typename T>
-P nodeFor__(const T &e)
-{
-    return e.node_;
-}
-
-
 static bool qnameEquals_(const QName &qn, xmlNsPtr ns, const xmlChar *name)
 {
     if(ns) {
@@ -486,7 +509,7 @@ const string &QName::ns() const
 }
 
 
-bool QName::operator==(const QName &other)
+bool QName::operator==(const QName &other) const
 {
     return other.tag_ == tag_ && other.ns_ == ns_;
 }
@@ -600,48 +623,109 @@ std::vector<Element> XPath::findall(const Element &e) const
 }
 
 
-// -----------------
-// AttrMap iterators
-// -----------------
+// -------------------
+// Attribute functions
+// -------------------
 
-AttrIterator::AttrIterator(xmlNodePtr node)
-    : node_(node)
+Attribute::Attribute(xmlAttrPtr attr)
+    : attr_(attr)
 {
 }
 
 
-QName AttrIterator::key()
+string Attribute::tag() const
 {
-    const char *ns = "";
-    if(node_->ns) {
-        ns = toChar_(node_->ns->href);
+    if(! attr_) {
+        return "";
     }
-    return QName(ns, toChar_(node_->name));
+    return (const char *)attr_->name;
 }
 
 
-string AttrIterator::value()
+string Attribute::ns() const
 {
+    if(! attr_) {
+        return "";
+    }
+    return attr_->ns ? (const char *)attr_->ns->href : "";
+}
+
+
+QName Attribute::qname() const
+{
+    if(attr_) {
+        return QName(ns(), tag());
+    }
+    return QName("", "");
+}
+
+
+string Attribute::value() const
+{
+    if(! attr_) {
+        return "";
+    }
     string out;
-    xmlChar *s = ::xmlNodeListGetString(node_->doc,
-                                        node_->children, 1);
+    auto s = ::xmlNodeGetContent((_xmlNode *) attr_);
     if(s) {
         out = toChar_(s);
         ::xmlFree(s);
     }
-
     return out;
 }
 
 
-bool AttrIterator::next()
+// -----------------
+// AttrMap iterators
+// -----------------
+
+AttrIterator::AttrIterator(xmlNodePtr node, xmlAttrPtr attr)
+    : node_(node)
+    , attr_(attr)
 {
-    if(node_->next) {
-        node_ = ref(node_->next);
-        unref(node_->prev);
-        return true;
+    if(node_) {
+        ref(node_);
     }
-    return false;
+}
+
+AttrIterator::AttrIterator()
+    : node_(0)
+    , attr_(0)
+{
+}
+
+
+AttrIterator::~AttrIterator()
+{
+    if(node_) {
+        unref(node_);
+    }
+}
+
+
+bool AttrIterator::operator ==(const AttrIterator& other)
+{
+    return attr_ == other.attr_;
+}
+
+
+bool AttrIterator::operator !=(const AttrIterator& other)
+{
+    return attr_ != other.attr_;
+}
+
+
+const Attribute AttrIterator::operator *()
+{
+    assert(attr_ != NULL);
+    return Attribute(attr_);
+}
+
+
+AttrIterator &AttrIterator::operator ++()
+{
+    attr_ = attr_->next;
+    return *this;
 }
 
 
@@ -661,6 +745,18 @@ AttrMap::~AttrMap()
 }
 
 
+AttrIterator AttrMap::begin() const
+{
+    return AttrIterator(node_, node_->properties);
+}
+
+
+AttrIterator AttrMap::end() const
+{
+    return AttrIterator();
+}
+
+
 bool AttrMap::has(const QName &qname) const
 {
     return ::xmlHasNsProp(node_, c_str(qname.tag()), c_str(qname.ns()));
@@ -668,7 +764,7 @@ bool AttrMap::has(const QName &qname) const
 
 
 string AttrMap::get(const QName &qname,
-                         const string &default_) const
+                    const string &default_) const
 {
     string out(default_);
     xmlChar *s = ::xmlGetNsProp(node_, c_str(qname.tag()), c_str(qname.ns()));
@@ -698,6 +794,28 @@ std::vector<QName> AttrMap::keys() const
         p = p->next;
     }
     return names;
+}
+
+
+bool AttrMap::remove(const QName &qname)
+{
+    xmlAttrPtr p = xmlHasNsProp(node_, c_str(qname.tag()), c_str(qname.ns()));
+    if(p) {
+        int rc = xmlRemoveProp(p);
+        assert(rc == 0);
+        return true;
+    }
+    return false;
+}
+
+
+size_t AttrMap::size() const
+{
+    size_t i = 0;
+    for(xmlAttrPtr p = node_->properties; p; p = p->next) {
+        i++;
+    }
+    return i;
 }
 
 
@@ -988,6 +1106,15 @@ std::vector<Element> Element::findall(const XPath &expr) const
 }
 
 
+void reparentNode_(xmlNodePtr node, xmlNodePtr newParent)
+{
+    //std::tr1::hash_map<const char *, xmlNsPtr, eqstr> nsCache;
+
+    visit(node, [&](xmlNodePtr child) {
+        
+    });
+}
+
 void Element::append(Element &e)
 {
     std::cout << "appending " << e;
@@ -995,6 +1122,7 @@ void Element::append(Element &e)
     if(isTransitiveParent(e, *this)) {
         throw cyclical_tree_error();
     }
+    
     ::xmlUnlinkNode(e.node_);
     unref(e.node_->doc);
     e.node_->doc = ref(node_->doc);
@@ -1232,14 +1360,14 @@ Element fromstring(const char *s, size_t n)
         n = ::strlen(s);
     }
     StringBuf sb(s, n);
-    ElementTree doc = parse_<::xmlReadIO, stringBufRead__>(&sb);
+    ElementTree doc = parse_< ::xmlReadIO, stringBufRead__>(&sb);
     return doc.getroot();
 }
 
 
 ElementTree parse(std::istream &is)
 {
-    return parse_<::xmlReadIO, istreamRead__>(&is);
+    return parse_<xmlReadIO, istreamRead__>(&is);
 }
 
 
@@ -1252,7 +1380,7 @@ ElementTree parse(const string &path)
 
 ElementTree parse(int fd)
 {
-    return parse_<::xmlReadIO, fdRead__>(&fd);
+    return parse_<xmlReadIO, fdRead__>(&fd);
 }
 
 
@@ -1271,7 +1399,7 @@ static const int options = (0
 Element fromstring(const char *s)
 {
     StringBuf sb(s, ::strlen(s));
-    ElementTree doc = parse_<::htmlReadIO, stringBufRead__, options>(&sb);
+    ElementTree doc = parse_<htmlReadIO, stringBufRead__, options>(&sb);
     return doc.getroot();
 }
 
@@ -1279,14 +1407,14 @@ Element fromstring(const char *s)
 Element fromstring(const string &s)
 {
     StringBuf sb(s.data(), s.size());
-    ElementTree doc = parse_<::htmlReadIO, stringBufRead__, options>(&sb);
+    ElementTree doc = parse_<htmlReadIO, stringBufRead__, options>(&sb);
     return doc.getroot();
 }
 
 
 ElementTree parse(std::istream &is)
 {
-    return parse_<::htmlReadIO, istreamRead__, options>(&is);
+    return parse_<htmlReadIO, istreamRead__, options>(&is);
 }
 
 
@@ -1299,7 +1427,7 @@ ElementTree parse(const string &path)
 
 ElementTree parse(int fd)
 {
-    return parse_<::htmlReadIO, fdRead__, options>(&fd);
+    return parse_<htmlReadIO, fdRead__, options>(&fd);
 }
 
 

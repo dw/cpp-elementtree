@@ -9,7 +9,6 @@
 std::string get_file_contents(const std::string &filename);
 void get_path_list(std::vector<std::string> &out, const char *dirname);
 void decompress(const std::string &path, std::string &out);
-bool decompress_str(const std::string &s, std::string &out);
 
 
 #endif

@@ -34,7 +34,7 @@ void get_path_list(std::vector<std::string> &out, const char *dirname)
         if(ent->d_name[0] == '.') {
             continue;
         }
-        out.emplace_back();
+        out.push_back(std::string());
         std::string &s = out.back();
         s.append(dirname);
         s.append("/");
@@ -60,46 +60,4 @@ void decompress(const std::string &path, std::string &out)
         out.append(buf, 0, ret);
     }
     gzclose(gfp);
-}
-
-
-bool decompress_str(const std::string &s, std::string &out)
-{
-    unsigned have;
-    std::string buf;
-    buf.resize(65536);
-
-    z_stream strm;
-    strm.zalloc = NULL;
-    strm.zfree = NULL;
-    strm.opaque = NULL;
-    strm.avail_in = s.size();
-    char *ss = const_cast<char *>(s.data());
-    strm.next_in = reinterpret_cast<Bytef *>(ss);
-
-    if(inflateInit(&strm) != Z_OK) {
-        return false;
-    }
-
-    int ret;
-    do {
-        do {
-            strm.avail_out = buf.size();
-            strm.next_out = reinterpret_cast<Bytef *>(&buf[0]);
-            ret = inflate(&strm, Z_NO_FLUSH);
-            switch (ret) {
-            case Z_STREAM_ERROR:
-            case Z_NEED_DICT:
-            case Z_DATA_ERROR:
-            case Z_MEM_ERROR:
-                inflateEnd(&strm);
-                return false;
-            }
-            out.append(buf.data(), buf.size() - strm.avail_out);
-        } while(strm.avail_out == 0);
-    } while(strm.avail_in && ret != Z_STREAM_END);
-
-    inflateEnd(&strm);
-    assert(Z_STREAM_END == ret);
-    return true;
 }

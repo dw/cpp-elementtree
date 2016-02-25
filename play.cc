@@ -1,11 +1,6 @@
 
-#include <condition_variable>
 #include <algorithm>
-#include <atomic>
-#include <mutex>
-#include <thread>
 #include <stdlib.h>
-#include <chrono>
 
 #include <cassert>
 #include <iostream>
@@ -30,11 +25,6 @@ using std::ostream;
 
 using namespace etree;
 using etree::feed::Feed;
-
-using std::chrono::milliseconds;
-using std::chrono::high_resolution_clock;
-using std::chrono::duration_cast;
-
 
 
 int main2(void)
@@ -66,6 +56,7 @@ int main2(void)
 
 void main3()
 {
+#ifdef ETREE_0X
     Element root("dave", {
         {"zerp", "zoop"}
     });
@@ -89,6 +80,7 @@ void main3()
     cout << "WRITING" << endl;
     cout << s << endl;;
     cout << "WRITING " << s.size() << endl;
+#endif
 }
 
 
@@ -215,19 +207,10 @@ void main9()
 }
 
 
-void main10()
-{
-    std::string f = get_file_contents("a.gz");
-    std::string o;
-    assert(decompress_str(f, o));
-    cout << o << "\n";
-}
-
-
 int main(void)
 {
     try {
-        main10();
+        main9();
     } catch(std::exception &e) {
         cout << "EEK! " << e.what() << endl;
         abort();

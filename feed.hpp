@@ -35,15 +35,6 @@ void stripWs_(std::string &s);
 
 
 /**
- * Wrap an Element containing a feed and return a reference.
- *
- * @param elem  Parsed feed as an Element.
- * @returns     Feed reference.
- */
-Feed fromelement(Element elem);
-
-
-/**
  * Enumeration of supported feed types.
  */
 enum feed_format {
@@ -66,16 +57,36 @@ enum content_type {
 
 
 /**
+ * Wrap an Element containing a feed and return a reference.
+ *
+ * @param elem  Parsed feed as an Element.
+ * @returns     Feed reference.
+ */
+Feed fromelement(Element elem);
+
+
+Item itemFromElement(Element elem, enum feed_format format);
+
+
+/**
  * Represent a single feed item. Use Feed::makeItem() to make an instance.
  */
 class Item
 {
+    template<typename T>
+    friend FeedFormat &formatFor__(const T &);
+
     const ItemFormat &format_;
     Element elem_;
 
     public:
     Item(const Item &);
     Item(const ItemFormat &, const Element &);
+
+    /**
+     * Remove this item from its parent feed, if any.
+     */
+    void remove();
 
     /**
      * Return the item title.
@@ -178,6 +189,9 @@ class Item
  */
 class Feed
 {
+    template<typename T>
+    friend FeedFormat &formatFor__(const T &);
+
     const FeedFormat &format_;
     Element elem_;
 
@@ -204,6 +218,16 @@ class Feed
     void icon(std::string s);
 
     std::vector<Item> items() const;
+
+    /**
+     * Append an item to this feed, removing it from its present feed. If the
+     * destination feed differs in format from the item, the item is converted
+     * in-place, discarding any non-essential data.
+     *
+     * @param item
+     *      Item to append.
+     */
+    void append(Item item);
 
     Element element() const;
 };

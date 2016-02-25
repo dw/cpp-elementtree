@@ -24,6 +24,13 @@ typedef const std::vector<QName> NameList;
 // Helper functions
 // ----------------
 
+
+template<typename T>
+const FeedFormat &formatFor__(const T &item)
+{
+    return item.format_;
+}
+
 static Element getChild_(Element &parent, const QName &qn)
 {
     Nullable<Element> maybe = parent.child(qn);
@@ -79,6 +86,7 @@ class FeedFormat
     public:
     virtual bool identify(const Element &e) const = 0;
     virtual enum feed_format format() const = 0;
+    virtual ItemFormat *item_format() const = 0;
     virtual string title(const Element &) const = 0;
     virtual void title(Element &, const string &) const = 0;
     virtual string link(const Element &) const = 0;
@@ -140,6 +148,10 @@ time_t Item::published() const          { return format_.published(elem_); }
 void Item::published(time_t published)  { format_.published(elem_, published); }
 Element Item::element() const           { return elem_; }
 
+void Item::remove() {
+    elem_.remove();
+}
+
 
 // -------------------
 // Feed implementation
@@ -161,6 +173,11 @@ string Feed::description() const        { return format_.description(elem_); }
 void Feed::description(const string &s) { format_.description(elem_, s); }
 std::vector<Item> Feed::items() const   { return format_.items(elem_); }
 Element Feed::element() const           { return elem_; }
+
+void Feed::append(Item item) {
+    
+
+}
 
 
 // -------------------
@@ -368,7 +385,13 @@ struct AtomFeedFormat
         setText_(e, kAtomContentPath, s);
     }
 
-    std::vector<Item> items(const Element &e) const {
+    ItemFormat *item_format() const
+    {
+        return &AtomItemFormat::instance;
+    }
+
+    std::vector<Item> items(const Element &e) const
+    {
         return itemsFromPath_(AtomItemFormat::instance, e, kAtomItemsPath);
     }
 };
@@ -536,7 +559,13 @@ class Rss20FeedFormat
         assert(0);
     }
 
-    std::vector<Item> items(const Element &e) const {
+    ItemFormat *item_format() const
+    {
+        return &Rss20ItemFormat::instance;
+    }
+
+    std::vector<Item> items(const Element &e) const
+    {
         return itemsFromPath_(Rss20ItemFormat::instance, e, kRssItemsPath);
     }
 };
@@ -553,6 +582,19 @@ static const std::vector<const FeedFormat *> formats_ = {
 
 
 
+
+static const FeedFormat *formatFromEnum(enum feed_format n)
+{
+    for(auto &format : formats_) {
+        if(format->format() == n) {
+            return format;
+        }
+    }
+    assert(0);
+    return NULL;
+}
+
+
 Feed fromelement(Element elem)
 {
     for(auto &format : formats_) {
@@ -561,6 +603,13 @@ Feed fromelement(Element elem)
         }
     }
     throw memory_error();
+}
+
+
+Item itemFromElement(Element elem, enum feed_format format)
+{
+    ItemFormat *itemFormat = formatFromEnum(format)->item_format();
+    return Item(*itemFormat, elem);
 }
 
 
