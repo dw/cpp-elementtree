@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdio> // snprintf().
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <unistd.h>
@@ -25,6 +26,17 @@ namespace etree {
 
 using std::string;
 using std::ostream;
+
+
+// ------------------------------------
+// Ensure libxml2 is cleaned up at exit
+// ------------------------------------
+
+static struct _atexit_libxml_cleanup {
+    _atexit_libxml_cleanup() {
+        atexit(xmlCleanupParser);
+    }
+} _atexit_libxml_cleanup;
 
 
 // -----------------------
