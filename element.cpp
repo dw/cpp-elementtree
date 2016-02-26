@@ -205,7 +205,7 @@ static void
 unref(xmlNodePtr node)
 {
     assert(node && node->_private);
-    if((! --refCount_(node)) && node->doc) {
+    if(! --refCount_(node)) {
         unref(node->doc);
     }
 }
@@ -1074,12 +1074,7 @@ ChildIterator::operator*()
 
 Element::~Element()
 {
-    if(node_->parent) {
-        unref(node_);
-    } else {
-        unref(node_->doc);
-        ::xmlFreeNode(node_);
-    }
+    unref(node_);
 }
 
 
