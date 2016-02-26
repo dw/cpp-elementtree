@@ -278,6 +278,16 @@ MU_TEST(appendNewTwice)
 }
 
 
+MU_TEST(appendDuplicateNs)
+{
+    auto root = etree::fromstring(DOC);
+    auto child = etree::Element("{urn:foo}bar");
+    child.attrib().set("{urn:foo}baz", "1");
+    root.append(child);
+    assert(etree::tostring(child) == "<foo:bar foo:baz=\"1\"/>");
+}
+
+
 // ------
 // remove
 // ------
