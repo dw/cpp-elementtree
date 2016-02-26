@@ -414,11 +414,11 @@ reparentNs_(xmlNodePtr node,
         xmlNsPtr ns = ::xmlSearchNsByHref(node->doc, node->parent, (*nsdef)->href);
         if(! ns) {
             // new namespace href => keep and cache the ns declaration
-            nsCache.insert({ {*nsdef, *nsdef} });
+            nsCache.insert(std::make_pair(*nsdef, *nsdef));
         } else {
             // known namespace href => cache mapping and strip old ns. prepend
             // ns to garbage chain.
-            nsCache.insert({ {*nsdef, ns} });
+            nsCache.insert(std::make_pair(*nsdef, ns));
             (*nsdef)->next = staleNsList;
             staleNsList = *nsdef;
         }
