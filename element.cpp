@@ -391,6 +391,7 @@ _textNodeOrSkip(xmlNodePtr node)
 static void
 moveTail_(xmlNodePtr tail, xmlNodePtr target)
 {
+    tail = _textNodeOrSkip(tail);
     while(tail) {
         xmlNodePtr next = _textNodeOrSkip(tail->next);
         ::xmlAddNextSibling(target, tail);
@@ -480,7 +481,7 @@ _removeText(xmlNodePtr node)
 {
     node = _textNodeOrSkip(node);
     while(node) {
-        xmlNodePtr next = _textNodeOrSkip(node);
+        xmlNodePtr next = _textNodeOrSkip(node->next);
         ::xmlUnlinkNode(node);
         ::xmlFreeNode(node);
         node = next;

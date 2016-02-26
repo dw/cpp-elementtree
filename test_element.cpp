@@ -410,6 +410,38 @@ MU_TEST(elemRemovePreservesTail)
 }
 
 
+MU_TEST(elemRemovePreservesTailTextOnly)
+{
+    auto elem = etree::fromstring("<a><b/><c/></a>");
+    auto e2 = *elem.child("b");
+    e2.remove();
+    assert(etree::tostring(elem) == "<a><c/></a>");
+}
+
+
+MU_TEST(elemText)
+{
+    auto elem = etree::fromstring("<name>David</name>");
+    assert(elem.text() == "David");
+}
+
+
+MU_TEST(elemTextSet)
+{
+    auto elem = etree::fromstring("<name/>");
+    elem.text("David");
+    assert("<name>David</name>" == etree::tostring(elem));
+}
+
+
+MU_TEST(elemTextSetEmpty)
+{
+    auto elem = etree::fromstring("<name>David</name>");
+    elem.text("");
+    assert("<name/>" == etree::tostring(elem));
+}
+
+
 //
 // tostring
 //
