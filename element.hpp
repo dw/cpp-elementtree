@@ -740,6 +740,11 @@ class Element
     void remove();
 
     /**
+     * Return true if this is an ancestor of some element.
+     */
+    bool ancestorOf(const Element &e) const;
+
+    /**
      * Return the next sibling element, if any.
      */
     Nullable<Element> getnext() const;

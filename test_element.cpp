@@ -14,9 +14,11 @@ using std::string;
 
 
 static auto DOC = (
-    "<who type='people' count='1' foo:x='true' xmlns:foo='urn:foo'>"
-        "<person type='human'>"
-            "<name>David</name>"
+    "<who xmlns:foo=\"urn:foo\" type=\"people\" count=\"1\" foo:x=\"true\">"
+        "<person type=\"human\">"
+            "<name foo:attrx=\"3\">David</name>"
+            "<foo:attr1>123</foo:attr1>"
+            "<foo:attr2>123</foo:attr2>"
         "</person>"
     "</who>"
 );
@@ -230,6 +232,144 @@ MU_TEST(testSize)
     assert(e.attrib().size() == 0);
 }
 
+
+// ------
+// append
+// ------
+
+
+MU_TEST(appendSelfFails)
+{
+    auto root = etree::fromstring(DOC);
+    MU_RAISES(etree::cyclical_tree_error, [&]() {
+        root.append(root);
+    })
+}
+
+
+MU_TEST(appendAncestorFails)
+{
+    auto root = etree::fromstring(DOC);
+    auto person = *root.child("person");
+    MU_RAISES(etree::cyclical_tree_error, [&]() {
+        person.append(root);
+    })
+}
+
+
+MU_TEST(appendNew)
+{
+    auto root = etree::Element("root");
+    auto child = etree::Element("child");
+    root.append(child);
+    assert(root.size() == 1);
+    assert(child == *root.child("child"));
+}
+
+
+MU_TEST(appendNewTwice)
+{
+    auto root = etree::Element("root");
+    auto child = etree::Element("child");
+    root.append(child);
+    root.append(child);
+    assert(root.size() == 1);
+    assert(child == *root.child("child"));
+}
+
+
+// ------
+// remove
+// ------
+
+
+MU_TEST(removeNoArg)
+{
+    auto root = etree::fromstring(DOC);
+    auto person = *root.child("person");
+    person.remove();
+    assert(! person.getparent());
+    assert(! root.child("person"));
+}
+
+
+MU_TEST(removeArg)
+{
+    auto root = etree::fromstring(DOC);
+    auto person = *root.child("person");
+    root.remove(person);
+    assert(! person.getparent());
+    assert(! root.child("person"));
+}
+
+
+MU_TEST(removeArgNotParent)
+{
+    auto root = etree::fromstring(DOC);
+    auto name = *root.find("person/name");
+    root.remove(name);
+    assert(root.size() == 1);
+    //assert((*name.getparent()).tag() == "person");
+    assert(! root.child("name"));
+}
+
+
+MU_TEST(removeTwiceNoArgs)
+{
+    auto root = etree::fromstring(DOC);
+    auto person = *root.child("person");
+    person.remove();
+    person.remove();
+    assert(! root.child("person"));
+}
+
+
+MU_TEST(removeSucceeds)
+{
+    auto root = etree::fromstring(DOC);
+    auto person = *root.child("person");
+    root.remove(person);
+}
+
+
+MU_TEST(removeTwiceOkay)
+{
+    auto root = etree::fromstring(DOC);
+    auto person = *root.child("person");
+    root.remove(person);
+    root.remove(person);
+}
+
+
+MU_TEST(removeThenAppend)
+{
+    auto root = etree::fromstring(DOC);
+    auto person = *root.child("person");
+    root.remove(person);
+    root.append(person);
+    assert(DOC == etree::tostring(root));
+}
+
+
+MU_TEST(removeNsPreserved)
+{
+    auto root = etree::fromstring(DOC);
+    auto name = *root.find("person/name");
+    name.remove();
+    assert(etree::tostring(name) ==
+           "<name xmlns:ns0=\"urn:foo\" ns0:attrx=\"3\">David</name>");
+}
+
+
+MU_TEST(removeAddNsCollapsed)
+{
+    auto root = etree::fromstring(DOC);
+    auto name = *root.find("person/name");
+    name.remove();
+    root.append(name);
+    assert(etree::tostring(name) ==
+           "<name foo:attrx=\"3\">David</name>");
+}
 
 
 // ---

@@ -79,3 +79,12 @@ dependency (e.g. Boost), ``etree::feed`` is UNIX-only for the time being.
    entertainment. The resulting object is most probably misaligned, and buggy
    in other ways yet unknown. The ``char[]`` buffer should be replaced with a
    typed member variable.
+
+
+
+### TODO
+
+* Remove items from *Horrors* section.
+* Use libxml2 parser string interning.
+* Preserve namespace prefixes better.
+* removeArgNotParent commented out assert causes leak -- placement new
