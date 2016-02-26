@@ -24,6 +24,7 @@
  */
 
 #include <algorithm>
+#include <cstdio>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -84,7 +85,7 @@ main(int argc, const char **argv)
 
     for(int i = 0; i < run_count; i++) {
         for(auto test : filtered) {
-            std::cout << "Running " << getTestName(test) << "..." << std::endl;
+            std::cout << "Running " << getTestName(test) << " ..." << std::endl;
             test->func();
         }
     }
@@ -124,6 +125,17 @@ getTestName(const Test *t)
 
 
 } // ::myunit
+
+
+#define MU_RAISES(type, expr) \
+    try { \
+        (expr)(); \
+        assert(! #type " was not raised"); \
+    } catch(type &e) {}
+
+
+#define MU_DEBUG(x, ...) \
+    fprintf(stderr, __FILE__ ": " x "\n", __VA_ARGS__);
 
 
 #define MU_TEST(name) \
