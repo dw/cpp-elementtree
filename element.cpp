@@ -161,45 +161,52 @@ template class Nullable<string>;
  * document.
  */
 
+
+template<typename T>
+static inline intptr_t &
+refCount_(T node) {
+    return *reinterpret_cast<intptr_t *>(&(node->_private));
+}
+
+
 static xmlDocPtr
 ref(xmlDocPtr doc)
 {
     // Relies on NULL (aka. initial state of _private) being (intptr_t)0, which
     // isn't true on some weird archs.
     assert(doc && (sizeof(void *) >= sizeof(intptr_t)));
-    (*reinterpret_cast<intptr_t *>(&(doc->_private)))++;
+    refCount_(doc)++;
     return doc;
 }
+
 
 static void
 unref(xmlDocPtr doc)
 {
-    assert(doc && (sizeof(void *) >= sizeof(intptr_t)));
-    assert(doc->_private);
-    if(! --*reinterpret_cast<intptr_t *>(&(doc->_private))) {
+    assert(doc && doc->_private);
+    if(! --refCount_(doc)) {
         xmlFreeDoc(doc);
     }
 }
+
 
 static xmlNodePtr
 ref(xmlNodePtr node)
 {
     assert(node);
-    if(! (*reinterpret_cast<intptr_t *>(&(node->_private)))++) {
+    if(! refCount_(node)++) {
         ref(node->doc);
     }
     return node;
 }
 
+
 static void
 unref(xmlNodePtr node)
 {
-    assert(node);
-    assert(node->_private);
-    if(! --*reinterpret_cast<intptr_t *>(&(node->_private))) {
-        if(node->doc) {
-            unref(node->doc);
-        }
+    assert(node && node->_private);
+    if((! --refCount_(node)) && node->doc) {
+        unref(node->doc);
     }
 }
 
