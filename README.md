@@ -87,4 +87,3 @@ dependency (e.g. Boost), ``etree::feed`` is UNIX-only for the time being.
 * Remove items from *Horrors* section.
 * Use libxml2 parser string interning.
 * Preserve namespace prefixes better.
-* removeArgNotParent commented out assert causes leak -- placement new

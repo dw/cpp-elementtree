@@ -319,7 +319,7 @@ MU_TEST(removeArgNotParent)
     auto name = *root.find("person/name");
     root.remove(name);
     assert(root.size() == 1);
-    //assert((*name.getparent()).tag() == "person");
+    assert((*name.getparent()).tag() == "person");
     assert(! root.child("name"));
 }
 

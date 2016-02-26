@@ -1384,7 +1384,7 @@ Element::getparent() const
 {
     xmlNodePtr parent = node_->parent;
     if(parent && parent->type != XML_DOCUMENT_NODE) {
-        return Nullable<Element>(ref(parent));
+        return Nullable<Element>(parent);
     }
     return Nullable<Element>();
 }
