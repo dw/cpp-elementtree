@@ -83,6 +83,7 @@ main(int argc, const char **argv)
         run_count = std::stoi(getenv("RUN_COUNT"));
     }
 
+    std::cout << "Selected " << filtered.size() << " tests." << std::endl;
     for(int i = 0; i < run_count; i++) {
         for(auto test : filtered) {
             std::cout << "Running " << getTestName(test) << " ..." << std::endl;
@@ -127,11 +128,15 @@ getTestName(const Test *t)
 } // ::myunit
 
 
-#define MU_RAISES(type, expr) \
+#define MU_RAISES2(type, expr, expr2) \
     try { \
         (expr)(); \
         assert(! #type " was not raised"); \
-    } catch(type &e) {}
+    } catch(type &e) { (expr2)(e); }
+
+
+#define MU_RAISES(type, expr) \
+    MU_RAISES2(type, expr, [&](type &e) {})
 
 
 #define MU_DEBUG(x, ...) \

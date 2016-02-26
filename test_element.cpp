@@ -29,10 +29,14 @@ static auto NS_DOC = (
     "</foo:who>"
 );
 
+#define OUT(x) std::cout << x << std::endl;
+#define TOSTRING(x) OUT(etree::tostring(x))
+
 
 // ------------
 // Constructors
 // ------------
+
 
 MU_TEST(elemDestructor)
 {
@@ -58,21 +62,22 @@ MU_TEST(elemKvList)
 // Accessors
 // ---------
 
-MU_TEST(qname)
+
+MU_TEST(elemQname)
 {
     Element e("x");
     assert(e.qname() == "x");
 }
 
 
-MU_TEST(qnameNs)
+MU_TEST(elemQnameNs)
 {
     Element e("{urn:woah}x");
     assert(e.qname() == "{urn:woah}x");
 }
 
 
-MU_TEST(setQname)
+MU_TEST(elemQnameSet)
 {
     Element e("x");
     e.qname("y");
@@ -80,7 +85,7 @@ MU_TEST(setQname)
 }
 
 
-MU_TEST(setQnameNs)
+MU_TEST(elemQnameSetNs)
 {
     Element e("x");
     e.qname("{x}y");
@@ -88,14 +93,14 @@ MU_TEST(setQnameNs)
 }
 
 
-MU_TEST(tag)
+MU_TEST(elemTag)
 {
     Element e("x");
     assert(e.tag() == "x");
 }
 
 
-MU_TEST(setTag)
+MU_TEST(elemTagSet)
 {
     Element e("x");
     e.tag("y");
@@ -104,7 +109,7 @@ MU_TEST(setTag)
 }
 
 
-MU_TEST(setTagKeepNs)
+MU_TEST(elemTagSetKeepNs)
 {
     Element e("{x}y");
     e.tag("z");
@@ -246,12 +251,40 @@ MU_TEST(testSize)
 }
 
 
+// ----------
+// ancestorOf
+// ----------
+
+
+MU_TEST(elemAncestorOfTrue)
+{
+    auto root = etree::fromstring("<a><b/></a>");
+    assert(root.ancestorOf(*root.child("b")));
+}
+
+
+MU_TEST(elemAncestorOfFalse)
+{
+    auto root = etree::fromstring("<a><b/></a>");
+    assert(! (*root.child("b")).ancestorOf(root));
+}
+
+
+MU_TEST(elemAncestorOfFalseWrongDoc)
+{
+    auto root = etree::fromstring("<a><b/></a>");
+    auto root2 = etree::fromstring("<a><b/></a>");
+    assert(! root.ancestorOf(root2));
+}
+
+
+
 // ------
 // append
 // ------
 
 
-MU_TEST(appendSelfFails)
+MU_TEST(elemAppendSelfFails)
 {
     auto root = etree::fromstring(DOC);
     MU_RAISES(etree::cyclical_tree_error, [&]() {
@@ -260,7 +293,7 @@ MU_TEST(appendSelfFails)
 }
 
 
-MU_TEST(appendAncestorFails)
+MU_TEST(elemAppendAncestorFails)
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
@@ -270,7 +303,7 @@ MU_TEST(appendAncestorFails)
 }
 
 
-MU_TEST(appendNew)
+MU_TEST(elemAppendNew)
 {
     auto root = etree::Element("root");
     auto child = etree::Element("child");
@@ -280,7 +313,7 @@ MU_TEST(appendNew)
 }
 
 
-MU_TEST(appendNewTwice)
+MU_TEST(elemAppendNewTwice)
 {
     auto root = etree::Element("root");
     auto child = etree::Element("child");
@@ -291,13 +324,40 @@ MU_TEST(appendNewTwice)
 }
 
 
-MU_TEST(appendDuplicateNs)
+MU_TEST(elemAppendDuplicateNs)
 {
     auto root = etree::fromstring(DOC);
     auto child = etree::Element("{urn:foo}bar");
     child.attrib().set("{urn:foo}baz", "1");
     root.append(child);
     assert(etree::tostring(child) == "<foo:bar foo:baz=\"1\"/>");
+}
+
+
+MU_TEST(elemAppendMoveNsSimple1)
+{
+    auto root = etree::fromstring("<a xmlns:foo=\"urn:foo\"/>");
+    auto root2 = etree::fromstring("<b xmlns=\"urn:foo\"/>");
+    root.append(root2);
+    assert(etree::tostring(root) == "<a xmlns:foo=\"urn:foo\"><foo:b/></a>");
+}
+
+
+MU_TEST(elemAppendMoveNsSimple2)
+{
+    auto root = etree::fromstring("<a xmlns=\"urn:foo\"/>");
+    auto root2 = etree::fromstring("<b xmlns=\"urn:foo\"/>");
+    root.append(root2);
+    assert(etree::tostring(root) == "<a xmlns=\"urn:foo\"><b/></a>");
+}
+
+
+MU_TEST(elemAppendMoveNsNested)
+{
+    auto root = etree::fromstring(DOC);
+    auto root2 = etree::fromstring(DOC);
+    root.append(*root2.find("person/name"));
+    TOSTRING(root)
 }
 
 
@@ -442,6 +502,32 @@ MU_TEST(elemTextSetEmpty)
 }
 
 
+MU_TEST(elemTextSetChildElements)
+{
+    auto elem = etree::fromstring("<name><lang/></name>");
+    elem.text("David");
+    assert("<name>David<lang/></name>" == etree::tostring(elem));
+}
+
+
+//
+// fromstring
+//
+
+MU_TEST(elemFromstringBadXml)
+{
+    MU_RAISES2(etree::xml_error,
+        [&]() {
+            etree::fromstring("corrupt");
+        },
+        [&](etree::xml_error &e) {
+            auto expect = "Start tag expected, '<' not found\n";
+            assert(e.what() == std::string(expect));
+        }
+    );
+}
+
+
 //
 // tostring
 //
@@ -479,6 +565,44 @@ MU_TEST(treeTostring)
 }
 
 
+
+//
+// QName
+//
+
+MU_TEST(qnameConstructNsTag)
+{
+    auto qn = etree::QName("ns", "tag");
+    assert(qn.ns() == "ns");
+    assert(qn.tag() == "tag");
+}
+
+
+MU_TEST(qnameConstructCopy)
+{
+    auto qn = etree::QName("ns", "tag");
+    auto qn2 = qn;
+    assert(qn2.ns() == "ns");
+    assert(qn2.tag() == "tag");
+}
+
+
+MU_TEST(qnameConstructUniversalName)
+{
+    auto qn = etree::QName(std::string("{ns}tag"));
+    assert(qn.ns() == "ns");
+    assert(qn.tag() == "tag");
+}
+
+
+MU_TEST(qnameConstructUniversalNameChar)
+{
+    auto qn = etree::QName("{ns}tag");
+    assert(qn.ns() == "ns");
+    assert(qn.tag() == "tag");
+}
+
+
 MU_TEST(qnameTostringNoNs)
 {
     auto qn = etree::QName("nons");
@@ -492,6 +616,65 @@ MU_TEST(qnameTostringNs)
     assert(qn.tostring() == "{urn:foo}nons");
 }
 
+
+MU_TEST(qnameEquals)
+{
+    auto qn = etree::QName("{urn:foo}nons");
+    assert(qn.equals("urn:foo", "nons"));
+}
+
+
+MU_TEST(qnameEqualsFalse)
+{
+    auto qn = etree::QName("{urn:foo}nons");
+    assert(! qn.equals("urn:foo", "ns"));
+}
+
+
+MU_TEST(qnameEqualsFalseNoNs)
+{
+    auto qn = etree::QName("{urn:foo}nons");
+    assert(! qn.equals(NULL, "nons"));
+}
+
+
+MU_TEST(qnameEqualsFalseWrongTag)
+{
+    auto qn = etree::QName("{urn:foo}nons");
+    assert(! qn.equals("urn:foo", "ns"));
+}
+
+
+MU_TEST(qnameOpEqTrue)
+{
+    auto qn = etree::QName("{urn:foo}nons");
+    auto qn2 = etree::QName("{urn:foo}nons");
+    assert(qn == qn2);
+}
+
+
+MU_TEST(qnameOpFalseUnequalNs)
+{
+    auto qn = etree::QName("{urn:foo}nons");
+    auto qn2 = etree::QName("{urn:foo2}nons");
+    assert(qn != qn2);
+}
+
+
+MU_TEST(qnameOpEqFalseUnequalTag)
+{
+    auto qn = etree::QName("{urn:foo}nons");
+    auto qn2 = etree::QName("{urn:foo}ns");
+    assert(qn != qn2);
+}
+
+
+MU_TEST(qnaneOpUnequalMissingNs)
+{
+    auto qn = etree::QName("nons");
+    auto qn2 = etree::QName("{urn:foo2}nons");
+    assert(qn != qn2);
+}
 
 
 // ---
@@ -511,5 +694,108 @@ MU_TEST(elemGetNs)
     #define NS "{urn:foo}"
     assert("human" == (*root.child(NS "person")).get(NS "type"));
 }
+
+
+
+
+//
+// Nullable
+//
+
+MU_TEST(nullableDefaultConstructor)
+{
+    auto val = etree::Nullable<etree::Element>();
+    assert(! val);
+}
+
+
+MU_TEST(nullableConstructor)
+{
+    auto elem = etree::Element("a");
+    auto val = etree::Nullable<etree::Element>(elem);
+    assert(val);
+    assert(elem == *val);
+}
+
+
+MU_TEST(nullableRvalConstructor)
+{
+    auto val = etree::Nullable<etree::Element>(etree::Element("a"));
+    assert(val);
+    assert((*val).tag() == "a");
+}
+
+
+MU_TEST(nullableCopyConstructorUnset)
+{
+    auto val = etree::Nullable<etree::Element>();
+    auto val2 = val;
+    assert(! val);
+    assert(! val2);
+    assert(val == val2);
+}
+
+
+MU_TEST(nullableCopyConstructorSet)
+{
+    auto elem = etree::Element("a");
+    auto val = etree::Nullable<etree::Element>(elem);
+    auto val2 = val;
+    assert(val);
+    assert(val2);
+    assert(val == val2);
+}
+
+
+MU_TEST(nullableAssignUnsetToUnset)
+{
+    auto val = etree::Nullable<etree::Element>();
+    auto val2 = etree::Nullable<etree::Element>();
+    val2 = val;
+    assert(! val);
+    assert(! val2);
+}
+
+
+MU_TEST(nullableAssignSetToUnset)
+{
+    auto elem = etree::Element("a");
+    auto val = etree::Nullable<etree::Element>(elem);
+    auto val2 = etree::Nullable<etree::Element>();
+    val2 = val;
+    assert(val);
+    assert(val2);
+    assert(*val == *val2);
+}
+
+
+MU_TEST(nullableAssignUnsetToSet)
+{
+    auto elem = etree::Element("a");
+    auto val = etree::Nullable<etree::Element>();
+    auto val2 = etree::Nullable<etree::Element>(elem);
+    val2 = val;
+    assert(! val);
+    assert(! val2);
+}
+
+
+MU_TEST(nullableDerefUnset)
+{
+    auto val = etree::Nullable<etree::Element>();
+    MU_RAISES(etree::missing_value_error, [&]() {
+        *val;
+    })
+}
+
+
+MU_TEST(nullableDerefSet)
+{
+    auto elem = etree::Element("a");
+    auto val = etree::Nullable<etree::Element>(elem);
+    assert(*val == elem);
+}
+
+
 
 MU_MAIN()

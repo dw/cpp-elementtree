@@ -236,7 +236,6 @@ nextElement_(xmlNodePtr &p)
     return false;
 }
 
-
 static const char *
 toChar_(const xmlChar *s)
 {
@@ -248,6 +247,13 @@ static char *
 toChar_(xmlChar *s)
 {
     return reinterpret_cast<char *>(s);
+}
+
+
+static const char *
+nsToChar_(const xmlNsPtr ns)
+{
+    return ns ? toChar_(ns->href) : NULL;
 }
 
 
@@ -524,46 +530,9 @@ _collectText(xmlNodePtr node)
 }
 
 
-static bool
-qnameEquals_(const QName &qn, xmlNsPtr ns, const xmlChar *name)
-{
-    if(ns) {
-        if(qn.ns() != toChar_(ns->href)) {
-            return false;
-        }
-    } else if(qn.ns().size()) {
-        return false;
-    }
-
-    return qn.tag() == toChar_(name);
-}
-
-
 // ---------------
 // QName functions
 // ---------------
-
-
-void
-QName::fromString_(const string &qname)
-{
-    if(qname.size() > 0 && qname[0] == '{') {
-        size_t e = qname.find('}');
-        if(e == string::npos) {
-            throw qname_error();
-        } else if(qname.size() - 1 == e) {
-            throw qname_error();
-        }
-        ns_ = qname.substr(1, e - 1);
-        tag_ = qname.substr(e + 1);
-        if(tag_.size() == 0) {
-            throw qname_error();
-        }
-    } else {
-        ns_ = "";
-        tag_ = qname;
-    }
-}
 
 
 string
@@ -599,14 +568,28 @@ QName::QName(const QName &other)
 
 QName::QName(const string &qname)
 {
-    fromString_(qname);
+    if(qname.size() > 0 && qname[0] == '{') {
+        size_t e = qname.find('}');
+        if(e == string::npos) {
+            throw qname_error();
+        } else if(qname.size() - 1 == e) {
+            throw qname_error();
+        }
+        ns_ = qname.substr(1, e - 1);
+        tag_ = qname.substr(e + 1);
+        if(tag_.size() == 0) {
+            throw qname_error();
+        }
+    } else {
+        ns_ = "";
+        tag_ = qname;
+    }
 }
 
 
 QName::QName(const char *qname)
-{
-    fromString_(qname);
-}
+    : QName(std::string(qname))
+{}
 
 
 const string &
@@ -624,9 +607,31 @@ QName::ns() const
 
 
 bool
+QName::equals(const char *ns, const char *tag) const
+{
+    if(ns) {
+        if(ns_ != ns) {
+            return false;
+        }
+    } else if(ns_.size()) {
+        return false;
+    }
+
+    return tag_ == tag;
+}
+
+
+bool
 QName::operator==(const QName &other) const
 {
     return other.tag_ == tag_ && other.ns_ == ns_;
+}
+
+
+bool
+QName::operator!=(const QName &other) const
+{
+    return !(other == *this);
 }
 
 
@@ -637,6 +642,7 @@ QName::operator==(const QName &other) const
 static xmlXPathCompExprPtr
 compileOrThrow(const string &s)
 {
+    ::xmlResetLastError();
     xmlXPathCompExprPtr expr = ::xmlXPathCompile(toXmlChar_(s.c_str()));
     maybeThrow_();
     return expr;
@@ -1228,6 +1234,13 @@ Element::operator==(const Element &e)
 }
 
 
+bool
+Element::operator!=(const Element &e)
+{
+    return node_ != e.node_;
+}
+
+
 Element &
 Element::operator=(const Element &e)
 {
@@ -1244,7 +1257,7 @@ Element::child(const QName &qn) const
 {
     for(xmlNodePtr cur = node_->children; cur; cur = cur->next) {
         if(cur->type == XML_ELEMENT_NODE) {
-            if(qnameEquals_(qn, cur->ns, cur->name)) {
+            if(qn.equals(nsToChar_(cur->ns), toChar_(cur->name))) {
                 return Element(cur);
             }
         }
@@ -1259,7 +1272,7 @@ Element::children(const QName &qn) const
     std::vector<Element> out;
     for(xmlNodePtr cur = node_->children; cur; cur = cur->next) {
         if(cur->type == XML_ELEMENT_NODE) {
-            if(qnameEquals_(qn, cur->ns, cur->name)) {
+            if(qn.equals(nsToChar_(cur->ns), toChar_(cur->name))) {
                 out.push_back(cur);
             }
         }
@@ -1503,22 +1516,6 @@ tostring(const ElementTree &t)
 // Helper functions
 // ----------------
 
-
-static void
-ensureValidDoc_(xmlDocPtr doc)
-{
-    if(doc) {
-        if(doc->children) {
-            return;
-        }
-    }
-
-    ::xmlFreeDoc(doc); // NULL ok.
-    maybeThrow_();
-    throw parse_error();
-}
-
-
 Element
 SubElement(Element &parent, const QName &qname)
 {
@@ -1607,10 +1604,17 @@ template<ReadIOFunc readIoFunc,
 static ElementTree
 parse_(T obj)
 {
+    ::xmlResetLastError();
     xmlDocPtr doc = readIoFunc(readCbFunc, dummyClose_,
                                static_cast<void *>(obj), 0, 0, options);
-    ensureValidDoc_(doc);
-    return ElementTree(doc);
+
+    if(doc && doc->children) {
+        return ElementTree(doc);
+    }
+
+    ::xmlFreeDoc(doc); // NULL ok.
+    maybeThrow_();
+    throw parse_error();
 }
 
 

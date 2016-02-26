@@ -323,8 +323,6 @@ class QName {
     /// Tag part.
     string tag_;
 
-    void fromString_(const string &qname);
-
     public:
     /**
      * Create a QName from a namespace-tag pair.
@@ -373,12 +371,30 @@ class QName {
     const string &ns() const;
 
     /**
+     * Return true if the (raw) strings match the QName's content.
+     *
+     * @param ns
+     *      NULL, or the namespace URI.
+     * @param tag
+     *      The tag.
+     */
+    bool equals(const char *ns, const char *tag) const;
+
+    /**
      * Compare this QName to another.
      *
      * @param other     Other QName.
      * @returns         True if equal.
      */
     bool operator==(const QName &other) const;
+
+    /**
+     * Compare this QName to another.
+     *
+     * @param other     Other QName.
+     * @returns         False if equal.
+     */
+    bool operator!=(const QName &other) const;
 };
 
 /**
@@ -656,6 +672,12 @@ class Element
     bool operator==(const Element &other);
 
     /**
+     * Return false if the identity of this element is equal to the given
+     * element, i.e. both references refer to the same DOM node.
+     */
+    bool operator!=(const Element &other);
+
+    /**
      * Replace this <strong>element reference</strong> with an element.
      * Note the underlying DOM node is not modified, only the reference is
      * updated.
@@ -875,7 +897,8 @@ EXCEPTION(serialization_error)
 
 struct xml_error : public std::runtime_error
 {
-    xml_error(const char *s) : std::runtime_error(s) {}
+    xml_error(const char *s)
+        : std::runtime_error(s) {}
 };
 
 
