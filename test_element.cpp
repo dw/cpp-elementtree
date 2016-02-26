@@ -34,13 +34,13 @@ static auto NS_DOC = (
 // Constructors
 // ------------
 
-MU_TEST(destructor)
+MU_TEST(elemDestructor)
 {
     Element e("x");
 }
 
 
-MU_TEST(kvList)
+MU_TEST(elemKvList)
 {
     Element e("x", {
         {"a", "b"},
@@ -177,6 +177,19 @@ MU_TEST(attrSetNs)
 }
 
 
+MU_TEST(attrSetKv)
+{
+    auto e = Element("a");
+    e.attrib().set({
+        {"x", "1"},
+        {"y", "2"}
+    });
+    assert(e.attrib().size() == 2);
+    assert("1" == e.attrib().get("x"));
+    assert("2" == e.attrib().get("y"));
+}
+
+
 MU_TEST(attrKeys)
 {
     auto root = etree::fromstring(DOC);
@@ -293,7 +306,7 @@ MU_TEST(appendDuplicateNs)
 // ------
 
 
-MU_TEST(removeNoArg)
+MU_TEST(elemRemoveNoArg)
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
@@ -303,7 +316,7 @@ MU_TEST(removeNoArg)
 }
 
 
-MU_TEST(removeArg)
+MU_TEST(elemRemoveArg)
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
@@ -313,7 +326,7 @@ MU_TEST(removeArg)
 }
 
 
-MU_TEST(removeArgNotParent)
+MU_TEST(elemRemoveArgNotParent)
 {
     auto root = etree::fromstring(DOC);
     auto name = *root.find("person/name");
@@ -324,7 +337,7 @@ MU_TEST(removeArgNotParent)
 }
 
 
-MU_TEST(removeTwiceNoArgs)
+MU_TEST(elemRemoveTwiceNoArgs)
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
@@ -334,7 +347,7 @@ MU_TEST(removeTwiceNoArgs)
 }
 
 
-MU_TEST(removeSucceeds)
+MU_TEST(elemRemoveSucceeds)
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
@@ -342,7 +355,7 @@ MU_TEST(removeSucceeds)
 }
 
 
-MU_TEST(removeTwiceOkay)
+MU_TEST(elemRemoveTwiceOkay)
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
@@ -351,7 +364,7 @@ MU_TEST(removeTwiceOkay)
 }
 
 
-MU_TEST(removeThenAppend)
+MU_TEST(elemRemoveThenAppend)
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
@@ -361,7 +374,7 @@ MU_TEST(removeThenAppend)
 }
 
 
-MU_TEST(removeNsPreserved)
+MU_TEST(elemRemoveNsPreserved)
 {
     auto root = etree::fromstring(DOC);
     auto name = *root.find("person/name");
@@ -371,7 +384,7 @@ MU_TEST(removeNsPreserved)
 }
 
 
-MU_TEST(removeAddNsCollapsed)
+MU_TEST(elemRemoveAddNsCollapsed)
 {
     auto root = etree::fromstring(DOC);
     auto name = *root.find("person/name");
@@ -382,18 +395,85 @@ MU_TEST(removeAddNsCollapsed)
 }
 
 
+MU_TEST(elemRemovePreservesTail)
+{
+    auto elem = etree::Element("person");
+    auto e2 = etree::SubElement(elem, "name");
+    e2.tail("\n\n");
+    e2.remove();
+    elem.append(e2);
+    assert(etree::tostring(elem) == (
+        "<person><name/>\n"
+        "\n"
+        "</person>"
+    ));
+}
+
+
+//
+// tostring
+//
+
+MU_TEST(elemTostring)
+{
+    auto elem = etree::Element("name");
+    elem.text("David");
+    elem.attrib().set({
+        {"{urn:foo}x", "1"},
+        {"{urn:bar}y", "2"}
+    });
+
+    auto got = etree::tostring(elem);
+    auto expect = ("<name xmlns:ns0=\"urn:foo\" xmlns:ns1=\"urn:bar\" "
+                  "ns0:x=\"1\" ns1:y=\"2\">David</name>");
+    assert(got == expect);
+}
+
+
+MU_TEST(treeTostring)
+{
+    auto elem = etree::Element("name");
+    elem.text("David");
+    elem.attrib().set({
+        {"{urn:foo}x", "1"},
+        {"{urn:bar}y", "2"}
+    });
+
+    auto got = etree::tostring(elem.getroottree());
+    auto expect = ("<?xml version=\"1.0\"?>\n"
+                   "<name xmlns:ns0=\"urn:foo\" xmlns:ns1=\"urn:bar\" "
+                    "ns0:x=\"1\" ns1:y=\"2\">David</name>\n");
+    assert(got == expect);
+}
+
+
+MU_TEST(qnameTostringNoNs)
+{
+    auto qn = etree::QName("nons");
+    assert(qn.tostring() == "nons");
+}
+
+
+MU_TEST(qnameTostringNs)
+{
+    auto qn = etree::QName("{urn:foo}nons");
+    assert(qn.tostring() == "{urn:foo}nons");
+}
+
+
+
 // ---
 // Rest??
 // ---
 
-MU_TEST(getNoNs)
+MU_TEST(elemGetNoNs)
 {
     auto root = etree::fromstring(DOC);
     assert("human" == (*root.child("person")).get("type"));
 }
 
 
-MU_TEST(getNs)
+MU_TEST(elemGetNs)
 {
     auto root = etree::fromstring(NS_DOC);
     #define NS "{urn:foo}"

@@ -392,7 +392,7 @@ static void
 moveTail_(xmlNodePtr tail, xmlNodePtr target)
 {
     while(tail) {
-        xmlNodePtr next = _textNodeOrSkip(tail);
+        xmlNodePtr next = _textNodeOrSkip(tail->next);
         ::xmlAddNextSibling(target, tail);
         tail = next;
     }
@@ -925,6 +925,17 @@ AttrMap::set(const QName &qname, const string &s)
     ::xmlSetNsProp(node_,
         getNs_(node_, node_, qname.ns()), c_str(qname.tag()), c_str(s));
 }
+
+
+#ifdef ETREE_0X
+void
+AttrMap::set(kv_list attribs)
+{
+    for(auto &kv : attribs) {
+        set(kv.first, kv.second);
+    }
+}
+#endif
 
 
 std::vector<QName>
@@ -1472,6 +1483,23 @@ tostring(const Element &e)
         static_cast<void *>(&out), 0, 0);
 
     int ret = ::xmlSaveTree(ctx, nodeFor__<xmlNodePtr>(e));
+    ::xmlSaveClose(ctx);
+    if(ret == -1) {
+        throw serialization_error();
+    }
+    return out;
+}
+
+
+string
+tostring(const ElementTree &t)
+{
+    string out;
+    xmlSaveCtxtPtr ctx = ::xmlSaveToIO(writeCallback, closeCallback,
+        static_cast<void *>(&out), 0, 0);
+
+    auto doc = nodeFor__<xmlDocPtr>(t);
+    int ret = ::xmlSaveTree(ctx, reinterpret_cast<xmlNodePtr>(doc));
     ::xmlSaveClose(ctx);
     if(ret == -1) {
         throw serialization_error();

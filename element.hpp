@@ -88,6 +88,14 @@ Element fromstring(const char *s, size_t n=0);
 string tostring(const Element &e);
 
 /**
+ * Serialize a tree. See ElementTree::tostring() for another variant.
+ *
+ * @param e             Element to serialize.
+ * @returns             UTF-8 encoded string.
+ */
+string tostring(const ElementTree &e);
+
+/**
  * Parse an XML document from a STL istream and return it.
  *
  * @param is            Input stream.
@@ -493,6 +501,11 @@ class AttrMap
     bool has(const QName &qname) const;
     string get(const QName &qname, const string &default_="") const;
     void set(const QName &qname, const string &s);
+
+    #ifdef ETREE_0X
+    void set(kv_list attribs);
+    #endif
+
     vector<QName> keys() const;
 
     /**
