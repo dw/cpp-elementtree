@@ -357,23 +357,24 @@ getNs_(xmlNodePtr node, xmlNodePtr target, const string &uri)
  * @param node
  *      The node.
  */
-static xmlNodePtr
-_textNodeOrSkip(xmlNodePtr node)
+template<typename Function>
+static void
+visitText_(xmlNodePtr node, Function func)
 {
     while(node) {
+        xmlNodePtr next = node->next;
         switch(node->type) {
             case XML_TEXT_NODE:
             case XML_CDATA_SECTION_NODE:
-                return node;
+                func(node);
             case XML_XINCLUDE_START:
             case XML_XINCLUDE_END:
-                node = node->next;
                 break;
             default:
-                return 0;
+                return;
         }
+        node = next;
     }
-    return 0;
 }
 
 
@@ -391,12 +392,9 @@ _textNodeOrSkip(xmlNodePtr node)
 static void
 moveTail_(xmlNodePtr tail, xmlNodePtr target)
 {
-    tail = _textNodeOrSkip(tail);
-    while(tail) {
-        xmlNodePtr next = _textNodeOrSkip(tail->next);
+    visitText_(tail, [&](xmlNodePtr node) {
         ::xmlAddNextSibling(target, tail);
-        tail = next;
-    }
+    });
 }
 
 
@@ -479,13 +477,10 @@ reparent_(xmlNodePtr startNode)
 static void
 _removeText(xmlNodePtr node)
 {
-    node = _textNodeOrSkip(node);
-    while(node) {
-        xmlNodePtr next = _textNodeOrSkip(node->next);
+    visitText_(node, [&](xmlNodePtr node) {
         ::xmlUnlinkNode(node);
         ::xmlFreeNode(node);
-        node = next;
-    }
+    });
 }
 
 
@@ -522,14 +517,9 @@ static string
 _collectText(xmlNodePtr node)
 {
     string result;
-    for(;;) {
-        node = _textNodeOrSkip(node);
-        if(! node) {
-            break;
-        }
+    visitText_(node, [&](xmlNodePtr node) {
         result += (const char *) node->content;
-        node = node->next;
-    }
+    });
     return result;
 }
 
