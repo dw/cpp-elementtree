@@ -706,11 +706,11 @@ XPath::find(const Element &e) const
 
 
 std::string
-XPath::findtext(const Element &e) const
+XPath::findtext(const Element &e, const string &default_) const
 {
     std::vector<Element> out = findall(e);
     if(out.empty()) {
-        return "";
+        return default_;
     }
     return out[0].text();
 }
@@ -1040,14 +1040,14 @@ ChildIterator::operator++(int)
 
 
 bool
-ChildIterator::operator==(const ChildIterator &other)
+ChildIterator::operator==(const ChildIterator &other) const
 {
     return elem_ == other.elem_;
 }
 
 
 bool
-ChildIterator::operator!=(const ChildIterator &other)
+ChildIterator::operator!=(const ChildIterator &other) const
 {
     return !(elem_ == other.elem_);
 }
@@ -1228,14 +1228,14 @@ Element::operator[] (size_t i)
 
 
 bool
-Element::operator==(const Element &e)
+Element::operator==(const Element &e) const
 {
     return node_ == e.node_;
 }
 
 
 bool
-Element::operator!=(const Element &e)
+Element::operator!=(const Element &e) const
 {
     return node_ != e.node_;
 }
@@ -1281,6 +1281,17 @@ Element::children(const QName &qn) const
 }
 
 
+std::vector<Element>
+Element::children() const
+{
+    std::vector<Element> out;
+    for(auto child : *this) {
+        out.push_back(child);
+    }
+    return out;
+}
+
+
 Nullable<Element>
 Element::find(const XPath &expr) const
 {
@@ -1289,9 +1300,9 @@ Element::find(const XPath &expr) const
 
 
 string
-Element::findtext(const XPath &expr) const
+Element::findtext(const XPath &expr, const string &default_) const
 {
-    return expr.findtext(*this);
+    return expr.findtext(*this, default_);
 }
 
 
@@ -1441,7 +1452,7 @@ Element::tail(const string &s)
 
 
 ChildIterator
-Element::begin()
+Element::begin() const
 {
     xmlNodePtr cur = node_->children;
     if(nextElement_(cur)) {
@@ -1452,7 +1463,7 @@ Element::begin()
 
 
 ChildIterator
-Element::end()
+Element::end() const
 {
     return ChildIterator();
 }

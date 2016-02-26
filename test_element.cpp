@@ -681,6 +681,7 @@ MU_TEST(qnaneOpUnequalMissingNs)
 // Rest??
 // ---
 
+
 MU_TEST(elemGetNoNs)
 {
     auto root = etree::fromstring(DOC);
@@ -696,11 +697,10 @@ MU_TEST(elemGetNs)
 }
 
 
-
-
 //
 // Nullable
 //
+
 
 MU_TEST(nullableDefaultConstructor)
 {
@@ -796,6 +796,93 @@ MU_TEST(nullableDerefSet)
     assert(*val == elem);
 }
 
+
+//
+// XPath
+//
+
+
+MU_TEST(xpathConstructor)
+{
+    auto xp = etree::XPath(".");
+    assert(xp.expr() == ".");
+}
+
+
+MU_TEST(xpathConstructorParseError)
+{
+    MU_RAISES2(etree::xml_error,
+        [&]() {
+            etree::XPath("&%^&%^&");
+        },
+        [&](etree::xml_error &e) {
+            assert(e.what() == std::string("Invalid expression\n"));
+        }
+    );
+}
+
+
+MU_TEST(xpathCopyConstructor)
+{
+    auto xp = etree::XPath(".");
+    auto xp2 = xp;
+    assert(xp.expr() == xp2.expr());
+}
+
+
+MU_TEST(xpathExpr)
+{
+    auto xp = etree::XPath(".");
+    assert(xp.expr() == ".");
+}
+
+
+MU_TEST(xpathFindOrder)
+{
+    auto elem = etree::fromstring("<root><a/><b/><c/></root>");
+    auto xp = etree::XPath("./*");
+    assert(elem.child("a") == *xp.find(elem));
+}
+
+
+MU_TEST(xpathFindNoMatch)
+{
+    auto elem = etree::fromstring("<root><a/><b/><c/></root>");
+    auto xp = etree::XPath("./nonexistent");
+    assert(! xp.find(elem));
+}
+
+
+MU_TEST(xpathFindall)
+{
+    auto elem = etree::fromstring("<root><a/><b/><c/></root>");
+    auto xp = etree::XPath("./*");
+    assert(elem.children() == xp.findall(elem));
+}
+
+
+MU_TEST(xpathFindallNoMatch)
+{
+    auto elem = etree::fromstring("<root><a/><b/><c/></root>");
+    auto xp = etree::XPath("./nonexistent");
+    assert(elem.children("nonexistent") == xp.findall(elem));
+}
+
+
+MU_TEST(xpathFindText)
+{
+    auto elem = etree::fromstring("<root><name>David</name></root>");
+    auto xp = etree::XPath("name");
+    assert("David" == xp.findtext(elem));
+}
+
+
+MU_TEST(xpathFindTextDefault)
+{
+    auto elem = etree::fromstring("<root><name>David</name></root>");
+    auto xp = etree::XPath("age");
+    assert("Unknown" == xp.findtext(elem, "Unknown"));
+}
 
 
 MU_MAIN()

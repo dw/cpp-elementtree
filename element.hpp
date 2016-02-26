@@ -469,7 +469,7 @@ class XPath {
      * @returns         Text part of the first matching element, or the empty
      *                  string.
      */
-    string findtext(const Element &e) const;
+    string findtext(const Element &e, const string &default_="") const;
 };
 
 
@@ -669,13 +669,13 @@ class Element
      * Return true if the identity of this element is equal to the given
      * element, i.e. both references refer to the same DOM node.
      */
-    bool operator==(const Element &other);
+    bool operator==(const Element &other) const;
 
     /**
      * Return false if the identity of this element is equal to the given
      * element, i.e. both references refer to the same DOM node.
      */
-    bool operator!=(const Element &other);
+    bool operator!=(const Element &other) const;
 
     /**
      * Replace this <strong>element reference</strong> with an element.
@@ -701,6 +701,13 @@ class Element
     vector<Element> children(const QName &qn) const;
 
     /**
+     * Return all children.
+     *
+     * @returns         Vector of elements.
+     */
+    vector<Element> children() const;
+
+    /**
      * Execute an XPath expression rooted on this element.
      *
      * @param expr      Expression to element.
@@ -716,6 +723,15 @@ class Element
      *                  string.
      */
     string findtext(const XPath &expr) const;
+
+    /**
+     * \copybrief XPath::findtext
+     *
+     * @param expr      XPath expression to match.
+     * @returns         Text part of the first matching element, or the empty
+     *                  string.
+     */
+    string findtext(const XPath &expr, const string &default_="") const;
 
     /**
      * \copybrief XPath::findall
@@ -840,8 +856,8 @@ class Element
      */
     void tail(const string &s);
 
-    ChildIterator begin();
-    ChildIterator end();
+    ChildIterator begin() const;
+    ChildIterator end() const;
 };
 
 
@@ -855,8 +871,8 @@ class ChildIterator
     ChildIterator(const ChildIterator &);
     ChildIterator operator++(int);
     ChildIterator operator++();
-    bool operator==(const ChildIterator &);
-    bool operator!=(const ChildIterator &);
+    bool operator==(const ChildIterator &) const;
+    bool operator!=(const ChildIterator &) const;
     Element &operator*();
 };
 
