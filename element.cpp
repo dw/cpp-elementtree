@@ -22,7 +22,9 @@
 
 #include "element.hpp"
 
+
 namespace etree {
+
 
 using std::string;
 using std::ostream;
@@ -35,6 +37,7 @@ using std::ostream;
 // Ensure libxml2 is cleaned up at exit
 // ------------------------------------
 
+
 static struct _atexit_libxml_cleanup {
     _atexit_libxml_cleanup() {
         atexit(xmlCleanupParser);
@@ -42,26 +45,10 @@ static struct _atexit_libxml_cleanup {
 } _atexit_libxml_cleanup;
 
 
-// --------------------
-// const char * hashmap
-// --------------------
-
-struct eqstr
-{
-    bool operator()(const char *s) const
-    {
-        int h = 5381;
-        while(char c = *s++) {
-            h = ((h << 5) + h) + c;
-        }
-        return h;
-    }
-};
-
-
 // -----------------------
 // Nullable implementation
 // -----------------------
+
 
 template<typename T>
 Nullable<T>::Nullable()
@@ -106,6 +93,7 @@ Nullable<T>::~Nullable()
     }
 }
 
+
 template<typename T>
 bool Nullable<T>::operator==(const Nullable<T> &other)
 {
@@ -114,6 +102,7 @@ bool Nullable<T>::operator==(const Nullable<T> &other)
     }
     return set_ == other.set_;
 }
+
 
 template<typename T>
 Nullable<T> &Nullable<T>::operator=(const Nullable<T> &other)
@@ -172,7 +161,8 @@ template class Nullable<string>;
  * document.
  */
 
-static xmlDocPtr ref(xmlDocPtr doc)
+static xmlDocPtr
+ref(xmlDocPtr doc)
 {
     // Relies on NULL (aka. initial state of _private) being (intptr_t)0, which
     // isn't true on some weird archs.
@@ -181,7 +171,8 @@ static xmlDocPtr ref(xmlDocPtr doc)
     return doc;
 }
 
-static void unref(xmlDocPtr doc)
+static void
+unref(xmlDocPtr doc)
 {
     assert(doc && (sizeof(void *) >= sizeof(intptr_t)));
     assert(doc->_private);
@@ -190,7 +181,8 @@ static void unref(xmlDocPtr doc)
     }
 }
 
-static xmlNodePtr ref(xmlNodePtr node)
+static xmlNodePtr
+ref(xmlNodePtr node)
 {
     assert(node);
     if(! (*reinterpret_cast<intptr_t *>(&(node->_private)))++) {
@@ -199,7 +191,8 @@ static xmlNodePtr ref(xmlNodePtr node)
     return node;
 }
 
-static void unref(xmlNodePtr node)
+static void
+unref(xmlNodePtr node)
 {
     assert(node);
     assert(node->_private);
@@ -216,7 +209,8 @@ static void unref(xmlNodePtr node)
 // -------------------------
 
 template<typename Function>
-void visit(bool visitAttrs, xmlNodePtr node, Function func)
+static void
+visit(bool visitAttrs, xmlNodePtr node, Function func)
 {
     func(node);
     for(xmlNodePtr child = node->children; child; child = child->next) {
@@ -231,7 +225,8 @@ void visit(bool visitAttrs, xmlNodePtr node, Function func)
 }
 
 
-static bool nextElement_(xmlNodePtr &p)
+static bool
+nextElement_(xmlNodePtr &p)
 {
     for(; p; p = p->next) {
         if(p->type == XML_ELEMENT_NODE) {
@@ -241,27 +236,37 @@ static bool nextElement_(xmlNodePtr &p)
     return false;
 }
 
-const char *toChar_(const xmlChar *s)
+
+static const char *
+toChar_(const xmlChar *s)
 {
     return reinterpret_cast<const char *>(s);
 }
 
-char *toChar_(xmlChar *s)
+
+static char *
+toChar_(xmlChar *s)
 {
     return reinterpret_cast<char *>(s);
 }
 
-const xmlChar *toXmlChar_(const char *s)
+
+static const xmlChar *
+toXmlChar_(const char *s)
 {
     return reinterpret_cast<const xmlChar *>(s);
 }
 
-xmlChar *toXmlChar_(char *s)
+
+static xmlChar *
+toXmlChar_(char *s)
 {
     return reinterpret_cast<xmlChar *>(s);
 }
 
-static void maybeThrow_()
+
+static void
+maybeThrow_()
 {
     xmlErrorPtr error = ::xmlGetLastError();
     if(error) {
@@ -269,15 +274,18 @@ static void maybeThrow_()
     }
 }
 
+
 template<typename P, typename T>
-P nodeFor__(const T &e)
+/*static*/ P
+nodeFor__(const T &e)
 {
     return e.node_;
 }
 
 
 #ifdef ETREE_0X
-static void attrsFromList_(Element &elem, kv_list &attribs)
+static void
+attrsFromList_(Element &elem, kv_list &attribs)
 {
     AttrMap attrs = elem.attrib();
     for(auto &kv : attribs) {
@@ -287,13 +295,15 @@ static void attrsFromList_(Element &elem, kv_list &attribs)
 #endif
 
 
-static const xmlChar *c_str(const string &s)
+static const xmlChar *
+c_str(const string &s)
 {
     return toXmlChar_(s.empty() ? 0 : s.c_str());
 }
 
 
-static xmlNsPtr makeNs_(xmlNodePtr node, const string &uri)
+static xmlNsPtr
+makeNs_(xmlNodePtr node, const string &uri)
 {
     xmlChar prefix[6];
     xmlNsPtr ns;
@@ -319,7 +329,8 @@ static xmlNsPtr makeNs_(xmlNodePtr node, const string &uri)
 }
 
 
-static xmlNsPtr getNs_(xmlNodePtr node, xmlNodePtr target, const string &uri)
+static xmlNsPtr
+getNs_(xmlNodePtr node, xmlNodePtr target, const string &uri)
 {
     if(uri.empty()) {
         return 0;
@@ -346,7 +357,8 @@ static xmlNsPtr getNs_(xmlNodePtr node, xmlNodePtr target, const string &uri)
  * @param node
  *      The node.
  */
-static xmlNodePtr _textNodeOrSkip(xmlNodePtr node)
+static xmlNodePtr
+_textNodeOrSkip(xmlNodePtr node)
 {
     while(node) {
         switch(node->type) {
@@ -420,7 +432,6 @@ reparentNs_(xmlNodePtr node,
  * up their namespace references to point to namespaces existing in the new
  * document, assuming.
  */
-
 static void
 reparent_(xmlNodePtr startNode)
 {
@@ -464,7 +475,8 @@ reparent_(xmlNodePtr startNode)
 }
 
 
-static void _removeText(xmlNodePtr node)
+static void
+_removeText(xmlNodePtr node)
 {
     node = _textNodeOrSkip(node);
     while(node) {
@@ -476,7 +488,8 @@ static void _removeText(xmlNodePtr node)
 }
 
 
-static void _setNodeText(xmlNodePtr node, const string &s)
+static void
+_setNodeText(xmlNodePtr node, const string &s)
 {
     _removeText(node->children);
     // TODO: CDATA
@@ -492,7 +505,8 @@ static void _setNodeText(xmlNodePtr node, const string &s)
 }
 
 
-static void _setTailText(xmlNodePtr node, const string &s)
+static void
+_setTailText(xmlNodePtr node, const string &s)
 {
     _removeText(node->next);
     if(s.size()) {
@@ -503,7 +517,8 @@ static void _setTailText(xmlNodePtr node, const string &s)
 }
 
 
-static string _collectText(xmlNodePtr node)
+static string
+_collectText(xmlNodePtr node)
 {
     string result;
     for(;;) {
@@ -518,7 +533,8 @@ static string _collectText(xmlNodePtr node)
 }
 
 
-static bool qnameEquals_(const QName &qn, xmlNsPtr ns, const xmlChar *name)
+static bool
+qnameEquals_(const QName &qn, xmlNsPtr ns, const xmlChar *name)
 {
     if(ns) {
         if(qn.ns() != toChar_(ns->href)) {
@@ -537,7 +553,8 @@ static bool qnameEquals_(const QName &qn, xmlNsPtr ns, const xmlChar *name)
 // ---------------
 
 
-void QName::fromString_(const string &qname)
+void
+QName::fromString_(const string &qname)
 {
     if(qname.size() > 0 && qname[0] == '{') {
         size_t e = qname.find('}');
@@ -558,7 +575,8 @@ void QName::fromString_(const string &qname)
 }
 
 
-string QName::tostring() const
+string
+QName::tostring() const
 {
     if(ns_.empty()) {
         return tag_;
@@ -600,19 +618,22 @@ QName::QName(const char *qname)
 }
 
 
-const string &QName::tag() const
+const string &
+QName::tag() const
 {
     return tag_;
 }
 
 
-const string &QName::ns() const
+const string &
+QName::ns() const
 {
     return ns_;
 }
 
 
-bool QName::operator==(const QName &other) const
+bool
+QName::operator==(const QName &other) const
 {
     return other.tag_ == tag_ && other.ns_ == ns_;
 }
@@ -622,7 +643,8 @@ bool QName::operator==(const QName &other) const
 // XPath functions
 // ---------------
 
-static xmlXPathCompExprPtr compileOrThrow(const string &s)
+static xmlXPathCompExprPtr
+compileOrThrow(const string &s)
 {
     xmlXPathCompExprPtr expr = ::xmlXPathCompile(toXmlChar_(s.c_str()));
     maybeThrow_();
@@ -658,13 +680,15 @@ XPath::XPath(const XPath &other)
 }
 
 
-const std::string &XPath::expr() const
+const std::string &
+XPath::expr() const
 {
     return s_;
 }
 
 
-XPath &XPath::operator =(const XPath &other)
+XPath &
+XPath::operator =(const XPath &other)
 {
     ::xmlXPathFreeCompExpr(expr_);
     expr_ = compileOrThrow(other.s_);
@@ -673,7 +697,8 @@ XPath &XPath::operator =(const XPath &other)
 }
 
 
-Nullable<Element> XPath::find(const Element &e) const
+Nullable<Element>
+XPath::find(const Element &e) const
 {
     std::vector<Element> out = findall(e);
     if(out.empty()) {
@@ -683,7 +708,8 @@ Nullable<Element> XPath::find(const Element &e) const
 }
 
 
-std::string XPath::findtext(const Element &e) const
+std::string
+XPath::findtext(const Element &e) const
 {
     std::vector<Element> out = findall(e);
     if(out.empty()) {
@@ -693,7 +719,8 @@ std::string XPath::findtext(const Element &e) const
 }
 
 
-std::vector<Element> XPath::findall(const Element &e) const
+std::vector<Element>
+XPath::findall(const Element &e) const
 {
     std::vector<Element> out;
     xmlNodePtr node = nodeFor__<xmlNodePtr>(e);
@@ -736,7 +763,8 @@ Attribute::Attribute(xmlAttrPtr attr)
 }
 
 
-string Attribute::tag() const
+string
+Attribute::tag() const
 {
     if(! attr_) {
         return "";
@@ -745,7 +773,8 @@ string Attribute::tag() const
 }
 
 
-string Attribute::ns() const
+string
+Attribute::ns() const
 {
     if(! attr_) {
         return "";
@@ -754,7 +783,8 @@ string Attribute::ns() const
 }
 
 
-QName Attribute::qname() const
+QName
+Attribute::qname() const
 {
     if(attr_) {
         return QName(ns(), tag());
@@ -763,7 +793,8 @@ QName Attribute::qname() const
 }
 
 
-string Attribute::value() const
+string
+Attribute::value() const
 {
     if(! attr_) {
         return "";
@@ -806,26 +837,30 @@ AttrIterator::~AttrIterator()
 }
 
 
-bool AttrIterator::operator ==(const AttrIterator& other)
+bool
+AttrIterator::operator ==(const AttrIterator& other)
 {
     return attr_ == other.attr_;
 }
 
 
-bool AttrIterator::operator !=(const AttrIterator& other)
+bool
+AttrIterator::operator !=(const AttrIterator& other)
 {
     return attr_ != other.attr_;
 }
 
 
-const Attribute AttrIterator::operator *()
+const Attribute
+AttrIterator::operator *()
 {
     assert(attr_ != NULL);
     return Attribute(attr_);
 }
 
 
-AttrIterator &AttrIterator::operator ++()
+AttrIterator &
+AttrIterator::operator ++()
 {
     attr_ = attr_->next;
     return *this;
@@ -848,26 +883,30 @@ AttrMap::~AttrMap()
 }
 
 
-AttrIterator AttrMap::begin() const
+AttrIterator
+AttrMap::begin() const
 {
     return AttrIterator(node_, node_->properties);
 }
 
 
-AttrIterator AttrMap::end() const
+AttrIterator
+AttrMap::end() const
 {
     return AttrIterator();
 }
 
 
-bool AttrMap::has(const QName &qname) const
+bool
+AttrMap::has(const QName &qname) const
 {
     return ::xmlHasNsProp(node_, c_str(qname.tag()), c_str(qname.ns()));
 }
 
 
-string AttrMap::get(const QName &qname,
-                    const string &default_) const
+string
+AttrMap::get(const QName &qname,
+             const string &default_) const
 {
     string out(default_);
     xmlChar *s = ::xmlGetNsProp(node_, c_str(qname.tag()), c_str(qname.ns()));
@@ -880,14 +919,16 @@ string AttrMap::get(const QName &qname,
 }
 
 
-void AttrMap::set(const QName &qname, const string &s)
+void
+AttrMap::set(const QName &qname, const string &s)
 {
     ::xmlSetNsProp(node_,
         getNs_(node_, node_, qname.ns()), c_str(qname.tag()), c_str(s));
 }
 
 
-std::vector<QName> AttrMap::keys() const
+std::vector<QName>
+AttrMap::keys() const
 {
     std::vector<QName> names;
     for(xmlAttrPtr p = node_->properties; p; p = p->next) {
@@ -898,7 +939,8 @@ std::vector<QName> AttrMap::keys() const
 }
 
 
-bool AttrMap::remove(const QName &qname)
+bool
+AttrMap::remove(const QName &qname)
 {
     xmlAttrPtr p = xmlHasNsProp(node_, c_str(qname.tag()), c_str(qname.ns()));
     if(p) {
@@ -910,7 +952,8 @@ bool AttrMap::remove(const QName &qname)
 }
 
 
-size_t AttrMap::size() const
+size_t
+AttrMap::size() const
 {
     size_t i = 0;
     for(xmlAttrPtr p = node_->properties; p; p = p->next) {
@@ -949,22 +992,27 @@ Element ElementTree::getroot() const
 // ChildIterator functions
 // -------------------------
 
+
 ChildIterator::ChildIterator()
     : elem_()
 {
 }
+
 
 ChildIterator::ChildIterator(const Element &e)
     : elem_(e)
 {
 }
 
+
 ChildIterator::ChildIterator(const ChildIterator &other)
     : elem_(other.elem_)
 {
 }
 
-ChildIterator ChildIterator::operator++()
+
+ChildIterator
+ChildIterator::operator++()
 {
     if(! elem_) {
         throw out_of_bounds_error();
@@ -973,24 +1021,32 @@ ChildIterator ChildIterator::operator++()
     return *this;
 }
 
-ChildIterator ChildIterator::operator++(int)
+
+ChildIterator
+ChildIterator::operator++(int)
 {
     ChildIterator tmp(*this);
     operator++();
     return tmp;
 }
 
-bool ChildIterator::operator==(const ChildIterator &other)
+
+bool
+ChildIterator::operator==(const ChildIterator &other)
 {
     return elem_ == other.elem_;
 }
 
-bool ChildIterator::operator!=(const ChildIterator &other)
+
+bool
+ChildIterator::operator!=(const ChildIterator &other)
 {
     return !(elem_ == other.elem_);
 }
 
-Element &ChildIterator::operator*()
+
+Element &
+ChildIterator::operator*()
 {
     return *elem_;
 }
@@ -999,6 +1055,7 @@ Element &ChildIterator::operator*()
 // -----------------
 // Element functions
 // -----------------
+
 
 Element::~Element()
 {
@@ -1023,7 +1080,8 @@ Element::Element(xmlNodePtr node)
 }
 
 
-static xmlNodePtr nodeFromQname_(const QName &qname)
+static xmlNodePtr
+nodeFromQname_(const QName &qname)
 {
     xmlDocPtr doc = ::xmlNewDoc(0);
     if(! doc) {
@@ -1073,39 +1131,45 @@ Element::Element(const QName &qname, kv_list attribs)
 #endif
 
 
-size_t Element::size() const
+size_t
+Element::size() const
 {
     return ::xmlChildElementCount(node_);
 }
 
 
-QName Element::qname() const
+QName
+Element::qname() const
 {
     return QName(ns(), tag());
 }
 
 
-void Element::qname(const QName &qname)
+void
+Element::qname(const QName &qname)
 {
     ns(qname.ns());
     tag(qname.tag());
 }
 
 
-string Element::tag() const
+string
+Element::tag() const
 {
     return toChar_(node_->name);
 }
 
 
-void Element::tag(const string &s)
+void
+Element::tag(const string &s)
 {
     assert(! s.empty());
     ::xmlNodeSetName(node_, c_str(s));
 }
 
 
-string Element::ns() const
+string
+Element::ns() const
 {
     if(node_->ns) {
         return toChar_(node_->ns->href);
@@ -1114,7 +1178,8 @@ string Element::ns() const
 }
 
 
-void Element::ns(const string &ns)
+void
+Element::ns(const string &ns)
 {
     if(ns.empty()) {
         node_->ns = NULL;
@@ -1124,19 +1189,22 @@ void Element::ns(const string &ns)
 }
 
 
-AttrMap Element::attrib() const
+AttrMap
+Element::attrib() const
 {
     return AttrMap(node_);
 }
 
 
-string Element::get(const QName &qname, const string &default_) const
+string
+Element::get(const QName &qname, const string &default_) const
 {
     return attrib().get(qname, default_);
 }
 
 
-Element Element::operator[] (size_t i)
+Element
+Element::operator[] (size_t i)
 {
     xmlNodePtr cur = node_->children;
     for(;;) {
@@ -1151,13 +1219,15 @@ Element Element::operator[] (size_t i)
 }
 
 
-bool Element::operator==(const Element &e)
+bool
+Element::operator==(const Element &e)
 {
     return node_ == e.node_;
 }
 
 
-Element &Element::operator=(const Element &e)
+Element &
+Element::operator=(const Element &e)
 {
     if(this != &e) {
         unref(node_);
@@ -1167,7 +1237,8 @@ Element &Element::operator=(const Element &e)
 }
 
 
-Nullable<Element> Element::child(const QName &qn) const
+Nullable<Element>
+Element::child(const QName &qn) const
 {
     for(xmlNodePtr cur = node_->children; cur; cur = cur->next) {
         if(cur->type == XML_ELEMENT_NODE) {
@@ -1180,7 +1251,8 @@ Nullable<Element> Element::child(const QName &qn) const
 }
 
 
-std::vector<Element> Element::children(const QName &qn) const
+std::vector<Element>
+Element::children(const QName &qn) const
 {
     std::vector<Element> out;
     for(xmlNodePtr cur = node_->children; cur; cur = cur->next) {
@@ -1194,25 +1266,29 @@ std::vector<Element> Element::children(const QName &qn) const
 }
 
 
-Nullable<Element> Element::find(const XPath &expr) const
+Nullable<Element>
+Element::find(const XPath &expr) const
 {
     return expr.find(*this);
 }
 
 
-string Element::findtext(const XPath &expr) const
+string
+Element::findtext(const XPath &expr) const
 {
     return expr.findtext(*this);
 }
 
 
-std::vector<Element> Element::findall(const XPath &expr) const
+std::vector<Element>
+Element::findall(const XPath &expr) const
 {
     return expr.findall(*this);
 }
 
 
-void Element::append(Element &e)
+void
+Element::append(Element &e)
 {
     if(e.ancestorOf(*this)) {
         throw cyclical_tree_error();
@@ -1233,7 +1309,8 @@ void Element::append(Element &e)
 }
 
 
-void Element::insert(size_t i, Element &e)
+void
+Element::insert(size_t i, Element &e)
 {
     if(i == size()) {
         append(e);
@@ -1243,7 +1320,8 @@ void Element::insert(size_t i, Element &e)
 }
 
 
-void Element::remove(Element &e)
+void
+Element::remove(Element &e)
 {
     if(e.node_->parent == node_) {
         e.remove();
@@ -1251,7 +1329,8 @@ void Element::remove(Element &e)
 }
 
 
-void Element::remove()
+void
+Element::remove()
 {
     if(node_->parent == reinterpret_cast<xmlNodePtr>(node_->doc)) {
         return;
@@ -1274,7 +1353,8 @@ void Element::remove()
 }
 
 
-bool Element::ancestorOf(const Element &e) const
+bool
+Element::ancestorOf(const Element &e) const
 {
     xmlNodePtr parent = nodeFor__<xmlNodePtr>(*this);
     xmlNodePtr child = nodeFor__<xmlNodePtr>(e);
@@ -1288,7 +1368,8 @@ bool Element::ancestorOf(const Element &e) const
 }
 
 
-Nullable<Element> Element::getnext() const
+Nullable<Element>
+Element::getnext() const
 {
     xmlNodePtr cur = node_->next;
     if(nextElement_(cur)) {
@@ -1298,7 +1379,8 @@ Nullable<Element> Element::getnext() const
 }
 
 
-Nullable<Element> Element::getparent() const
+Nullable<Element>
+Element::getparent() const
 {
     xmlNodePtr parent = node_->parent;
     if(parent && parent->type != XML_DOCUMENT_NODE) {
@@ -1308,37 +1390,43 @@ Nullable<Element> Element::getparent() const
 }
 
 
-ElementTree Element::getroottree() const
+ElementTree
+Element::getroottree() const
 {
     return ElementTree(node_->doc);
 }
 
 
-string Element::text() const
+string
+Element::text() const
 {
     return _collectText(node_->children);
 }
 
 
-void Element::text(const string &s)
+void
+Element::text(const string &s)
 {
     _setNodeText(node_, s);
 }
 
 
-string Element::tail() const
+string
+Element::tail() const
 {
     return _collectText(node_->next);
 }
 
 
-void Element::tail(const string &s)
+void
+Element::tail(const string &s)
 {
     _setTailText(node_, s);
 }
 
 
-ChildIterator Element::begin()
+ChildIterator
+Element::begin()
 {
     xmlNodePtr cur = node_->children;
     if(nextElement_(cur)) {
@@ -1348,7 +1436,8 @@ ChildIterator Element::begin()
 }
 
 
-ChildIterator Element::end()
+ChildIterator
+Element::end()
 {
     return ChildIterator();
 }
@@ -1359,7 +1448,8 @@ ChildIterator Element::end()
 // -------------------------
 
 
-static int writeCallback(void *ctx, const char *buffer, int len)
+static int
+writeCallback(void *ctx, const char *buffer, int len)
 {
     string *s = static_cast<string *>(ctx);
     s->append(buffer, len);
@@ -1367,13 +1457,15 @@ static int writeCallback(void *ctx, const char *buffer, int len)
 }
 
 
-static int closeCallback(void *ctx)
+static int
+closeCallback(void *ctx)
 {
     return 0;
 }
 
 
-string tostring(const Element &e)
+string
+tostring(const Element &e)
 {
     string out;
     xmlSaveCtxtPtr ctx = ::xmlSaveToIO(writeCallback, closeCallback,
@@ -1392,7 +1484,9 @@ string tostring(const Element &e)
 // Helper functions
 // ----------------
 
-static void ensureValidDoc_(xmlDocPtr doc)
+
+static void
+ensureValidDoc_(xmlDocPtr doc)
 {
     if(doc) {
         if(doc->children) {
@@ -1406,7 +1500,8 @@ static void ensureValidDoc_(xmlDocPtr doc)
 }
 
 
-Element SubElement(Element &parent, const QName &qname)
+Element
+SubElement(Element &parent, const QName &qname)
 {
     Element elem(qname);
     parent.append(elem);
@@ -1415,7 +1510,8 @@ Element SubElement(Element &parent, const QName &qname)
 
 
 #ifdef ETREE_0X
-Element SubElement(Element &parent, const QName &qname, kv_list attribs)
+Element
+SubElement(Element &parent, const QName &qname, kv_list attribs)
 {
     Element elem = SubElement(parent, qname);
     attrsFromList_(elem, attribs);
@@ -1428,6 +1524,7 @@ Element SubElement(Element &parent, const QName &qname, kv_list attribs)
 // fromstring() / parse() implementation
 // -------------------------------------
 
+
 struct StringBuf {
     const char *s;
     size_t remain;
@@ -1435,13 +1532,15 @@ struct StringBuf {
 };
 
 
-static int dummyClose_(void *ignored)
+static int
+dummyClose_(void *ignored)
 {
     return 0;
 }
 
 
-int stringBufRead__(void *strm, char *buffer, int len)
+/*static*/ int
+stringBufRead__(void *strm, char *buffer, int len)
 {
     StringBuf &sb = *static_cast<StringBuf *>(strm);
     size_t cnt = std::min(size_t(len), sb.remain);
@@ -1452,7 +1551,8 @@ int stringBufRead__(void *strm, char *buffer, int len)
 }
 
 
-int istreamRead__(void *strm, char *buffer, int len)
+/*static*/ int
+istreamRead__(void *strm, char *buffer, int len)
 {
     std::istream &is = *static_cast<std::istream *>(strm);
 
@@ -1464,14 +1564,20 @@ int istreamRead__(void *strm, char *buffer, int len)
 }
 
 
-int fdRead__(void *strm, char *buffer, int len)
+/*static*/ int
+fdRead__(void *strm, char *buffer, int len)
 {
     int &fd = *static_cast<int *>(strm);
     return ::read(fd, buffer, len);
 }
 
 typedef xmlDocPtr (*ReadIOFunc)(xmlInputReadCallback, 
-     xmlInputCloseCallback, void *, const char *, const char *, int);
+                                xmlInputCloseCallback,
+                                void *,
+                                const char *,
+                                const char *,
+                                int);
+
 typedef int (*ReadCbFunc)(void *, char *, int);
 
 
@@ -1479,7 +1585,8 @@ template<ReadIOFunc readIoFunc,
          ReadCbFunc readCbFunc,
          int options=XML_PARSE_NODICT,
          typename T>
-static ElementTree parse_(T obj)
+static ElementTree
+parse_(T obj)
 {
     xmlDocPtr doc = readIoFunc(readCbFunc, dummyClose_,
                                static_cast<void *>(obj), 0, 0, options);
@@ -1488,7 +1595,8 @@ static ElementTree parse_(T obj)
 }
 
 
-Element fromstring(const char *s, size_t n)
+Element
+fromstring(const char *s, size_t n)
 {
     if(n == 0) {
         n = ::strlen(s);
@@ -1499,20 +1607,23 @@ Element fromstring(const char *s, size_t n)
 }
 
 
-ElementTree parse(std::istream &is)
+ElementTree
+parse(std::istream &is)
 {
     return parse_<xmlReadIO, istreamRead__>(&is);
 }
 
 
-ElementTree parse(const string &path)
+ElementTree
+parse(const string &path)
 {
     std::ifstream is(path.c_str(), std::ios_base::binary);
     return parse(is);
 }
 
 
-ElementTree parse(int fd)
+ElementTree
+parse(int fd)
 {
     return parse_<xmlReadIO, fdRead__>(&fd);
 }
@@ -1530,7 +1641,8 @@ static const int options = (0
     |HTML_PARSE_NOWARNING);
 
 
-Element fromstring(const char *s)
+Element
+fromstring(const char *s)
 {
     StringBuf sb(s, ::strlen(s));
     ElementTree doc = parse_<htmlReadIO, stringBufRead__, options>(&sb);
@@ -1538,7 +1650,8 @@ Element fromstring(const char *s)
 }
 
 
-Element fromstring(const string &s)
+Element
+fromstring(const string &s)
 {
     StringBuf sb(s.data(), s.size());
     ElementTree doc = parse_<htmlReadIO, stringBufRead__, options>(&sb);
@@ -1546,20 +1659,23 @@ Element fromstring(const string &s)
 }
 
 
-ElementTree parse(std::istream &is)
+ElementTree
+parse(std::istream &is)
 {
     return parse_<htmlReadIO, istreamRead__, options>(&is);
 }
 
 
-ElementTree parse(const string &path)
+ElementTree
+parse(const string &path)
 {
     std::ifstream is(path.c_str(), std::ios_base::binary);
     return etree::html::parse(is);
 }
 
 
-ElementTree parse(int fd)
+ElementTree
+parse(int fd)
 {
     return parse_<htmlReadIO, fdRead__, options>(&fd);
 }
@@ -1573,14 +1689,16 @@ ElementTree parse(int fd)
 // -----------------
 
 
-ostream &operator<< (ostream &out, const ElementTree &tree)
+ostream &
+operator<< (ostream &out, const ElementTree &tree)
 {
     out << "<ElementTree at " << nodeFor__<xmlDocPtr>(tree) << ">";
     return out;
 }
 
 
-ostream &operator<< (ostream &out, const Element &elem)
+ostream &
+operator<< (ostream &out, const Element &elem)
 {
     out << "<Element " << elem.qname().tostring() << " at ";
     out << nodeFor__<xmlNodePtr>(elem);
@@ -1589,7 +1707,8 @@ ostream &operator<< (ostream &out, const Element &elem)
 }
 
 
-ostream& operator<< (ostream& out, const QName& qname)
+ostream &
+operator<< (ostream& out, const QName& qname)
 {
     if(qname.ns().size()) {
         out << "{" << qname.ns() << "}";
