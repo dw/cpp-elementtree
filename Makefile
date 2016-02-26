@@ -12,8 +12,8 @@ ifdef RELEASE
 CXXFLAGS += -O2
 CXXFLAGS += -DNDEBUG
 else
-CXXFLAGS += -g
 endif
+CXXFLAGS += -g
 
 CXXFLAGS += $(shell pkg-config --cflags libxml-2.0)
 CXXFLAGS += -std=c++0x
