@@ -548,6 +548,25 @@ class ElementTree
     ElementTree();
     ElementTree(_xmlDoc *doc);
     Element getroot() const;
+
+    /**
+     * Return true if the identity of this element is equal to the given
+     * element, i.e. both references refer to the same DOM node.
+     */
+    bool operator==(const ElementTree &other) const;
+
+    /**
+     * Return false if the identity of this element is equal to the given
+     * element, i.e. both references refer to the same DOM node.
+     */
+    bool operator!=(const ElementTree &other) const;
+
+    /**
+     * Replace this <strong>element reference</strong> with an element.
+     * Note the underlying DOM node is not modified, only the reference is
+     * updated.
+     */
+    ElementTree &operator=(const ElementTree&);
 };
 
 
@@ -884,7 +903,8 @@ class ChildIterator
  *      Function called as (void)func(Element&);
  */
 template<typename Function>
-void visit(Element &elem, Function func)
+void
+visit(Element &elem, Function func)
 {
     func(elem);
     for(auto &child : elem) {

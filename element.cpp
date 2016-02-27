@@ -982,6 +982,7 @@ AttrMap::size() const
 // ElementTree functions
 // ---------------------
 
+
 ElementTree::~ElementTree()
 {
     unref(node_);
@@ -1000,6 +1001,31 @@ Element ElementTree::getroot() const
     bool ok = nextElement_(cur);
     assert(ok);
     return Element(cur);
+}
+
+
+bool
+ElementTree::operator==(const ElementTree &other) const
+{
+    return node_ == other.node_;
+}
+
+
+bool
+ElementTree::operator!=(const ElementTree &other) const
+{
+    return node_ != other.node_;
+}
+
+
+ElementTree &
+ElementTree::operator=(const ElementTree &e)
+{
+    if(e != *this) {
+        unref(node_);
+        node_ = ref(e.node_);
+    }
+    return *this;
 }
 
 
@@ -1246,7 +1272,7 @@ Element::operator!=(const Element &e) const
 Element &
 Element::operator=(const Element &e)
 {
-    if(this != &e) {
+    if(e != *this) {
         unref(node_);
         node_ = ref(e.node_);
     }
@@ -1397,11 +1423,25 @@ Element::ancestorOf(const Element &e) const
 
 
 Nullable<Element>
+Element::getprev() const
+{
+    for(auto cur = node_->prev; cur; cur = cur->prev) {
+       if(cur->type == XML_ELEMENT_NODE) {
+            return Nullable<Element>(cur);
+       }
+    }
+    return Nullable<Element>();
+}
+
+
+Nullable<Element>
 Element::getnext() const
 {
     xmlNodePtr cur = node_->next;
-    if(nextElement_(cur)) {
-        return Element(cur);
+    for(auto cur = node_->next; cur; cur = cur->next) {
+       if(cur->type == XML_ELEMENT_NODE) {
+            return Element(cur);
+       }
     }
     return Nullable<Element>();
 }
@@ -1411,7 +1451,7 @@ Nullable<Element>
 Element::getparent() const
 {
     xmlNodePtr parent = node_->parent;
-    if(parent && parent->type != XML_DOCUMENT_NODE) {
+    if(parent->type != XML_DOCUMENT_NODE) {
         return Nullable<Element>(parent);
     }
     return Nullable<Element>();
