@@ -207,18 +207,50 @@ class Feed
      */
     enum feed_format format() const;
 
+    /**
+     * Fetch the feed title.
+     */
     std::string title() const;
+
+    /**
+     * Set the feed title.
+     */
     void title(const std::string &s);
 
+    /**
+     * Fetch the feed's link, which is usually its associated web site or topic
+     * page.
+     */
     std::string link() const;
+
+    /**
+     * Set the feed's link.
+     */
     void link(const std::string &s);
 
+    /**
+     * Fetch the feed description.
+     */
     std::string description() const;
+
+    /**
+     * Set the feed description.
+     */
     void description(const std::string &s);
 
+    /**
+     * Fetch the feed icon URL.
+     */
     std::string icon() const;
+
+    /**
+     * Set the feed icon URL.
+     */
     void icon(std::string s);
 
+    /**
+     * Fetch a vector of all the feed's items.
+     */
     std::vector<Item> items() const;
 
     /**
@@ -231,6 +263,9 @@ class Feed
      */
     void append(Item item);
 
+    /**
+     * Fetch the underlying etree::Element representing the feed.
+     */
     Element element() const;
 };
 

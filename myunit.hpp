@@ -41,6 +41,10 @@ static inline std::string getTestName(const Test *t);
 typedef void (*test_func)();
 
 
+/**
+ * Internal descriptor for a test case, tracks the name of the unit where the
+ * test was defined, its name, and a reference to its closure.
+ */
 struct Test {
     std::string unit;
     std::string name;

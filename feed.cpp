@@ -15,8 +15,6 @@ namespace feed {
 
 using namespace etree;
 
-using std::string;
-
 typedef const std::vector<QName> NameList;
 
 
@@ -38,7 +36,7 @@ static Element getChild_(Element &parent, const QName &qn)
 }
 
 
-static string getText_(const Element cur, const NameList &names)
+static std::string getText_(const Element cur, const NameList &names)
 {
     for(int i = 0; i < names.size(); i++) {
         Nullable<Element> maybe = cur.child(names[i]);
@@ -51,7 +49,7 @@ static string getText_(const Element cur, const NameList &names)
 }
 
 
-static void setText_(Element cur, const NameList &names, const string &s)
+static void setText_(Element cur, const NameList &names, const std::string &s)
 {
     for(int i = 0; i < names.size(); i++) {
         cur = getChild_(cur, names[i]);
@@ -87,14 +85,14 @@ class FeedFormat
     virtual bool identify(const Element &e) const = 0;
     virtual enum feed_format format() const = 0;
     virtual ItemFormat *item_format() const = 0;
-    virtual string title(const Element &) const = 0;
-    virtual void title(Element &, const string &) const = 0;
-    virtual string link(const Element &) const = 0;
-    virtual void link(Element &, const string &) const = 0;
-    virtual string description(const Element &) const = 0;
-    virtual void description(Element &, const string &) const = 0;
-    virtual string icon(const Element &) const = 0;
-    virtual void icon(Element &, const string &) const = 0;
+    virtual std::string title(const Element &) const = 0;
+    virtual void title(Element &, const std::string &) const = 0;
+    virtual std::string link(const Element &) const = 0;
+    virtual void link(Element &, const std::string &) const = 0;
+    virtual std::string description(const Element &) const = 0;
+    virtual void description(Element &, const std::string &) const = 0;
+    virtual std::string icon(const Element &) const = 0;
+    virtual void icon(Element &, const std::string &) const = 0;
     virtual std::vector<Item> items(const Element &) const = 0;
 };
 
@@ -102,19 +100,19 @@ class FeedFormat
 class ItemFormat
 {
     public:
-    virtual string title(const Element &) const = 0;
-    virtual void title(Element &, const string &) const = 0;
-    virtual string link(const Element &) const = 0;
-    virtual void link(Element &, const string &) const = 0;
-    virtual string content(const Element &) const = 0;
-    virtual void content(Element &, const string &) const = 0;
+    virtual std::string title(const Element &) const = 0;
+    virtual void title(Element &, const std::string &) const = 0;
+    virtual std::string link(const Element &) const = 0;
+    virtual void link(Element &, const std::string &) const = 0;
+    virtual std::string content(const Element &) const = 0;
+    virtual void content(Element &, const std::string &) const = 0;
     virtual enum content_type type(const Element &) const = 0;
     virtual void type(Element &, enum content_type) const = 0;
-    virtual string author(const Element &) const = 0;
-    virtual void author(Element &, const string &) const = 0;
-    virtual string guid(const Element &) const = 0;
-    virtual void guid(Element &, const string &) const = 0;
-    virtual string originalGuid(const Element &) const = 0;
+    virtual std::string author(const Element &) const = 0;
+    virtual void author(Element &, const std::string &) const = 0;
+    virtual std::string guid(const Element &) const = 0;
+    virtual void guid(Element &, const std::string &) const = 0;
+    virtual std::string originalGuid(const Element &) const = 0;
     virtual time_t published(const Element &) const = 0;
     virtual void published(Element &, time_t) const = 0;
 };
@@ -131,19 +129,19 @@ Item::Item(const Item &other)
     : format_(other.format_)
     , elem_(other.elem_) {}
 
-string Item::title() const              { return format_.title(elem_); }
-void Item::title(const string &s)       { format_.title(elem_, s); }
-string Item::link() const               { return format_.link(elem_); }
-void Item::link(const string &s)        { format_.link(elem_, s); }
-string Item::content() const            { return format_.content(elem_); }
-void Item::content(const string &s)     { format_.content(elem_, s); }
+std::string Item::title() const              { return format_.title(elem_); }
+void Item::title(const std::string &s)       { format_.title(elem_, s); }
+std::string Item::link() const               { return format_.link(elem_); }
+void Item::link(const std::string &s)        { format_.link(elem_, s); }
+std::string Item::content() const            { return format_.content(elem_); }
+void Item::content(const std::string &s)     { format_.content(elem_, s); }
 content_type Item::type() const         { return format_.type(elem_); }
 void Item::type(content_type type)      { format_.type(elem_, type); }
-string Item::author() const             { return format_.author(elem_); }
-void Item::author(const string &s)      { format_.author(elem_, s); }
-string Item::guid() const               { return format_.guid(elem_); }
-void Item::guid(const string &s)        { format_.guid(elem_, s); }
-string Item::originalGuid() const       { return format_.originalGuid(elem_); }
+std::string Item::author() const             { return format_.author(elem_); }
+void Item::author(const std::string &s)      { format_.author(elem_, s); }
+std::string Item::guid() const               { return format_.guid(elem_); }
+void Item::guid(const std::string &s)        { format_.guid(elem_, s); }
+std::string Item::originalGuid() const       { return format_.originalGuid(elem_); }
 time_t Item::published() const          { return format_.published(elem_); }
 void Item::published(time_t published)  { format_.published(elem_, published); }
 Element Item::element() const           { return elem_; }
@@ -165,12 +163,12 @@ Feed::Feed(const Feed &other)
     , elem_(other.elem_) {}
 
 enum feed_format Feed::format() const   { return format_.format(); }
-string Feed::title() const              { return format_.title(elem_); }
-void Feed::title(const string &s)       { format_.title(elem_, s); }
-string Feed::link() const               { return format_.link(elem_); }
-void Feed::link(const string &s)        { format_.link(elem_, s); }
-string Feed::description() const        { return format_.description(elem_); }
-void Feed::description(const string &s) { format_.description(elem_, s); }
+std::string Feed::title() const              { return format_.title(elem_); }
+void Feed::title(const std::string &s)       { format_.title(elem_, s); }
+std::string Feed::link() const               { return format_.link(elem_); }
+void Feed::link(const std::string &s)        { format_.link(elem_, s); }
+std::string Feed::description() const        { return format_.description(elem_); }
+void Feed::description(const std::string &s) { format_.description(elem_, s); }
 std::vector<Item> Feed::items() const   { return format_.items(elem_); }
 Element Feed::element() const           { return elem_; }
 
@@ -210,17 +208,17 @@ class AtomItemFormat
     public:
     static AtomItemFormat instance;
 
-    string title(const Element &e) const
+    std::string title(const Element &e) const
     {
         return getText_(e, kAtomTitlePath);
     }
 
-    void title(Element &e, const string &s) const
+    void title(Element &e, const std::string &s) const
     {
         setText_(e, kAtomTitlePath, s);
     }
 
-    string link(const Element &e) const
+    std::string link(const Element &e) const
     {
         for(auto &elem : e.children(kAtomLinkTag)) {
             if(elem.get(kAtomRelAttr) == "alternate"
@@ -231,7 +229,7 @@ class AtomItemFormat
         return "";
     }
 
-    void link(Element &e, const string &s) const
+    void link(Element &e, const std::string &s) const
     {
         setText_(e, kAtomLinkPath, s);
     }
@@ -253,13 +251,13 @@ class AtomItemFormat
         return out;
     }
 
-    string content(const Element &e) const
+    std::string content(const Element &e) const
     {
         Nullable<Element> content = getContentTag_(e);
         return content ? (*content).text() : "";
     }
 
-    void content(Element &e, const string &s) const
+    void content(Element &e, const std::string &s) const
     {
         Nullable<Element> content;
         while((content = getContentTag_(e))) {
@@ -272,7 +270,7 @@ class AtomItemFormat
     {
         Nullable<Element> content = e.child(kAtomContentTag);
         if(content) {
-            string type = (*content).get(kAtomTypeAttr);
+            std::string type = (*content).get(kAtomTypeAttr);
             if(type == "html" || type == "xhtml") {
                 return CTYPE_HTML;
             }
@@ -286,31 +284,31 @@ class AtomItemFormat
         getChild_(e, kAtomContentTag).attrib().set(kAtomTypeAttr, s);
     }
 
-    string author(const Element &e) const
+    std::string author(const Element &e) const
     {
         return getText_(e, kAtomAuthorPath);
     }
 
-    void author(Element &e, const string &s) const
+    void author(Element &e, const std::string &s) const
     {
         setText_(e, kAtomAuthorPath, s);
     }
 
-    string guid(const Element &e) const
+    std::string guid(const Element &e) const
     {
         return getText_(e, kAtomGuidPath);
     }
 
-    void guid(Element &e, const string &s) const
+    void guid(Element &e, const std::string &s) const
     {
         setText_(e, kAtomGuidPath, s);
     }
 
-    string originalGuid(const Element &e) const
+    std::string originalGuid(const Element &e) const
     {
         Nullable<Element> idElem = e.child(ATOM_NS "id");
         if(idElem) {
-            string out = (*idElem).get(kAtomOriginalGuidAttr);
+            std::string out = (*idElem).get(kAtomOriginalGuidAttr);
             if(out.size()) {
                 return out;
             }
@@ -346,41 +344,41 @@ struct AtomFeedFormat
         return FORMAT_ATOM;
     }
 
-    string title(const Element &e) const
+    std::string title(const Element &e) const
     {
         return getText_(e, kAtomTitlePath);
     }
 
-    void title(Element &e, const string &s) const
+    void title(Element &e, const std::string &s) const
     {
         setText_(e, kAtomTitlePath, s);
     }
 
-    string link(const Element &e) const
+    std::string link(const Element &e) const
     {
         return getText_(e, kAtomLinkPath);
     }
 
-    void link(Element &e, const string &s) const
+    void link(Element &e, const std::string &s) const
     {
         setText_(e, kAtomLinkPath, s);
     }
 
-    string icon(const Element &e) const
+    std::string icon(const Element &e) const
     {
         return "";
     }
 
-    void icon(Element &e, const string &s) const
+    void icon(Element &e, const std::string &s) const
     {
     }
 
-    string description(const Element &e) const
+    std::string description(const Element &e) const
     {
         return getText_(e, kAtomContentPath);
     }
 
-    void description(Element &e, const string &s) const
+    void description(Element &e, const std::string &s) const
     {
         setText_(e, kAtomContentPath, s);
     }
@@ -418,32 +416,32 @@ class Rss20ItemFormat
     public:
     static Rss20ItemFormat instance;
 
-    string title(const Element &e) const
+    std::string title(const Element &e) const
     {
         return getText_(e, kRssTitlePath);
     }
 
-    void title(Element &e, const string &s) const
+    void title(Element &e, const std::string &s) const
     {
         setText_(e, kRssTitlePath, s);
     }
 
-    string link(const Element &e) const
+    std::string link(const Element &e) const
     {
         return getText_(e, kRssLinkPath);
     }
 
-    void link(Element &e, const string &s) const
+    void link(Element &e, const std::string &s) const
     {
         setText_(e, kRssLinkPath, s);
     }
 
-    string content(const Element &e) const
+    std::string content(const Element &e) const
     {
         return getText_(e, kRssContentPath);
     }
 
-    void content(Element &e, const string &s) const
+    void content(Element &e, const std::string &s) const
     {
         setText_(e, kRssContentPath, s);
     }
@@ -458,26 +456,26 @@ class Rss20ItemFormat
         assert(type == CTYPE_HTML);
     }
 
-    string author(const Element &e) const
+    std::string author(const Element &e) const
     {
         return "";
     }
 
-    void author(Element &e, const string &s) const
+    void author(Element &e, const std::string &s) const
     {
     }
 
-    string guid(const Element &e) const
+    std::string guid(const Element &e) const
     {
         return getText_(e, kRssItemGuidPath);
     }
 
-    void guid(Element &e, const string &s) const
+    void guid(Element &e, const std::string &s) const
     {
         setText_(e, kRssItemGuidPath, s);
     }
 
-    string originalGuid(const Element &e) const
+    std::string originalGuid(const Element &e) const
     {
         return guid(e);
     }
@@ -510,42 +508,42 @@ class Rss20FeedFormat
         return FORMAT_RSS20;
     }
 
-    string title(const Element &e) const
+    std::string title(const Element &e) const
     {
         return getText_(e, kRssTitlePath);
     }
 
-    void title(Element &e, const string &s) const
+    void title(Element &e, const std::string &s) const
     {
         setText_(e, kRssTitlePath, s);
     }
 
-    string link(const Element &e) const
+    std::string link(const Element &e) const
     {
         return getText_(e, kRssLinkPath);
     }
 
-    void link(Element &e, const string &s) const
+    void link(Element &e, const std::string &s) const
     {
         setText_(e, kRssLinkPath, s);
     }
 
-    string description(const Element &e) const
+    std::string description(const Element &e) const
     {
         return getText_(e, kRssContentPath);
     }
 
-    void description(Element &e, const string &s) const
+    void description(Element &e, const std::string &s) const
     {
         setText_(e, kRssContentPath, s);
     }
 
-    string icon(const Element &e) const
+    std::string icon(const Element &e) const
     {
         return "";
     }
 
-    void icon(Element &e, const string &s) const
+    void icon(Element &e, const std::string &s) const
     {
     }
 

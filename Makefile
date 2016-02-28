@@ -19,6 +19,7 @@ test_main: \
 		test_main.cpp \
 		test_attrib.cpp \
 		test_element.cpp \
+		test_feed.cpp \
 		test_nullable.cpp \
 		test_qname.cpp \
 		test_xpath.cpp \
