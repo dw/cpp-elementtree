@@ -1,6 +1,5 @@
 
-cpp-ElementTree
----------------
+# cpp-ElementTree
 
 This libxml2 wrapper is intended as a small experiment in C++ interface design
 and various tricks relating to C++11, while still being useful.
@@ -34,20 +33,14 @@ The ``etree::feed`` namespace includes an incomplete RSS/ATOM feed
 parser/generator. It is a work in progress, but can already parse some basic
 pieces.
 
-Partially useful API docs can be found here:
 
- * <a href="http://dw.github.com/cpp-elementtree/namespaceetree.html">etree namespace</A>
- * <a href="http://dw.github.com/cpp-elementtree/namespaceetree_1_1feed.html">etree::feed namespace</a>
- * <a href="http://dw.github.com/cpp-elementtree/namespaceetree_1_1html.html">etree::html namespace</a>
+## Text handing
 
-
-### Text handing
-
-All text passed to or from the API is assumed to be in UTF-8 format. Text
-returned by the API is in UTF-8 format wrapped in a std::string.
+Text passed to the API is assumed to be in UTF-8 format. Text returned by the
+API is in UTF-8 format wrapped in a std::string.
 
 
-### Thread safety
+## Thread safety
 
 The library and underlying libxml2 implementation are thread safe in that
 determistic behavior is guaranteed only so long as library objects aren't
@@ -60,7 +53,7 @@ a thread to pass an object to another thread, it must relinquish all remaining
 references it holds on that document beforehand.
 
 
-### Building
+## Building
 
 cpp-ElementTree consists of two files: ``element.hpp`` and ``element.cpp``. The
 implementation file must be linked against libxml2 somehow during the build.
@@ -70,21 +63,14 @@ functions that aren't found on Windows. In order to avoid a large external
 dependency (e.g. Boost), ``etree::feed`` is UNIX-only for the time being.
 
 
-### Horrors
+## Horrors
 
- * Given the option of repeatedly heap-allocating potentially very short-lived
-   proxy objects, or casting a ``void *`` for use as an integer, the latter
-   path was chosen. ``ref()`` and ``unref()`` in ``element.cpp`` are suitably
-   readable as a result.
-
- * The Nullable implementation currently uses placement-new for the purposes of
-   entertainment. The resulting object is most probably misaligned, and buggy
-   in other ways yet unknown. The ``char[]`` buffer should be replaced with a
-   typed member variable.
+ * Given the choice of repeatedly heap-allocating potentially short-lived
+   proxies, or casting a ``void *`` for use as an integer, the latter path was
+   chosen.
 
 
-
-### TODO
+## TODO
 
 * Remove items from *Horrors* section.
 * Use libxml2 parser string interning.
