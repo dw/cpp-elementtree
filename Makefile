@@ -15,14 +15,22 @@ LDFLAGS += -lz
 LDFLAGS += -lxml2
 LDFLAGS += $(shell pkg-config --libs libxml-2.0)
 
-test_element: test_element.cpp element.cpp
+test_main: \
+		test_main.cpp \
+		test_attrib.cpp \
+		test_element.cpp \
+		test_nullable.cpp \
+		test_qname.cpp \
+		test_xpath.cpp \
+		element.cpp
+
 element.cpp: element.hpp
 feed.cpp: feed.hpp
 
 coverage:
 	$(MAKE) clean
-	CXXFLAGS=--coverage $(MAKE) test_element
-	./test_element
+	CXXFLAGS=--coverage $(MAKE) test_main
+	./test_main
 	lcov --directory . --base-directory . --gcov-tool ./llvm-gcov.sh --capture -o cov.info
 	genhtml cov.info -o output
 	open output/index.html
@@ -44,4 +52,4 @@ pushdocs: noexist
 	git pull
 
 clean:
-	rm -rf test_element *.o *.a output *.gcda *.gcno cov.info docs *.dSYM
+	rm -rf test_main *.o *.a output *.gcda *.gcno cov.info docs *.dSYM
