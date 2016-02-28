@@ -741,15 +741,6 @@ class Element
      * @returns         Text part of the first matching element, or the empty
      *                  string.
      */
-    string findtext(const XPath &expr) const;
-
-    /**
-     * \copybrief XPath::findtext
-     *
-     * @param expr      XPath expression to match.
-     * @returns         Text part of the first matching element, or the empty
-     *                  string.
-     */
     string findtext(const XPath &expr, const string &default_="") const;
 
     /**

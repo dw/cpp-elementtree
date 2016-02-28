@@ -1010,6 +1010,63 @@ MU_TEST(nullableDerefSet)
 
 
 //
+// Element::find()
+//
+
+
+MU_TEST(elemFindOrder)
+{
+    auto elem = etree::fromstring("<root><a/><b/><c/></root>");
+    assert(elem.child("a") == *elem.find("./*"));
+}
+
+
+MU_TEST(elemFindNoMatch)
+{
+    auto elem = etree::fromstring("<root><a/><b/><c/></root>");
+    assert(! elem.find("./nonexistent"));
+}
+
+
+//
+// Element::findall()
+//
+
+
+MU_TEST(elemFindall)
+{
+    auto elem = etree::fromstring("<root><a/><b/><c/></root>");
+    assert(elem.children() == elem.findall("./*"));
+}
+
+
+MU_TEST(elemFindallNoMatch)
+{
+    auto elem = etree::fromstring("<root><a/><b/><c/></root>");
+    assert(elem.children("missing") == elem.findall("./missing"));
+}
+
+
+//
+// Element::findtext()
+//
+
+
+MU_TEST(elemFindtext)
+{
+    auto elem = etree::fromstring("<root><name>David</name></root>");
+    assert("David" == elem.findtext("name"));
+}
+
+
+MU_TEST(elemFindtextDefault)
+{
+    auto elem = etree::fromstring("<root><name>David</name></root>");
+    assert("Unknown" == elem.findtext("age", "Unknown"));
+}
+
+
+//
 // XPath
 //
 
