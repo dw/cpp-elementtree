@@ -333,9 +333,9 @@ MU_TEST(elemAncestorOfFalseWrongDoc)
 MU_TEST(elemAppendSelfFails)
 {
     auto root = etree::fromstring(DOC);
-    MU_RAISES(etree::cyclical_tree_error, [&]() {
+    myunit::raises<etree::cyclical_tree_error>([&]() {
         root.append(root);
-    })
+    });
 }
 
 
@@ -343,9 +343,9 @@ MU_TEST(elemAppendAncestorFails)
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
-    MU_RAISES(etree::cyclical_tree_error, [&]() {
+    myunit::raises<etree::cyclical_tree_error>([&]() {
         person.append(root);
-    })
+    });
 }
 
 
@@ -479,9 +479,9 @@ MU_TEST(elemGetroottreeRemoved)
 MU_TEST(elemInsertSelfFails)
 {
     auto root = etree::fromstring(DOC);
-    MU_RAISES(etree::cyclical_tree_error, [&]() {
+    myunit::raises<etree::cyclical_tree_error>([&]() {
         root.insert(0, root);
-    })
+    });
 }
 
 
@@ -489,9 +489,9 @@ MU_TEST(elemInsertAncestorFails)
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
-    MU_RAISES(etree::cyclical_tree_error, [&]() {
+    myunit::raises<etree::cyclical_tree_error>([&]() {
         person.insert(0, root);
-    })
+    });
 }
 
 
@@ -726,15 +726,11 @@ MU_TEST(elemTextSetChildElements)
 
 MU_TEST(elemFromstringBadXml)
 {
-    MU_RAISES2(etree::xml_error,
-        [&]() {
-            etree::fromstring("corrupt");
-        },
-        [&](etree::xml_error &e) {
-            auto expect = "Start tag expected, '<' not found\n";
-            assert(e.what() == std::string(expect));
-        }
-    );
+    auto e = myunit::raises<etree::xml_error>([&]() {
+        etree::fromstring("corrupt");
+    });
+    auto expect = "Start tag expected, '<' not found\n";
+    assert(e.what() == std::string(expect));
 }
 
 
@@ -994,9 +990,9 @@ MU_TEST(nullableAssignUnsetToSet)
 MU_TEST(nullableDerefUnset)
 {
     auto val = etree::Nullable<etree::Element>();
-    MU_RAISES(etree::missing_value_error, [&]() {
+    myunit::raises<etree::missing_value_error>([&]() {
         *val;
-    })
+    });
 }
 
 
@@ -1079,14 +1075,10 @@ MU_TEST(xpathConstructor)
 
 MU_TEST(xpathConstructorParseError)
 {
-    MU_RAISES2(etree::xml_error,
-        [&]() {
-            etree::XPath("&%^&%^&");
-        },
-        [&](etree::xml_error &e) {
-            assert(e.what() == std::string("Invalid expression\n"));
-        }
-    );
+    auto e = myunit::raises<etree::xml_error>([&]() {
+        etree::XPath("&%^&%^&");
+    });
+    assert(e.what() == std::string("Invalid expression\n"));
 }
 
 

@@ -9,7 +9,9 @@
 /**
  * myunit: Ultra tiny test framework.
  *
- * Usage:
+ * Works across multiple files, only one of which may contain MU_MAIN. Example:
+ *
+ * @code
  *      #include <cassert>
  *      #include "myunit.hpp"
  *
@@ -19,8 +21,8 @@
  *      }
  *
  *      MU_MAIN
+ *  @endcode
  *
- *  Works across multiple files, only one of which may contain MU_MAIN.
  */
 
 #include <algorithm>
@@ -125,24 +127,52 @@ getTestName(const Test *t)
 }
 
 
+/**
+ * Crash if an exception was not thrown. Return the exception if it was thrown.
+ * the thrown exception value.
+ *
+ * @code
+ *      auto e = myunit::raises<std::runtime_error>([]() {
+ *          throw std::runtime_error("broken!");
+ *      });
+ * @endcode
+ */
+template<typename Exception,
+         typename Expr>
+Exception
+raises(Expr expr)
+{
+    try {
+        (expr)();
+        std::string s;
+        s += "myunit :";
+        s += typeid(Exception).name();
+        s += " was not raised";
+        fprintf(stderr, "%s\n", s.c_str());
+        throw std::runtime_error(s);
+    } catch(Exception &e) {
+        return e;
+    }
+}
+
+
 } // ::myunit
-
-
-#define MU_RAISES2(type, expr, expr2) \
-    try { \
-        (expr)(); \
-        assert(! #type " was not raised"); \
-    } catch(type &e) { (expr2)(e); }
-
-
-#define MU_RAISES(type, expr) \
-    MU_RAISES2(type, expr, [&](type &e) {})
 
 
 #define MU_DEBUG(x, ...) \
     fprintf(stderr, __FILE__ ": " x "\n", __VA_ARGS__);
 
 
+/**
+ * Declare a test function and register it for later execution by MU_MAIN().
+ *
+ * @code
+ *      MU_TEST(printfSucceeds)
+ *      {
+ *          assert(4 == printf("%s\n", "test"));
+ *      }
+ * @endcode
+ */
 #define MU_TEST(name) \
     static void test_##name(); \
     namespace myunit { \
@@ -151,6 +181,11 @@ getTestName(const Test *t)
     static void test_##name()
 
 
+/**
+ * Macro that expands to a C main() function that will execute registered
+ * tests. The tests may be filtered by specifying a list of substrings on the
+ * command line.
+ */
 #define MU_MAIN() \
     int main(int argc, const char **argv) { \
         return myunit::main(argc, argv); \

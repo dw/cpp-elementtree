@@ -8,7 +8,6 @@ endif
 
 CXXFLAGS += -g
 CXXFLAGS += -std=c++0x
-CXXFLAGS += -fno-rtti
 CXXFLAGS += -stdlib=libc++
 CXXFLAGS += $(shell pkg-config --cflags libxml-2.0)
 
