@@ -1,36 +1,24 @@
 
 UNAME = $(shell uname)
 
-CXX = c++
-
-ifeq ($(UNAME), Darwin)
-CXXFLAGS += -stdlib=libc++
-endif
-
-# LDFLAGS += -arch i386
 ifdef RELEASE
 CXXFLAGS += -O2
 CXXFLAGS += -DNDEBUG
-else
 endif
-CXXFLAGS += -g
 
-CXXFLAGS += $(shell pkg-config --cflags libxml-2.0)
+CXXFLAGS += -g
 CXXFLAGS += -std=c++0x
 CXXFLAGS += -fno-rtti
 CXXFLAGS += -stdlib=libc++
+CXXFLAGS += $(shell pkg-config --cflags libxml-2.0)
 
-LDFLAGS += $(shell pkg-config --libs libxml-2.0)
-#LDFLAGS += -liconv
 LDFLAGS += -lz
 LDFLAGS += -lxml2
-
-play: play.cc fileutil.cpp element.cpp feed.cpp feed-util.cpp
-
-element.cpp: element.hpp
-feed.cpp: feed.hpp
+LDFLAGS += $(shell pkg-config --libs libxml-2.0)
 
 test_element: test_element.cpp element.cpp
+element.cpp: element.hpp
+feed.cpp: feed.hpp
 
 coverage:
 	$(MAKE) clean
@@ -57,4 +45,4 @@ pushdocs: noexist
 	git pull
 
 clean:
-	rm -rf test_element play *.o *.a output *.gcda *.gcno cov.info docs *.dSYM
+	rm -rf test_element *.o *.a output *.gcda *.gcno cov.info docs *.dSYM
