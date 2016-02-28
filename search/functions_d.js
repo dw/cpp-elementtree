@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['remove',['remove',['../classetree_1_1_attr_map.html#a26dd18e4647c66da95d4266104b0bff7',1,'etree::AttrMap::remove()'],['../classetree_1_1_element.html#afcca584486ba7becdf9b2a499b557877',1,'etree::Element::remove(Element &amp;e)'],['../classetree_1_1_element.html#a6da5e137f1ad1c2122fd057486f5f6b7',1,'etree::Element::remove()'],['../classetree_1_1feed_1_1_item.html#a1053d3a5278d26e083f0c7b3bab38163',1,'etree::feed::Item::remove()']]],
-  ['reparent_5f',['reparent_',['../namespaceetree.html#a3fdec401518aaa1e9a3e3edc005be918',1,'etree']]],
-  ['reparentns_5f',['reparentNs_',['../namespaceetree.html#a6c9da9f94489ef96f00505aa661f5c3f',1,'etree']]]
+  ['size',['size',['../classetree_1_1_attr_map.html#a0aba3059e9b73a79ac9759e7852ffc3c',1,'etree::AttrMap::size()'],['../classetree_1_1_element.html#ae4edcaf4a6503f31e103387aa946cd17',1,'etree::Element::size()']]],
+  ['subelement',['SubElement',['../namespaceetree.html#a9b20f9f954cf9b5a13483d603a87754b',1,'etree::SubElement(Element &amp;parent, const QName &amp;qname)'],['../namespaceetree.html#a7ab81388da62eeb3b049162bbb50d9b3',1,'etree::SubElement(Element &amp;parent, const QName &amp;qname, kv_list attribs)']]]
 ];

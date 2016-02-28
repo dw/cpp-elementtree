@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['insert',['insert',['../classetree_1_1_element.html#a3e4655b8e6bfda2424a58328ba76c11b',1,'etree::Element']]],
-  ['istransitiveparent',['isTransitiveParent',['../namespaceetree.html#abb4f259c381975b3d44ec9398d83215a',1,'etree']]]
+  ['link',['link',['../classetree_1_1feed_1_1_item.html#ac79680ecf7bae116adc0766c1a180ed9',1,'etree::feed::Item::link() const '],['../classetree_1_1feed_1_1_item.html#acee44e2c29e4903fa8691065a9f9e03b',1,'etree::feed::Item::link(const std::string &amp;s)']]]
 ];

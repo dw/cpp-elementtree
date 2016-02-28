@@ -115,10 +115,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:afef8a3276bceb9c2cc5c61b0d7e979e8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_q_name.html#afef8a3276bceb9c2cc5c61b0d7e979e8">QName</a> (const char *qname)</td></tr>
 <tr class="memdesc:afef8a3276bceb9c2cc5c61b0d7e979e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a <a class="el" href="classetree_1_1_q_name.html" title="Canonical representation for a name-namespace pair, without namespace prefix, in James Clark&#39;s Univer...">QName</a> from Universal Name notation.  <a href="#afef8a3276bceb9c2cc5c61b0d7e979e8">More...</a><br /></td></tr>
 <tr class="separator:afef8a3276bceb9c2cc5c61b0d7e979e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a548b29b2f3892461e6388c19348ec588"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_q_name.html#a548b29b2f3892461e6388c19348ec588">equals</a> (const char *<a class="el" href="classetree_1_1_q_name.html#abbd275f289b8bc991e7ea5947014f8b4">ns</a>, const char *<a class="el" href="classetree_1_1_q_name.html#a0c043f3562e40427f4919f54087f20b0">tag</a>) const </td></tr>
+<tr class="memdesc:a548b29b2f3892461e6388c19348ec588"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the (raw) strings match the <a class="el" href="classetree_1_1_q_name.html" title="Canonical representation for a name-namespace pair, without namespace prefix, in James Clark&#39;s Univer...">QName</a>'s content.  <a href="#a548b29b2f3892461e6388c19348ec588">More...</a><br /></td></tr>
+<tr class="separator:a548b29b2f3892461e6388c19348ec588"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abbd275f289b8bc991e7ea5947014f8b4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abbd275f289b8bc991e7ea5947014f8b4"></a>
 const string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_q_name.html#abbd275f289b8bc991e7ea5947014f8b4">ns</a> () const </td></tr>
 <tr class="memdesc:abbd275f289b8bc991e7ea5947014f8b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the namespace URI part of the <a class="el" href="classetree_1_1_q_name.html" title="Canonical representation for a name-namespace pair, without namespace prefix, in James Clark&#39;s Univer...">QName</a>. <br /></td></tr>
 <tr class="separator:abbd275f289b8bc991e7ea5947014f8b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f3c3be66ff19475ac6e23efece740ec"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_q_name.html#a3f3c3be66ff19475ac6e23efece740ec">operator!=</a> (const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;other) const </td></tr>
+<tr class="memdesc:a3f3c3be66ff19475ac6e23efece740ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compare this <a class="el" href="classetree_1_1_q_name.html" title="Canonical representation for a name-namespace pair, without namespace prefix, in James Clark&#39;s Univer...">QName</a> to another.  <a href="#a3f3c3be66ff19475ac6e23efece740ec">More...</a><br /></td></tr>
+<tr class="separator:a3f3c3be66ff19475ac6e23efece740ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01e14eaab3f0ebc3329ab3146a08aea9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_q_name.html#a01e14eaab3f0ebc3329ab3146a08aea9">operator==</a> (const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;other) const </td></tr>
 <tr class="memdesc:a01e14eaab3f0ebc3329ab3146a08aea9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compare this <a class="el" href="classetree_1_1_q_name.html" title="Canonical representation for a name-namespace pair, without namespace prefix, in James Clark&#39;s Univer...">QName</a> to another.  <a href="#a01e14eaab3f0ebc3329ab3146a08aea9">More...</a><br /></td></tr>
 <tr class="separator:a01e14eaab3f0ebc3329ab3146a08aea9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -242,6 +248,66 @@ const string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a548b29b2f3892461e6388c19348ec588"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool etree::QName::equals </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>ns</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>tag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return true if the (raw) strings match the <a class="el" href="classetree_1_1_q_name.html" title="Canonical representation for a name-namespace pair, without namespace prefix, in James Clark&#39;s Univer...">QName</a>'s content. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ns</td><td>NULL, or the namespace URI. </td></tr>
+    <tr><td class="paramname">tag</td><td>The tag. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a3f3c3be66ff19475ac6e23efece740ec"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool etree::QName::operator!= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;&#160;</td>
+          <td class="paramname"><em>other</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Compare this <a class="el" href="classetree_1_1_q_name.html" title="Canonical representation for a name-namespace pair, without namespace prefix, in James Clark&#39;s Univer...">QName</a> to another. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">other</td><td>Other <a class="el" href="classetree_1_1_q_name.html" title="Canonical representation for a name-namespace pair, without namespace prefix, in James Clark&#39;s Univer...">QName</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>False if equal. </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a01e14eaab3f0ebc3329ab3146a08aea9"></a>
 <div class="memitem">
 <div class="memproto">
