@@ -95,18 +95,145 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">etree::AttrMap Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Represents a mapping of an <a class="el" href="classetree_1_1_element.html" title="Represents a reference to a single XML element. ">Element</a>'s attribute names to their values.  
+ <a href="classetree_1_1_attr_map.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="element_8hpp_source.html">element.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:adf2a0a6c78cf676b30f6d67884fc533f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adf2a0a6c78cf676b30f6d67884fc533f"></a>
+<a class="el" href="classetree_1_1_attr_iterator.html">AttrIterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_attr_map.html#adf2a0a6c78cf676b30f6d67884fc533f">begin</a> () const </td></tr>
+<tr class="memdesc:adf2a0a6c78cf676b30f6d67884fc533f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Produce an <a class="el" href="classetree_1_1_attr_iterator.html" title="Represents iteration position produced by AttrMap::begin() and AttrMap::end(). ">AttrIterator</a> pointing to the first attribute. <br /></td></tr>
+<tr class="separator:adf2a0a6c78cf676b30f6d67884fc533f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14237af86d41bd1e7507e60c7bf438e3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a14237af86d41bd1e7507e60c7bf438e3"></a>
+<a class="el" href="classetree_1_1_attr_iterator.html">AttrIterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_attr_map.html#a14237af86d41bd1e7507e60c7bf438e3">end</a> () const </td></tr>
+<tr class="memdesc:a14237af86d41bd1e7507e60c7bf438e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Produce an <a class="el" href="classetree_1_1_attr_iterator.html" title="Represents iteration position produced by AttrMap::begin() and AttrMap::end(). ">AttrIterator</a> pointing past the last attribute. <br /></td></tr>
+<tr class="separator:a14237af86d41bd1e7507e60c7bf438e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a231b31425ce4cf70b4237093e1cb6713"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_attr_map.html#a231b31425ce4cf70b4237093e1cb6713">get</a> (const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;qname, const string &amp;default_=&quot;&quot;) const </td></tr>
+<tr class="memdesc:a231b31425ce4cf70b4237093e1cb6713"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return an attribute's value, or some default.  <a href="#a231b31425ce4cf70b4237093e1cb6713">More...</a><br /></td></tr>
+<tr class="separator:a231b31425ce4cf70b4237093e1cb6713"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a567b4999171ae5b5329ecb58a8e8bfe2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a567b4999171ae5b5329ecb58a8e8bfe2"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_attr_map.html#a567b4999171ae5b5329ecb58a8e8bfe2">has</a> (const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;qname) const </td></tr>
+<tr class="memdesc:a567b4999171ae5b5329ecb58a8e8bfe2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the <a class="el" href="classetree_1_1_element.html" title="Represents a reference to a single XML element. ">Element</a> has the named attribute. <br /></td></tr>
+<tr class="separator:a567b4999171ae5b5329ecb58a8e8bfe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c523cb8e7c4398831f2ec1a1ae632b5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0c523cb8e7c4398831f2ec1a1ae632b5"></a>
+vector&lt; <a class="el" href="classetree_1_1_q_name.html">QName</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_attr_map.html#a0c523cb8e7c4398831f2ec1a1ae632b5">keys</a> () const </td></tr>
+<tr class="memdesc:a0c523cb8e7c4398831f2ec1a1ae632b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the QNames of all attributes present on the <a class="el" href="classetree_1_1_element.html" title="Represents a reference to a single XML element. ">Element</a>. <br /></td></tr>
+<tr class="separator:a0c523cb8e7c4398831f2ec1a1ae632b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26dd18e4647c66da95d4266104b0bff7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a26dd18e4647c66da95d4266104b0bff7"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_attr_map.html#a26dd18e4647c66da95d4266104b0bff7">remove</a> (const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;qname)</td></tr>
 <tr class="memdesc:a26dd18e4647c66da95d4266104b0bff7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove an attribute if it exists, returning true if deletion occured. <br /></td></tr>
 <tr class="separator:a26dd18e4647c66da95d4266104b0bff7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0dd306a1ea9dfe0dd8086b04887a0752"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_attr_map.html#a0dd306a1ea9dfe0dd8086b04887a0752">set</a> (const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;qname, const string &amp;s)</td></tr>
+<tr class="memdesc:a0dd306a1ea9dfe0dd8086b04887a0752"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add or replace attribute's value.  <a href="#a0dd306a1ea9dfe0dd8086b04887a0752">More...</a><br /></td></tr>
+<tr class="separator:a0dd306a1ea9dfe0dd8086b04887a0752"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedd16571ac695d35a561c33defbe24bf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_attr_map.html#aedd16571ac695d35a561c33defbe24bf">set</a> (kv_list attribs)</td></tr>
+<tr class="memdesc:aedd16571ac695d35a561c33defbe24bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">C++0x: set multiple attribute values in a single call.  <a href="#aedd16571ac695d35a561c33defbe24bf">More...</a><br /></td></tr>
+<tr class="separator:aedd16571ac695d35a561c33defbe24bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0aba3059e9b73a79ac9759e7852ffc3c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0aba3059e9b73a79ac9759e7852ffc3c"></a>
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_attr_map.html#a0aba3059e9b73a79ac9759e7852ffc3c">size</a> () const </td></tr>
 <tr class="memdesc:a0aba3059e9b73a79ac9759e7852ffc3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of attributes the element has. <br /></td></tr>
 <tr class="separator:a0aba3059e9b73a79ac9759e7852ffc3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Represents a mapping of an <a class="el" href="classetree_1_1_element.html" title="Represents a reference to a single XML element. ">Element</a>'s attribute names to their values. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a231b31425ce4cf70b4237093e1cb6713"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">string etree::AttrMap::get </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;&#160;</td>
+          <td class="paramname"><em>qname</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>default_</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return an attribute's value, or some default. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">qname</td><td><a class="el" href="classetree_1_1_attribute.html" title="Proxy value type yielded by AttrIterator. ">Attribute</a> <a class="el" href="classetree_1_1_q_name.html" title="Canonical representation for a name-namespace pair, without namespace prefix, in James Clark&#39;s Univer...">QName</a>. </td></tr>
+    <tr><td class="paramname">default_</td><td>String to return if attribute is not found. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a0dd306a1ea9dfe0dd8086b04887a0752"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::AttrMap::set </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;&#160;</td>
+          <td class="paramname"><em>qname</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>s</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add or replace attribute's value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">qname</td><td><a class="el" href="classetree_1_1_attribute.html" title="Proxy value type yielded by AttrIterator. ">Attribute</a> <a class="el" href="classetree_1_1_q_name.html" title="Canonical representation for a name-namespace pair, without namespace prefix, in James Clark&#39;s Univer...">QName</a>. </td></tr>
+    <tr><td class="paramname">s</td><td>New attribute value. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aedd16571ac695d35a561c33defbe24bf"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::AttrMap::set </td>
+          <td>(</td>
+          <td class="paramtype">kv_list&#160;</td>
+          <td class="paramname"><em>attribs</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>C++0x: set multiple attribute values in a single call. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">attribs</td><td>std::initializer_list of (<a class="el" href="classetree_1_1_q_name.html" title="Canonical representation for a name-namespace pair, without namespace prefix, in James Clark&#39;s Univer...">QName</a>, value) pairs. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li><a class="el" href="element_8hpp_source.html">element.hpp</a></li>
 <li>element.cpp</li>

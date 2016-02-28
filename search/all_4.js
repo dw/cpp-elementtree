@@ -1,10 +1,12 @@
 var searchData=
 [
-  ['get',['get',['../classetree_1_1_element.html#a064aedc35f7a645d9507077658388b16',1,'etree::Element']]],
-  ['getnext',['getnext',['../classetree_1_1_element.html#ac3ac0334b0829d935039c0add184b3b9',1,'etree::Element']]],
-  ['getparent',['getparent',['../classetree_1_1_element.html#abe213eaf2682ff0b7269a26e8de60e05',1,'etree::Element']]],
-  ['getprev',['getprev',['../classetree_1_1_element.html#a342e922cf72fe87e5e48bcfc3d5de35e',1,'etree::Element']]],
-  ['getroottree',['getroottree',['../classetree_1_1_element.html#a7f5f1c4143b67ca5ac2b9c02a3ad4120',1,'etree::Element']]],
-  ['getunitname',['getUnitName',['../namespacemyunit.html#a9938a0b7c531dea7ead53c78e5a588f4',1,'myunit']]],
-  ['guid',['guid',['../classetree_1_1feed_1_1_item.html#a2d2b2ca9c33da76e45ae8e322b51f43b',1,'etree::feed::Item::guid() const '],['../classetree_1_1feed_1_1_item.html#a31a4aa7f8c4d7ecd465145a03c376a66',1,'etree::feed::Item::guid(const std::string &amp;s)']]]
+  ['element',['Element',['../classetree_1_1_element.html',1,'etree']]],
+  ['element',['element',['../classetree_1_1feed_1_1_feed.html#a54eb1505bc74955654d782fd3915c4c5',1,'etree::feed::Feed::element()'],['../classetree_1_1_element.html#acd99a348e3b45aaa0ae0aa846819264e',1,'etree::Element::Element(const Element &amp;e)'],['../classetree_1_1_element.html#ac6985ee5f7314991360c3099d4ab3940',1,'etree::Element::Element(const QName &amp;qname)'],['../classetree_1_1_element.html#a1b4188191b464973c932fff484315235',1,'etree::Element::Element(const QName &amp;qname, kv_list attribs)']]],
+  ['elementtree',['ElementTree',['../classetree_1_1_element_tree.html',1,'etree']]],
+  ['end',['end',['../classetree_1_1_attr_map.html#a14237af86d41bd1e7507e60c7bf438e3',1,'etree::AttrMap::end()'],['../classetree_1_1_element.html#a7dc3605cc6af61c0f62e57e8e9137851',1,'etree::Element::end()']]],
+  ['equals',['equals',['../classetree_1_1_q_name.html#a548b29b2f3892461e6388c19348ec588',1,'etree::QName']]],
+  ['etree',['etree',['../namespaceetree.html',1,'']]],
+  ['expr',['expr',['../classetree_1_1_x_path.html#afe3004d3ac36030f77baff88d293accb',1,'etree::XPath']]],
+  ['feed',['feed',['../namespaceetree_1_1feed.html',1,'etree']]],
+  ['html',['html',['../namespaceetree_1_1html.html',1,'etree']]]
 ];

@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['xml_5ferror',['xml_error',['../structetree_1_1xml__error.html',1,'etree']]],
-  ['xpath',['XPath',['../classetree_1_1_x_path.html#a091b6043a7416c9992cf6d2a74cecf15',1,'etree::XPath::XPath(const char *s)'],['../classetree_1_1_x_path.html#aa2214f1b1865d320ee78e3d9d931c2bf',1,'etree::XPath::XPath(const string &amp;s)'],['../classetree_1_1_x_path.html#af2030cb3627cb0cdff8f53a5ad039ebf',1,'etree::XPath::XPath(const XPath &amp;other)']]],
-  ['xpath',['XPath',['../classetree_1_1_x_path.html',1,'etree']]]
+  ['raises',['raises',['../namespacemyunit.html#a3bb57c98ed980efa8bb831382a156bc9',1,'myunit']]],
+  ['remove',['remove',['../classetree_1_1_attr_map.html#a26dd18e4647c66da95d4266104b0bff7',1,'etree::AttrMap::remove()'],['../classetree_1_1_element.html#afcca584486ba7becdf9b2a499b557877',1,'etree::Element::remove(Element &amp;e)'],['../classetree_1_1_element.html#a6da5e137f1ad1c2122fd057486f5f6b7',1,'etree::Element::remove()'],['../classetree_1_1feed_1_1_item.html#a1053d3a5278d26e083f0c7b3bab38163',1,'etree::feed::Item::remove()']]]
 ];

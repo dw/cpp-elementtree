@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['visit',['visit',['../namespaceetree.html#af02a0910b28f9a60b8b0e32cf797ff8b',1,'etree']]],
-  ['visittext_5f',['visitText_',['../namespaceetree.html#a29ba3d6c9a611f4cb9bd6bb5eda47a49',1,'etree']]]
+  ['qname',['QName',['../classetree_1_1_q_name.html',1,'etree']]],
+  ['qname',['QName',['../classetree_1_1_q_name.html#aaa79e293d555ab90d0c4b6c4db7485df',1,'etree::QName::QName(const string &amp;ns, const string &amp;tag)'],['../classetree_1_1_q_name.html#a3707d883452a627cb8e4756e87aed58d',1,'etree::QName::QName(const QName &amp;other)'],['../classetree_1_1_q_name.html#ac4de54628455abad78c8f9851ec92bd4',1,'etree::QName::QName(const string &amp;qname)'],['../classetree_1_1_q_name.html#afef8a3276bceb9c2cc5c61b0d7e979e8',1,'etree::QName::QName(const char *qname)'],['../classetree_1_1_attribute.html#aec75eaac32f0dc4af0e63140e6f3080b',1,'etree::Attribute::qname()'],['../classetree_1_1_element.html#ad6bf4909c9f5e719f00b2b87a051033d',1,'etree::Element::qname() const '],['../classetree_1_1_element.html#a16e4da919c825781cd82af51c75c1adf',1,'etree::Element::qname(const QName &amp;qname)']]]
 ];

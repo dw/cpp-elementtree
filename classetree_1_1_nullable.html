@@ -121,7 +121,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a99da18849debac184a023afe08f1c5cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy the contained value if this <a class="el" href="classetree_1_1_nullable.html" title="Lightweight wrapper to add nullable semantics to another type. ">Nullable</a> is set. <br /></td></tr>
 <tr class="separator:a99da18849debac184a023afe08f1c5cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac51d9e7975c1ffce1f7bfd3ab29907cf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac51d9e7975c1ffce1f7bfd3ab29907cf"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_nullable.html#ac51d9e7975c1ffce1f7bfd3ab29907cf">operator bool</a> () const </td></tr>
+ETREE_EXPLICIT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_nullable.html#ac51d9e7975c1ffce1f7bfd3ab29907cf">operator bool</a> () const </td></tr>
 <tr class="memdesc:ac51d9e7975c1ffce1f7bfd3ab29907cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate to true if this <a class="el" href="classetree_1_1_nullable.html" title="Lightweight wrapper to add nullable semantics to another type. ">Nullable</a> is set. <br /></td></tr>
 <tr class="separator:ac51d9e7975c1ffce1f7bfd3ab29907cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a05d6e072c0118e4fc49af8150820e8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0a05d6e072c0118e4fc49af8150820e8"></a>
@@ -132,14 +132,22 @@ T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 const T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_nullable.html#a67f0c269c430a36157ed795916752b83">operator*</a> () const </td></tr>
 <tr class="memdesc:a67f0c269c430a36157ed795916752b83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the contained value, or throw missing_value_error(). <br /></td></tr>
 <tr class="separator:a67f0c269c430a36157ed795916752b83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a5f1f34a7be1a4ba325b4e74b764f4f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4a5f1f34a7be1a4ba325b4e74b764f4f"></a>
+const T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_nullable.html#a4a5f1f34a7be1a4ba325b4e74b764f4f">operator-&gt;</a> () const </td></tr>
+<tr class="memdesc:a4a5f1f34a7be1a4ba325b4e74b764f4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the contained value, or throw missing_value_error(). <br /></td></tr>
+<tr class="separator:a4a5f1f34a7be1a4ba325b4e74b764f4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66a053ce4a0e25ee027df292d060f54f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a66a053ce4a0e25ee027df292d060f54f"></a>
 <a class="el" href="classetree_1_1_nullable.html">Nullable</a>&lt; T &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_nullable.html#a66a053ce4a0e25ee027df292d060f54f">operator=</a> (const <a class="el" href="classetree_1_1_nullable.html">Nullable</a>&lt; T &gt; &amp;other)</td></tr>
 <tr class="memdesc:a66a053ce4a0e25ee027df292d060f54f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the instance and its contained value, if any. <br /></td></tr>
 <tr class="separator:a66a053ce4a0e25ee027df292d060f54f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f7c8e82e83670c08d5efa0d5a869936"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2f7c8e82e83670c08d5efa0d5a869936"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_nullable.html#a2f7c8e82e83670c08d5efa0d5a869936">operator==</a> (const <a class="el" href="classetree_1_1_nullable.html">Nullable</a>&lt; T &gt; &amp;other)</td></tr>
-<tr class="memdesc:a2f7c8e82e83670c08d5efa0d5a869936"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if both nullables are empty, or both nullables contain the same value. <br /></td></tr>
-<tr class="separator:a2f7c8e82e83670c08d5efa0d5a869936"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9302ff2bfa3b7665c5ad803efa94ded9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9302ff2bfa3b7665c5ad803efa94ded9"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_nullable.html#a9302ff2bfa3b7665c5ad803efa94ded9">operator==</a> (const <a class="el" href="classetree_1_1_nullable.html">Nullable</a>&lt; T &gt; &amp;other) const </td></tr>
+<tr class="memdesc:a9302ff2bfa3b7665c5ad803efa94ded9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if both nullables are empty, or both nullables contain the same value. <br /></td></tr>
+<tr class="separator:a9302ff2bfa3b7665c5ad803efa94ded9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d730a0b0965ec056e53dae41451e157"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6d730a0b0965ec056e53dae41451e157"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_nullable.html#a6d730a0b0965ec056e53dae41451e157">operator==</a> (const T &amp;other) const </td></tr>
+<tr class="memdesc:a6d730a0b0965ec056e53dae41451e157"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if both nullables are empty, or both nullables contain the same value. <br /></td></tr>
+<tr class="separator:a6d730a0b0965ec056e53dae41451e157"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;typename T&gt;<br />

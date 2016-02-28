@@ -6,5 +6,5 @@ var searchData=
   ['attribute',['Attribute',['../classetree_1_1_attribute.html',1,'etree']]],
   ['attriterator',['AttrIterator',['../classetree_1_1_attr_iterator.html',1,'etree']]],
   ['attrmap',['AttrMap',['../classetree_1_1_attr_map.html',1,'etree']]],
-  ['author',['author',['../classetree_1_1feed_1_1_item.html#af30b87fcd7cefc161eaa494731f8b07b',1,'etree::feed::Item::author() const '],['../classetree_1_1feed_1_1_item.html#a711cb82823669ff3be41b13997b8d88a',1,'etree::feed::Item::author(const std::string &amp;author)']]]
+  ['author',['author',['../classetree_1_1feed_1_1_item.html#a510abdd59e086b73e0f523f29f7be65c',1,'etree::feed::Item::author() const '],['../classetree_1_1feed_1_1_item.html#a711cb82823669ff3be41b13997b8d88a',1,'etree::feed::Item::author(const std::string &amp;author)']]]
 ];

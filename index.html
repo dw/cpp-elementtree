@@ -82,39 +82,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="contents">
 <div class="textblock"><p>This libxml2 wrapper is intended as a small experiment in C++ interface design and various tricks relating to C++11, while still being useful.</p>
 <p>It attempts to closely mimic the lxml Python library's <a href="http://lxml.de/tutorial.html">ElementTree</a> interface and all the perks that entails (e.g. uniform namespace and text handling), while making use of some modern C++ design ideas, such as automatic memory and ownership management. It is intended to work <em>without surprises</em>, in other words all libxml2 management quirks should be hidden.</p>
-<p>When built with a C++11 compiler, uniform initializer lists may be used in various places to specify attribute lists: </p><pre class="fragment">using etree::Element;
-using etree::SubElement;
-
-Element make_status_msg()
-{
-    Element msg("status", {
-        {"first-attribute",          "first-value"},
-        {"{urn:some-namepace}attr2", "second-value"}
-    });
-    SubElement(msg, "system-load").text(get_system_load());
-    return msg;
-}
-</pre><p>The <code><a class="el" href="namespaceetree_1_1feed.html" title="RSS/ATOM feed parser implementation. ">etree::feed</a></code> namespace includes an incomplete RSS/ATOM feed parser/generator. It is a work in progress, but can already parse some basic pieces.</p>
-<p>Partially useful API docs can be found here:</p>
-<ul>
-<li><a href="http://dw.github.com/cpp-elementtree/namespaceetree.html">etree namespace</a></li>
-<li><a href="http://dw.github.com/cpp-elementtree/namespaceetree_1_1feed.html">etree::feed namespace</a></li>
-<li><a href="http://dw.github.com/cpp-elementtree/namespaceetree_1_1html.html">etree::html namespace</a></li>
-</ul>
-<h3>Text handing</h3>
-<p>All text passed to or from the API is assumed to be in UTF-8 format. Text returned by the API is in UTF-8 format wrapped in a std::string.</p>
-<h3>Thread safety</h3>
+<p>When built with a C++11 compiler, uniform initializer lists may be used in various places to specify attribute lists:</p>
+<div class="fragment"><div class="line"><span class="keyword">using</span> <a class="code" href="classetree_1_1_element.html">etree::Element</a>;</div><div class="line"><span class="keyword">using</span> <a class="code" href="namespaceetree.html#a9b20f9f954cf9b5a13483d603a87754b">etree::SubElement</a>;</div><div class="line"></div><div class="line">Element make_status_msg()</div><div class="line">{</div><div class="line">    Element msg(<span class="stringliteral">&quot;status&quot;</span>, {</div><div class="line">        {<span class="stringliteral">&quot;first-attribute&quot;</span>,          <span class="stringliteral">&quot;first-value&quot;</span>},</div><div class="line">        {<span class="stringliteral">&quot;{urn:some-namepace}attr2&quot;</span>, <span class="stringliteral">&quot;second-value&quot;</span>}</div><div class="line">    });</div><div class="line">    <a class="code" href="namespaceetree.html#a9b20f9f954cf9b5a13483d603a87754b">SubElement</a>(msg, <span class="stringliteral">&quot;system-load&quot;</span>).<a class="code" href="classetree_1_1_element.html#ac669fa01ab6510979da6f15e8d973c80">text</a>(get_system_load());</div><div class="line">    <span class="keywordflow">return</span> msg;</div><div class="line">}</div></div><!-- fragment --><p>The <code><a class="el" href="namespaceetree_1_1feed.html" title="RSS/ATOM feed parser implementation. ">etree::feed</a></code> namespace includes an incomplete RSS/ATOM feed parser/generator. It is a work in progress, but can already parse some basic pieces.</p>
+<h2>Text handing</h2>
+<p>Text passed to the API is assumed to be in UTF-8 format. Text returned by the API is in UTF-8 format wrapped in a std::string.</p>
+<h2>Thread safety</h2>
 <p>The library and underlying libxml2 implementation are thread safe in that determistic behavior is guaranteed only so long as library objects aren't shared among threads. This is due to the library internally performing unlocked reference counting using the underlying libxml2 DOM structures.</p>
 <p>It is only possible to achieve thread safe behaviour if a single thread at a time is considered owner for all live objects referencing a given document. For a thread to pass an object to another thread, it must relinquish all remaining references it holds on that document beforehand.</p>
-<h3>Building</h3>
+<h2>Building</h2>
 <p>cpp-ElementTree consists of two files: <code><a class="el" href="element_8hpp_source.html">element.hpp</a></code> and <code>element.cpp</code>. The implementation file must be linked against libxml2 somehow during the build.</p>
 <p>The <code><a class="el" href="namespaceetree_1_1feed.html" title="RSS/ATOM feed parser implementation. ">etree::feed</a></code> implementation relies on various POSIX-related time parsing functions that aren't found on Windows. In order to avoid a large external dependency (e.g. Boost), <code><a class="el" href="namespaceetree_1_1feed.html" title="RSS/ATOM feed parser implementation. ">etree::feed</a></code> is UNIX-only for the time being.</p>
-<h3>Horrors</h3>
+<h2>Horrors</h2>
 <ul>
-<li>Given the option of repeatedly heap-allocating potentially very short-lived proxy objects, or casting a <code>void *</code> for use as an integer, the latter path was chosen. <code>ref()</code> and <code>unref()</code> in <code>element.cpp</code> are suitably readable as a result.</li>
-<li>The Nullable implementation currently uses placement-new for the purposes of entertainment. The resulting object is most probably misaligned, and buggy in other ways yet unknown. The <code>char[]</code> buffer should be replaced with a typed member variable.</li>
+<li>Given the choice of repeatedly heap-allocating potentially short-lived proxies, or casting a <code>void *</code> for use as an integer, the latter path was chosen.</li>
 </ul>
-<h3>TODO</h3>
+<h2>TODO</h2>
 <ul>
 <li>Remove items from <em>Horrors</em> section.</li>
 <li>Use libxml2 parser string interning.</li>
