@@ -841,7 +841,8 @@ Attribute::value() const
 // AttrMap iterators
 // -----------------
 
-AttrIterator::AttrIterator(xmlNode *node, xmlAttr *attr)
+
+AttrIterator::AttrIterator(_xmlNode *node, _xmlAttr *attr)
     : node_(node)
     , attr_(attr)
 {
@@ -1013,7 +1014,7 @@ ElementTree::~ElementTree()
 }
 
 
-ElementTree::ElementTree(xmlDoc *doc)
+ElementTree::ElementTree(_xmlDoc *doc)
     : node_(ref(doc))
 {
 }
@@ -1134,7 +1135,7 @@ Element::Element(const Element &e)
 }
 
 
-Element::Element(xmlNode *node)
+Element::Element(_xmlNode *node)
     : node_(ref(node))
 {
 }

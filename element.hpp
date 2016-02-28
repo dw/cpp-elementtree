@@ -77,8 +77,12 @@ Element SubElement(Element &parent, const QName &qname, kv_list attribs);
  * Parse an XML document from a character array and return a reference to its
  * root node.
  *
- * @param s             XML document as a string.
- * @returns             Root Element.
+ * @param s
+ *      XML document as a string.
+ * @param n
+ *      Number of bytes to consume. If zero, assumes s is NUL-terminated.
+ * @returns
+ *      Root Element.
  */
 Element fromstring(const char *s, size_t n=0);
 
@@ -477,27 +481,53 @@ class XPath {
     /**
      * Return the text part of the first matching element.
      *
-     * @param e         Root element to search from.
-     * @returns         Text part of the first matching element, or the empty
-     *                  string.
+     * @param e
+     *      Root element to search from.
+     * @param default_
+     *      String to return if text is not found.
+     * @returns
+     *      Text part of the first matching element, or the empty string.
      */
     string findtext(const Element &e, const string &default_="") const;
 };
 
 
+/**
+ * Proxy value type yielded by AttrIterator.
+ */
 class Attribute
 {
     _xmlAttr *attr_;
 
     public:
     Attribute(_xmlAttr *attr);
+
+    /**
+     * Return the attributes's tag name.
+     */
     string tag() const;
+
+    /**
+     * Return the attributes's namespace.
+     */
     string ns() const;
+
+    /**
+     * Return the attributes's QName.
+     */
     QName qname() const;
+
+    /**
+     * Return the attribute's value.
+     */
     string value() const;
 };
 
 
+/**
+ * Represents iteration position produced by AttrMap::begin() and
+ * AttrMap::end().
+ */
 class AttrIterator
 {
     _xmlNode *node_;
@@ -510,11 +540,19 @@ class AttrIterator
 
     bool operator ==(const AttrIterator &other);
     bool operator !=(const AttrIterator &other);
+
+    /**
+     * Yield an Attribute representing the attribute at this position.
+     */
     const Attribute operator *();
+
     AttrIterator &operator++();
 };
 
 
+/**
+ * Represents a mapping of an Element's attribute names to their values.
+ */
 class AttrMap
 {
     _xmlNode *node_;
@@ -523,17 +561,54 @@ class AttrMap
     ~AttrMap();
     AttrMap(_xmlNode *elem);
 
+    /**
+     * Produce an AttrIterator pointing to the first attribute.
+     */
     AttrIterator begin() const;
+
+    /**
+     * Produce an AttrIterator pointing past the last attribute.
+     */
     AttrIterator end() const;
 
+    /**
+     * Return true if the Element has the named attribute.
+     */
     bool has(const QName &qname) const;
+
+    /**
+     * Return an attribute's value, or some default.
+     *
+     * @param qname
+     *      Attribute QName.
+     * @param default_
+     *      String to return if attribute is not found.
+     */
     string get(const QName &qname, const string &default_="") const;
+
+    /**
+     * Add or replace attribute's value.
+     *
+     * @param qname
+     *      Attribute QName.
+     * @param s
+     *      New attribute value.
+     */
     void set(const QName &qname, const string &s);
 
     #ifdef ETREE_0X
+    /**
+     * C++0x: set multiple attribute values in a single call.
+     *
+     * @param attribs
+     *      std::initializer_list of (QName, value) pairs.
+     */
     void set(kv_list attribs);
     #endif
 
+    /**
+     * Return the QNames of all attributes present on the Element.
+     */
     vector<QName> keys() const;
 
     /**
@@ -548,6 +623,11 @@ class AttrMap
 };
 
 
+/**
+ * Represents a reference to the root of an XML tree, the document itself. Note
+ * that an element's documents are created and destroyed dynamically in
+ * response to Element::insert(), Element::append() and Element::remove().
+ */
 class ElementTree
 {
     template<typename P, typename T>
@@ -749,9 +829,12 @@ class Element
     /**
      * \copybrief XPath::findtext
      *
-     * @param expr      XPath expression to match.
-     * @returns         Text part of the first matching element, or the empty
-     *                  string.
+     * @param expr
+     *      XPath expression to match.
+     * @param default_
+     *      String to return if text is not found.
+     * @returns
+     *      Text part of the first matching element, or the empty string.
      */
     string findtext(const XPath &expr, const string &default_="") const;
 
@@ -881,11 +964,22 @@ class Element
      */
     void tail(const string &s);
 
+    /**
+     * Produce a ChildIterator pointing at the first child.
+     */
     ChildIterator begin() const;
+
+    /**
+     * Produce a ChildIterator pointing past the final child.
+     */
     ChildIterator end() const;
 };
 
 
+/**
+ * Represents iteration position produced by Element::begin() and
+ * Element::end().
+ */
 class ChildIterator
 {
     Nullable<Element> elem_;
@@ -898,6 +992,10 @@ class ChildIterator
     ChildIterator operator++();
     bool operator==(const ChildIterator &) const;
     bool operator!=(const ChildIterator &) const;
+
+    /**
+     * Yield an Element representing the child at this position.
+     */
     Element &operator*();
 };
 
@@ -905,6 +1003,8 @@ class ChildIterator
 /**
  * Depth-first visit an element and all of its subelements.
  *
+ * @param elem
+ *      Element to visit.
  * @param func
  *      Function called as (void)func(Element&);
  */
@@ -937,6 +1037,10 @@ EXCEPTION(serialization_error)
 
 #undef EXCEPTION
 
+
+/**
+ * Thrown to indicate libxml2 raised a parse error.
+ */
 struct xml_error : public std::runtime_error
 {
     xml_error(const char *s)

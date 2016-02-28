@@ -13,16 +13,6 @@ void Deleter(T *x)
 }
 
 
-template<class T, void (*F)(T *)>
-struct FuncDeleter
-{
-    void operator()(T *x) const
-    {
-        F(x);
-    }
-};
-
-
 template<class T>
 void dumpVector(const char *s, T v)
 {

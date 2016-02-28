@@ -144,7 +144,8 @@ class Item
     /**
      * Set the item author name.
      *
-     * @param s     New author name.
+     * @param author
+     *      New author name.
      */
     void author(const std::string &author);
 
@@ -176,7 +177,8 @@ class Item
     /**
      * Set the item's published date as a UNIX timestamp.
      *
-     * @param created       Published date.
+     * @param published
+     *      Published date.
      */
     void published(time_t published);
 
