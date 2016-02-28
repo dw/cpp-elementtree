@@ -784,8 +784,11 @@ class Element
      * \note
      *  All existing Element objects automatically update to the new location.
      *
-     * @param i         Index to insert element at (0..size()-1).
-     * @param e         Element to append as a child.
+     * @param i
+     *      Index to insert element at (0..size()-1). If the index is greater
+     *      than size(), behaves like append().
+     * @param e
+     *      Element to append as a child.
      */
     void insert(size_t i, Element &e);
 

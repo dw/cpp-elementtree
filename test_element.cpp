@@ -7,6 +7,11 @@
 
 #include "element.hpp"
 
+
+// operator[] negative
+// operator[] positive
+// operator[] size
+
 using etree::Element;
 using std::pair;
 using std::vector;
@@ -14,19 +19,19 @@ using std::string;
 
 
 static auto DOC = (
-    "<who xmlns:foo=\"urn:foo\" type=\"people\" count=\"1\" foo:x=\"true\">"
+    "<who xmlns:ns=\"urn:ns\" type=\"people\" count=\"1\" ns:x=\"true\">"
         "<person type=\"human\">"
-            "<name foo:attrx=\"3\">David</name>"
-            "<foo:attr1>123</foo:attr1>"
-            "<foo:attr2>123</foo:attr2>"
+            "<name ns:attrx=\"3\">David</name>"
+            "<ns:attr1>123</ns:attr1>"
+            "<ns:attr2>123</ns:attr2>"
         "</person>"
     "</who>"
 );
 
 static auto NS_DOC = (
-    "<foo:who xmlns:foo='urn:foo'>"
-        "<foo:person foo:type='human'><name>David</name></foo:person>"
-    "</foo:who>"
+    "<ns:who xmlns:ns='urn:ns'>"
+        "<ns:person ns:type='human'><name>David</name></ns:person>"
+    "</ns:who>"
 );
 
 #define OUT(x) std::cout << x << std::endl;
@@ -118,6 +123,47 @@ MU_TEST(elemTagSetKeepNs)
 }
 
 
+//
+// ChildIterator
+//
+
+MU_TEST(elemChildIter)
+{
+    auto root = etree::fromstring(DOC);
+    std::vector<std::string> qnames, expect {
+        { "name" },
+        { "{urn:ns}attr1" },
+        { "{urn:ns}attr2" }
+    };
+    for(auto child : *root.child("person")) {
+        qnames.push_back(child.qname().tostring());
+    }
+    assert(qnames == expect);
+}
+
+
+//
+// visit()
+//
+
+
+MU_TEST(visit)
+{
+    auto root = etree::fromstring(DOC);
+    std::vector<std::string> qnames, expect {
+        { "who" },
+        { "person" },
+        { "name" },
+        { "{urn:ns}attr1" },
+        { "{urn:ns}attr2" }
+    };
+    visit(root, [&](Element &e) {
+        qnames.push_back(e.qname().tostring());
+    });
+    assert(qnames == expect);
+}
+
+
 // -------
 // AttrMap
 // -------
@@ -129,7 +175,7 @@ MU_TEST(attrIter)
     vector<pair<string, string>> got, expect {
         { "type", "people" },
         { "count", "1" },
-        { "{urn:foo}x", "true" },
+        { "{urn:ns}x", "true" },
     };
 
     auto root = etree::fromstring(DOC);
@@ -153,7 +199,7 @@ MU_TEST(attrGet)
     auto root = etree::fromstring(DOC);
     assert("people" == root.attrib().get("type"));
     assert("" == root.attrib().get("x"));
-    assert("true" == root.attrib().get("{urn:foo}x"));
+    assert("true" == root.attrib().get("{urn:ns}x"));
 }
 
 
@@ -162,7 +208,7 @@ MU_TEST(attrGetDefault)
     auto root = etree::fromstring(DOC);
     assert("people" == root.attrib().get("type", "default"));
     assert("default" == root.attrib().get("x", "default"));
-    assert("true" == root.attrib().get("{urn:foo}x", "default"));
+    assert("true" == root.attrib().get("{urn:ns}x", "default"));
 }
 
 
@@ -201,7 +247,7 @@ MU_TEST(attrKeys)
     assert(root.attrib().keys() == vector<etree::QName>({
         "type",
         "count",
-        "{urn:foo}x"
+        "{urn:ns}x"
     }));
 }
 
@@ -225,9 +271,9 @@ MU_TEST(attrRemove)
 MU_TEST(attrRemoveNs)
 {
     auto root = etree::fromstring(DOC);
-    assert(root.attrib().remove("{urn:foo}x"));
-    assert(! root.attrib().remove("{urn:foo}x"));
-    assert(! root.attrib().has("{urn:foo}x"));
+    assert(root.attrib().remove("{urn:ns}x"));
+    assert(! root.attrib().remove("{urn:ns}x"));
+    assert(! root.attrib().has("{urn:ns}x"));
 }
 
 
@@ -327,28 +373,28 @@ MU_TEST(elemAppendNewTwice)
 MU_TEST(elemAppendDuplicateNs)
 {
     auto root = etree::fromstring(DOC);
-    auto child = etree::Element("{urn:foo}bar");
-    child.attrib().set("{urn:foo}baz", "1");
+    auto child = etree::Element("{urn:ns}bar");
+    child.attrib().set("{urn:ns}baz", "1");
     root.append(child);
-    assert(etree::tostring(child) == "<foo:bar foo:baz=\"1\"/>");
+    assert(etree::tostring(child) == "<ns:bar ns:baz=\"1\"/>");
 }
 
 
 MU_TEST(elemAppendMoveNsSimple1)
 {
-    auto root = etree::fromstring("<a xmlns:foo=\"urn:foo\"/>");
-    auto root2 = etree::fromstring("<b xmlns=\"urn:foo\"/>");
+    auto root = etree::fromstring("<a xmlns:ns=\"urn:ns\"/>");
+    auto root2 = etree::fromstring("<b xmlns=\"urn:ns\"/>");
     root.append(root2);
-    assert(etree::tostring(root) == "<a xmlns:foo=\"urn:foo\"><foo:b/></a>");
+    assert(etree::tostring(root) == "<a xmlns:ns=\"urn:ns\"><ns:b/></a>");
 }
 
 
 MU_TEST(elemAppendMoveNsSimple2)
 {
-    auto root = etree::fromstring("<a xmlns=\"urn:foo\"/>");
-    auto root2 = etree::fromstring("<b xmlns=\"urn:foo\"/>");
+    auto root = etree::fromstring("<a xmlns=\"urn:ns\"/>");
+    auto root2 = etree::fromstring("<b xmlns=\"urn:ns\"/>");
     root.append(root2);
-    assert(etree::tostring(root) == "<a xmlns=\"urn:foo\"><b/></a>");
+    assert(etree::tostring(root) == "<a xmlns=\"urn:ns\"><b/></a>");
 }
 
 
@@ -358,6 +404,171 @@ MU_TEST(elemAppendMoveNsNested)
     auto root2 = etree::fromstring(DOC);
     root.append(*root2.find("person/name"));
     TOSTRING(root)
+}
+
+
+//
+// getnext / getparent / getprev / getroottreee
+//
+
+
+MU_TEST(elemGetnextNone)
+{
+    auto root = etree::fromstring("<root><a/><b/><c/></root>");
+    assert(! (*root.child("c")).getnext());
+}
+
+
+MU_TEST(elemGetnext)
+{
+    auto root = etree::fromstring("<root><a/><b/><c/></root>");
+    assert((*root.child("b")) == *(*root.child("a")).getnext());
+}
+
+
+MU_TEST(elemGetprevNone)
+{
+    auto root = etree::fromstring("<root><a/><b/><c/></root>");
+    assert(! (*root.child("a")).getprev());
+}
+
+
+MU_TEST(elemGetParentRoot)
+{
+    auto root = etree::fromstring("<root><a/><b/><c/></root>");
+    assert(! root.getparent());
+}
+
+
+MU_TEST(elemGetParentNotroot)
+{
+    auto root = etree::fromstring("<root><a/><b/><c/></root>");
+    assert(root == *(*root.child("a")).getparent());
+}
+
+
+MU_TEST(elemGetroottree)
+{
+    auto root = etree::fromstring("<root><a/><b/><c/></root>");
+    assert(root.getroottree() == root.getroottree());
+}
+
+
+MU_TEST(elemGetroottreeDifferentDocs)
+{
+    auto root = etree::fromstring("<root><a/><b/><c/></root>");
+    auto root2 = etree::fromstring("<root><a/><b/><c/></root>");
+    assert(root.getroottree() != root2.getroottree());
+}
+
+
+MU_TEST(elemGetroottreeRemoved)
+{
+    auto root = etree::fromstring("<root><a/><b/><c/></root>");
+    auto elem = *root.child("a");
+    elem.remove();
+    assert(root.getroottree() != elem.getroottree());
+}
+
+
+// ------
+// insert
+// -----
+
+
+MU_TEST(elemInsertSelfFails)
+{
+    auto root = etree::fromstring(DOC);
+    MU_RAISES(etree::cyclical_tree_error, [&]() {
+        root.insert(0, root);
+    })
+}
+
+
+MU_TEST(elemInsertAncestorFails)
+{
+    auto root = etree::fromstring(DOC);
+    auto person = *root.child("person");
+    MU_RAISES(etree::cyclical_tree_error, [&]() {
+        person.insert(0, root);
+    })
+}
+
+
+MU_TEST(elemInsertNew)
+{
+    auto root = etree::Element("root");
+    auto child = etree::Element("child");
+    root.insert(0, child);
+    assert(root.size() == 1);
+    assert(child == *root.child("child"));
+}
+
+
+MU_TEST(elemInsertNewTwice)
+{
+    auto root = etree::Element("root");
+    auto child = etree::Element("child");
+    root.insert(0, child);
+    root.insert(0, child);
+    assert(root.size() == 1);
+    assert(child == *root.child("child"));
+}
+
+
+MU_TEST(elemInsertDuplicateNs)
+{
+    auto root = etree::fromstring(
+        "<who xmlns:ns=\"urn:ns\">"
+            "<ns:person />"
+        "</who>"
+    );
+    auto child = etree::Element("{urn:ns}child", {
+        {"{urn:ns}attr", "1"},
+    });
+    root.insert(0, child);
+    assert(etree::tostring(root) == (
+        "<who xmlns:ns=\"urn:ns\">"
+            "<ns:child ns:attr=\"1\"/>"
+            "<ns:person/>"
+        "</who>"
+    ));
+}
+
+
+MU_TEST(elemInsertIndexZeroWhileEmpty)
+{
+    auto root = etree::Element("a");
+    auto child = etree::Element("b");
+    root.insert(0, child);
+    assert(etree::tostring(root) == "<a><b/></a>");
+}
+
+
+MU_TEST(elemInsertIndexPastEnd)
+{
+    auto root = etree::fromstring("<a><b/></a>");
+    auto child = etree::Element("c");
+    root.insert(100, child);
+    assert(etree::tostring(root) == "<a><b/><c/></a>");
+}
+
+
+MU_TEST(elemInsertMoveNsSimple1)
+{
+    auto root = etree::fromstring("<a xmlns:ns=\"urn:ns\"><c/></a>");
+    auto root2 = etree::fromstring("<b xmlns=\"urn:ns\"/>");
+    root.insert(0, root2);
+    assert(etree::tostring(root) == "<a xmlns:ns=\"urn:ns\"><ns:b/><c/></a>");
+}
+
+
+MU_TEST(elemInsertMoveNsSimple2)
+{
+    auto root = etree::fromstring("<a xmlns=\"urn:ns\"><c/></a>");
+    auto root2 = etree::fromstring("<foo:b xmlns:foo=\"urn:ns\"/>");
+    root.insert(0, root2);
+    assert(etree::tostring(root) == "<a xmlns=\"urn:ns\"><b/><c/></a>");
 }
 
 
@@ -440,7 +651,7 @@ MU_TEST(elemRemoveNsPreserved)
     auto name = *root.find("person/name");
     name.remove();
     assert(etree::tostring(name) ==
-           "<name xmlns:ns0=\"urn:foo\" ns0:attrx=\"3\">David</name>");
+           "<name xmlns:ns0=\"urn:ns\" ns0:attrx=\"3\">David</name>");
 }
 
 
@@ -451,7 +662,7 @@ MU_TEST(elemRemoveAddNsCollapsed)
     name.remove();
     root.append(name);
     assert(etree::tostring(name) ==
-           "<name foo:attrx=\"3\">David</name>");
+           "<name ns:attrx=\"3\">David</name>");
 }
 
 
@@ -532,17 +743,18 @@ MU_TEST(elemFromstringBadXml)
 // tostring
 //
 
+
 MU_TEST(elemTostring)
 {
     auto elem = etree::Element("name");
     elem.text("David");
     elem.attrib().set({
-        {"{urn:foo}x", "1"},
+        {"{urn:ns}x", "1"},
         {"{urn:bar}y", "2"}
     });
 
     auto got = etree::tostring(elem);
-    auto expect = ("<name xmlns:ns0=\"urn:foo\" xmlns:ns1=\"urn:bar\" "
+    auto expect = ("<name xmlns:ns0=\"urn:ns\" xmlns:ns1=\"urn:bar\" "
                   "ns0:x=\"1\" ns1:y=\"2\">David</name>");
     assert(got == expect);
 }
@@ -553,22 +765,22 @@ MU_TEST(treeTostring)
     auto elem = etree::Element("name");
     elem.text("David");
     elem.attrib().set({
-        {"{urn:foo}x", "1"},
+        {"{urn:ns}x", "1"},
         {"{urn:bar}y", "2"}
     });
 
     auto got = etree::tostring(elem.getroottree());
     auto expect = ("<?xml version=\"1.0\"?>\n"
-                   "<name xmlns:ns0=\"urn:foo\" xmlns:ns1=\"urn:bar\" "
+                   "<name xmlns:ns0=\"urn:ns\" xmlns:ns1=\"urn:bar\" "
                     "ns0:x=\"1\" ns1:y=\"2\">David</name>\n");
     assert(got == expect);
 }
 
 
-
 //
 // QName
 //
+
 
 MU_TEST(qnameConstructNsTag)
 {
@@ -612,67 +824,67 @@ MU_TEST(qnameTostringNoNs)
 
 MU_TEST(qnameTostringNs)
 {
-    auto qn = etree::QName("{urn:foo}nons");
-    assert(qn.tostring() == "{urn:foo}nons");
+    auto qn = etree::QName("{urn:ns}nons");
+    assert(qn.tostring() == "{urn:ns}nons");
 }
 
 
 MU_TEST(qnameEquals)
 {
-    auto qn = etree::QName("{urn:foo}nons");
-    assert(qn.equals("urn:foo", "nons"));
+    auto qn = etree::QName("{urn:ns}nons");
+    assert(qn.equals("urn:ns", "nons"));
 }
 
 
 MU_TEST(qnameEqualsFalse)
 {
-    auto qn = etree::QName("{urn:foo}nons");
-    assert(! qn.equals("urn:foo", "ns"));
+    auto qn = etree::QName("{urn:ns}nons");
+    assert(! qn.equals("urn:ns", "ns"));
 }
 
 
 MU_TEST(qnameEqualsFalseNoNs)
 {
-    auto qn = etree::QName("{urn:foo}nons");
+    auto qn = etree::QName("{urn:ns}nons");
     assert(! qn.equals(NULL, "nons"));
 }
 
 
 MU_TEST(qnameEqualsFalseWrongTag)
 {
-    auto qn = etree::QName("{urn:foo}nons");
-    assert(! qn.equals("urn:foo", "ns"));
+    auto qn = etree::QName("{urn:ns}nons");
+    assert(! qn.equals("urn:ns", "ns"));
 }
 
 
 MU_TEST(qnameOpEqTrue)
 {
-    auto qn = etree::QName("{urn:foo}nons");
-    auto qn2 = etree::QName("{urn:foo}nons");
+    auto qn = etree::QName("{urn:ns}nons");
+    auto qn2 = etree::QName("{urn:ns}nons");
     assert(qn == qn2);
 }
 
 
 MU_TEST(qnameOpFalseUnequalNs)
 {
-    auto qn = etree::QName("{urn:foo}nons");
-    auto qn2 = etree::QName("{urn:foo2}nons");
+    auto qn = etree::QName("{urn:ns}nons");
+    auto qn2 = etree::QName("{urn:ns2}nons");
     assert(qn != qn2);
 }
 
 
 MU_TEST(qnameOpEqFalseUnequalTag)
 {
-    auto qn = etree::QName("{urn:foo}nons");
-    auto qn2 = etree::QName("{urn:foo}ns");
+    auto qn = etree::QName("{urn:ns}nons");
+    auto qn2 = etree::QName("{urn:ns}ns");
     assert(qn != qn2);
 }
 
 
-MU_TEST(qnaneOpUnequalMissingNs)
+MU_TEST(qnameOpUnequalMissingNs)
 {
     auto qn = etree::QName("nons");
-    auto qn2 = etree::QName("{urn:foo2}nons");
+    auto qn2 = etree::QName("{urn:ns2}nons");
     assert(qn != qn2);
 }
 
@@ -692,7 +904,7 @@ MU_TEST(elemGetNoNs)
 MU_TEST(elemGetNs)
 {
     auto root = etree::fromstring(NS_DOC);
-    #define NS "{urn:foo}"
+    #define NS "{urn:ns}"
     assert("human" == (*root.child(NS "person")).get(NS "type"));
 }
 

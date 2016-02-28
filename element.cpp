@@ -170,7 +170,7 @@ refCount_(T node) {
 
 
 static xmlDocPtr
-ref(xmlDocPtr doc)
+ref(xmlDoc *doc)
 {
     // Relies on NULL (aka. initial state of _private) being (intptr_t)0, which
     // isn't true on some weird archs.
@@ -181,7 +181,7 @@ ref(xmlDocPtr doc)
 
 
 static void
-unref(xmlDocPtr doc)
+unref(xmlDoc *doc)
 {
     assert(doc && doc->_private);
     if(! --refCount_(doc)) {
@@ -191,7 +191,7 @@ unref(xmlDocPtr doc)
 
 
 static xmlNodePtr
-ref(xmlNodePtr node)
+ref(xmlNode *node)
 {
     assert(node);
     if(! refCount_(node)++) {
@@ -202,7 +202,7 @@ ref(xmlNodePtr node)
 
 
 static void
-unref(xmlNodePtr node)
+unref(xmlNode *node)
 {
     assert(node && node->_private);
     if(! --refCount_(node)) {
@@ -217,10 +217,10 @@ unref(xmlNodePtr node)
 
 template<typename Function>
 static void
-visit(bool visitAttrs, xmlNodePtr node, Function func)
+visit(bool visitAttrs, xmlNode *node, Function func)
 {
     func(node);
-    for(xmlNodePtr child = node->children; child; child = child->next) {
+    for(xmlNode *child = node->children; child; child = child->next) {
         visit(visitAttrs, child, func);
     }
 
@@ -233,7 +233,7 @@ visit(bool visitAttrs, xmlNodePtr node, Function func)
 
 
 static bool
-nextElement_(xmlNodePtr &p)
+nextElement_(xmlNode *&p)
 {
     for(; p; p = p->next) {
         if(p->type == XML_ELEMENT_NODE) {
@@ -258,7 +258,7 @@ toChar_(xmlChar *s)
 
 
 static const char *
-nsToChar_(const xmlNsPtr ns)
+nsToChar_(const xmlNs *ns)
 {
     return ns ? toChar_(ns->href) : NULL;
 }
@@ -281,7 +281,7 @@ toXmlChar_(char *s)
 static void
 maybeThrow_()
 {
-    xmlErrorPtr error = ::xmlGetLastError();
+    xmlError *error = ::xmlGetLastError();
     if(error) {
         throw xml_error(error->message);
     }
@@ -316,10 +316,10 @@ c_str(const string &s)
 
 
 static xmlNsPtr
-makeNs_(xmlNodePtr node, const string &uri)
+makeNs_(xmlNode *node, const string &uri)
 {
     xmlChar prefix[6];
-    xmlNsPtr ns;
+    xmlNs *ns;
 
     for(int i = 0; i <= 1000; i++) {
         ::snprintf(toChar_(prefix), sizeof prefix, "ns%d", i);
@@ -343,16 +343,16 @@ makeNs_(xmlNodePtr node, const string &uri)
 
 
 static xmlNsPtr
-getNs_(xmlNodePtr node, xmlNodePtr target, const string &uri)
+getNs_(xmlNode *node, xmlNode *target, const string &uri)
 {
     if(uri.empty()) {
         return 0;
     }
 
     // Look for existing definition.
-    xmlNodePtr doc_node = reinterpret_cast<xmlNodePtr>(node->doc);
-    for(xmlNodePtr cur = node; cur && cur != doc_node; cur = cur->parent) {
-        for(xmlNsPtr ns = node->nsDef; ns != 0; ns = ns->next) {
+    xmlNode *doc_node = reinterpret_cast<xmlNodePtr>(node->doc);
+    for(xmlNode *cur = node; cur && cur != doc_node; cur = cur->parent) {
+        for(xmlNs *ns = node->nsDef; ns != 0; ns = ns->next) {
             if(uri == toChar_(ns->href)) {
                 return ns;
             }
@@ -372,10 +372,10 @@ getNs_(xmlNodePtr node, xmlNodePtr target, const string &uri)
  */
 template<typename Function>
 static void
-visitText_(xmlNodePtr node, Function func)
+visitText_(xmlNode *node, Function func)
 {
     while(node) {
-        xmlNodePtr next = node->next;
+        xmlNode *next = node->next;
         switch(node->type) {
             case XML_TEXT_NODE:
             case XML_CDATA_SECTION_NODE:
@@ -403,9 +403,9 @@ visitText_(xmlNodePtr node, Function func)
  *      be moved after.
  */
 static void
-moveTail_(xmlNodePtr tail, xmlNodePtr target)
+moveTail_(xmlNode *tail, xmlNode *target)
 {
-    visitText_(tail, [&](xmlNodePtr node) {
+    visitText_(tail, [&](xmlNode *node) {
         ::xmlAddNextSibling(target, tail);
     });
 }
@@ -416,14 +416,14 @@ moveTail_(xmlNodePtr tail, xmlNodePtr target)
  * its parents.  Does not free the xmlNs's, just prepends them to staleNsList.
  */
 static void
-reparentNs_(xmlNodePtr node,
-            std::map<xmlNsPtr const, xmlNsPtr const> &nsCache,
-            xmlNsPtr &staleNsList)
+reparentNs_(xmlNode *node,
+            std::map<xmlNs *, xmlNs *> &nsCache,
+            xmlNs *&staleNsList)
 {
-    xmlNsPtr *nsdef = &node->nsDef;
+    xmlNs **nsdef = &node->nsDef;
     while(*nsdef) {
-        xmlNsPtr nsNext = (*nsdef)->next;
-        xmlNsPtr ns = ::xmlSearchNsByHref(node->doc, node->parent, (*nsdef)->href);
+        xmlNs *nsNext = (*nsdef)->next;
+        xmlNs *ns = ::xmlSearchNsByHref(node->doc, node->parent, (*nsdef)->href);
         if(! ns) {
             // new namespace href => keep and cache the ns declaration
             nsCache.insert(std::make_pair(*nsdef, *nsdef));
@@ -445,13 +445,13 @@ reparentNs_(xmlNodePtr node,
  * document, assuming.
  */
 static void
-reparent_(xmlNodePtr startNode)
+reparent_(xmlNode *startNode)
 {
-    std::map<xmlNsPtr const, xmlNsPtr const> nsCache;
-    xmlNsPtr staleNsList = NULL;
+    std::map<xmlNs *, xmlNs *> nsCache;
+    xmlNs *staleNsList = NULL;
 
-    visit(true, startNode, [&](xmlNodePtr node) {
-        xmlNodePtr nsParent;
+    visit(true, startNode, [&](xmlNode *node) {
+        xmlNode *nsParent;
         switch(node->type) {
             case XML_ELEMENT_NODE:
             case XML_COMMENT_NODE:
@@ -474,9 +474,9 @@ reparent_(xmlNodePtr startNode)
             if(it != nsCache.end()) {
                 node->ns = it->second;
             } else {
-                xmlNsPtr oldNs = node->ns;
+                xmlNs *oldNs = node->ns;
                 node->ns = getNs_(nsParent, startNode, toChar_(node->ns->href));
-                nsCache.insert({{oldNs, node->ns}});
+                nsCache.insert(std::make_pair(oldNs, node->ns));
             }
         }
     });
@@ -488,9 +488,9 @@ reparent_(xmlNodePtr startNode)
 
 
 static void
-_removeText(xmlNodePtr node)
+_removeText(xmlNode *node)
 {
-    visitText_(node, [&](xmlNodePtr node) {
+    visitText_(node, [&](xmlNode *node) {
         ::xmlUnlinkNode(node);
         ::xmlFreeNode(node);
     });
@@ -498,12 +498,12 @@ _removeText(xmlNodePtr node)
 
 
 static void
-_setNodeText(xmlNodePtr node, const string &s)
+_setNodeText(xmlNode *node, const string &s)
 {
     _removeText(node->children);
     // TODO: CDATA
     if(s.size()) {
-        xmlNodePtr text = ::xmlNewText((xmlChar *) s.c_str());
+        xmlNode *text = ::xmlNewText((xmlChar *) s.c_str());
         assert(text != 0);
         if(node->children) {
             ::xmlAddPrevSibling(node->children, text);
@@ -515,11 +515,11 @@ _setNodeText(xmlNodePtr node, const string &s)
 
 
 static void
-_setTailText(xmlNodePtr node, const string &s)
+_setTailText(xmlNode *node, const string &s)
 {
     _removeText(node->next);
     if(s.size()) {
-        xmlNodePtr text = ::xmlNewText((xmlChar *) s.c_str());
+        xmlNode *text = ::xmlNewText((xmlChar *) s.c_str());
         assert(text != 0);
         ::xmlAddNextSibling(node, text);
     }
@@ -527,10 +527,10 @@ _setTailText(xmlNodePtr node, const string &s)
 
 
 static string
-_collectText(xmlNodePtr node)
+_collectText(xmlNode *node)
 {
     string result;
-    visitText_(node, [&](xmlNodePtr node) {
+    visitText_(node, [&](xmlNode *node) {
         result += (const char *) node->content;
     });
     return result;
@@ -650,7 +650,7 @@ static xmlXPathCompExprPtr
 compileOrThrow(const string &s)
 {
     ::xmlResetLastError();
-    xmlXPathCompExprPtr expr = ::xmlXPathCompile(toXmlChar_(s.c_str()));
+    xmlXPathCompExpr *expr = ::xmlXPathCompile(toXmlChar_(s.c_str()));
     maybeThrow_();
     return expr;
 }
@@ -727,23 +727,23 @@ std::vector<Element>
 XPath::findall(const Element &e) const
 {
     std::vector<Element> out;
-    xmlNodePtr node = nodeFor__<xmlNodePtr>(e);
-    xmlXPathContextPtr ctx = xmlXPathNewContext(node->doc);
+    xmlNode *node = nodeFor__<xmlNodePtr>(e);
+    xmlXPathContext *ctx = xmlXPathNewContext(node->doc);
     if(! ctx) {
         throw memory_error();
     }
 
     ctx->node = node;
-    xmlXPathObjectPtr res = xmlXPathCompiledEval(expr_, ctx);
+    xmlXPathObject *res = xmlXPathCompiledEval(expr_, ctx);
     if(! res) {
         ::xmlXPathFreeContext(ctx);
         throw memory_error();
     }
 
-    xmlNodeSetPtr set = res->nodesetval;
+    xmlNodeSet *set = res->nodesetval;
     if(set) {
         for(int i = 0; i < set->nodeNr; i++) {
-            xmlNodePtr node = set->nodeTab[i];
+            xmlNode *node = set->nodeTab[i];
             if(node->type == XML_ELEMENT_NODE) {
                 out.push_back(set->nodeTab[i]);
             }
@@ -761,7 +761,7 @@ XPath::findall(const Element &e) const
 // Attribute functions
 // -------------------
 
-Attribute::Attribute(xmlAttrPtr attr)
+Attribute::Attribute(xmlAttr *attr)
     : attr_(attr)
 {
 }
@@ -817,7 +817,7 @@ Attribute::value() const
 // AttrMap iterators
 // -----------------
 
-AttrIterator::AttrIterator(xmlNodePtr node, xmlAttrPtr attr)
+AttrIterator::AttrIterator(xmlNode *node, xmlAttr *attr)
     : node_(node)
     , attr_(attr)
 {
@@ -875,7 +875,7 @@ AttrIterator::operator ++()
 // AttrMap functions
 // -----------------
 
-AttrMap::AttrMap(xmlNodePtr node)
+AttrMap::AttrMap(xmlNode *node)
     : node_(ref(node))
 {
 }
@@ -946,7 +946,7 @@ std::vector<QName>
 AttrMap::keys() const
 {
     std::vector<QName> names;
-    for(xmlAttrPtr p = node_->properties; p; p = p->next) {
+    for(xmlAttr *p = node_->properties; p; p = p->next) {
         const char *ns = p->ns ? (const char *)p->ns->href : "";
         names.push_back(QName(ns, (const char *)p->name));
     }
@@ -957,7 +957,7 @@ AttrMap::keys() const
 bool
 AttrMap::remove(const QName &qname)
 {
-    xmlAttrPtr p = xmlHasNsProp(node_, c_str(qname.tag()), c_str(qname.ns()));
+    xmlAttr *p = xmlHasNsProp(node_, c_str(qname.tag()), c_str(qname.ns()));
     if(p) {
         int rc = xmlRemoveProp(p);
         assert(rc == 0);
@@ -971,7 +971,7 @@ size_t
 AttrMap::size() const
 {
     size_t i = 0;
-    for(xmlAttrPtr p = node_->properties; p; p = p->next) {
+    for(xmlAttr *p = node_->properties; p; p = p->next) {
         i++;
     }
     return i;
@@ -989,7 +989,7 @@ ElementTree::~ElementTree()
 }
 
 
-ElementTree::ElementTree(xmlDocPtr doc)
+ElementTree::ElementTree(xmlDoc *doc)
     : node_(ref(doc))
 {
 }
@@ -997,7 +997,7 @@ ElementTree::ElementTree(xmlDocPtr doc)
 
 Element ElementTree::getroot() const
 {
-    xmlNodePtr cur = node_->children;
+    xmlNode *cur = node_->children;
     bool ok = nextElement_(cur);
     assert(ok);
     return Element(cur);
@@ -1110,7 +1110,7 @@ Element::Element(const Element &e)
 }
 
 
-Element::Element(xmlNodePtr node)
+Element::Element(xmlNode *node)
     : node_(ref(node))
 {
 }
@@ -1119,12 +1119,12 @@ Element::Element(xmlNodePtr node)
 static xmlNodePtr
 nodeFromQname_(const QName &qname)
 {
-    xmlDocPtr doc = ::xmlNewDoc(0);
+    xmlDoc *doc = ::xmlNewDoc(0);
     if(! doc) {
         throw memory_error();
     }
 
-    xmlNodePtr node = ::xmlNewDocNode(doc, 0,
+    xmlNode *node = ::xmlNewDocNode(doc, 0,
         toXmlChar_(qname.tag().c_str()), 0);
     if(! node) {
         ::xmlFreeDoc(doc);
@@ -1135,7 +1135,7 @@ nodeFromQname_(const QName &qname)
     ref(node);
 
     if(qname.ns().size()) {
-        xmlNsPtr ns = ::xmlNewNs(node, (xmlChar *)qname.ns().c_str(), 0);
+        xmlNs *ns = ::xmlNewNs(node, (xmlChar *)qname.ns().c_str(), 0);
         if(ns == 0) {
             unref(node);
             throw memory_error();
@@ -1242,7 +1242,7 @@ Element::get(const QName &qname, const string &default_) const
 Element
 Element::operator[] (size_t i)
 {
-    xmlNodePtr cur = node_->children;
+    xmlNode *cur = node_->children;
     for(;;) {
         if(! nextElement_(cur)) {
             throw out_of_bounds_error();
@@ -1283,7 +1283,7 @@ Element::operator=(const Element &e)
 Nullable<Element>
 Element::child(const QName &qn) const
 {
-    for(xmlNodePtr cur = node_->children; cur; cur = cur->next) {
+    for(xmlNode *cur = node_->children; cur; cur = cur->next) {
         if(cur->type == XML_ELEMENT_NODE) {
             if(qn.equals(nsToChar_(cur->ns), toChar_(cur->name))) {
                 return Element(cur);
@@ -1298,7 +1298,7 @@ std::vector<Element>
 Element::children(const QName &qn) const
 {
     std::vector<Element> out;
-    for(xmlNodePtr cur = node_->children; cur; cur = cur->next) {
+    for(xmlNode *cur = node_->children; cur; cur = cur->next) {
         if(cur->type == XML_ELEMENT_NODE) {
             if(qn.equals(nsToChar_(cur->ns), toChar_(cur->name))) {
                 out.push_back(cur);
@@ -1348,8 +1348,8 @@ Element::append(Element &e)
         throw cyclical_tree_error();
     }
 
-    xmlDocPtr sourceDoc = e.node_->doc;
-    xmlNodePtr next = e.node_->next;
+    xmlDoc *sourceDoc = e.node_->doc;
+    xmlNode *next = e.node_->next;
 
     ::xmlUnlinkNode(e.node_);
     ::xmlAddChild(node_, e.node_);
@@ -1366,10 +1366,32 @@ Element::append(Element &e)
 void
 Element::insert(size_t i, Element &e)
 {
-    if(i == size()) {
-        append(e);
+    if(e.ancestorOf(*this)) {
+        throw cyclical_tree_error();
+    }
+
+    xmlNode *child = node_->children;
+    while(i && nextElement_(child)) {
+        i--;
+        child = child->next;
+    }
+
+    xmlDoc *sourceDoc = e.node_->doc;
+    xmlNode *next = e.node_->next;
+
+    if(child) {
+        ::xmlAddPrevSibling(child, e.node_);
     } else {
-        ::xmlAddPrevSibling(this[i].node_, e.node_);
+        ::xmlUnlinkNode(e.node_);
+        ::xmlAddChild(node_, e.node_);
+    }
+
+    moveTail_(next, e.node_);
+    reparent_(e.node_);
+
+    if(sourceDoc != node_->doc) {
+        ref(node_->doc);
+        unref(sourceDoc);
     }
 }
 
@@ -1390,13 +1412,13 @@ Element::remove()
         return;
     }
 
-    xmlDocPtr doc = ::xmlNewDoc(0);
+    xmlDoc *doc = ::xmlNewDoc(0);
     if(! doc) {
         throw memory_error();
     }
 
-    xmlDocPtr sourceDoc = node_->doc;
-    xmlNodePtr next = node_->next;
+    xmlDoc *sourceDoc = node_->doc;
+    xmlNode *next = node_->next;
     ::xmlUnlinkNode(node_);
     ::xmlDocSetRootElement(doc, node_);
     moveTail_(next, node_);
@@ -1410,8 +1432,8 @@ Element::remove()
 bool
 Element::ancestorOf(const Element &e) const
 {
-    xmlNodePtr parent = nodeFor__<xmlNodePtr>(*this);
-    xmlNodePtr child = nodeFor__<xmlNodePtr>(e);
+    xmlNode *parent = nodeFor__<xmlNodePtr>(*this);
+    xmlNode *child = nodeFor__<xmlNodePtr>(e);
 
     for(; child; child = child->parent) {
         if(parent == child) {
@@ -1437,7 +1459,7 @@ Element::getprev() const
 Nullable<Element>
 Element::getnext() const
 {
-    xmlNodePtr cur = node_->next;
+    xmlNode *cur = node_->next;
     for(auto cur = node_->next; cur; cur = cur->next) {
        if(cur->type == XML_ELEMENT_NODE) {
             return Element(cur);
@@ -1450,7 +1472,7 @@ Element::getnext() const
 Nullable<Element>
 Element::getparent() const
 {
-    xmlNodePtr parent = node_->parent;
+    xmlNode *parent = node_->parent;
     if(parent->type != XML_DOCUMENT_NODE) {
         return Nullable<Element>(parent);
     }
@@ -1496,7 +1518,7 @@ Element::tail(const string &s)
 ChildIterator
 Element::begin() const
 {
-    xmlNodePtr cur = node_->children;
+    xmlNode *cur = node_->children;
     if(nextElement_(cur)) {
         return ChildIterator(cur);
     }
@@ -1536,7 +1558,7 @@ string
 tostring(const Element &e)
 {
     string out;
-    xmlSaveCtxtPtr ctx = ::xmlSaveToIO(writeCallback, closeCallback,
+    xmlSaveCtxt *ctx = ::xmlSaveToIO(writeCallback, closeCallback,
         static_cast<void *>(&out), 0, 0);
 
     int ret = ::xmlSaveTree(ctx, nodeFor__<xmlNodePtr>(e));
@@ -1552,7 +1574,7 @@ string
 tostring(const ElementTree &t)
 {
     string out;
-    xmlSaveCtxtPtr ctx = ::xmlSaveToIO(writeCallback, closeCallback,
+    xmlSaveCtxt *ctx = ::xmlSaveToIO(writeCallback, closeCallback,
         static_cast<void *>(&out), 0, 0);
 
     auto doc = nodeFor__<xmlDocPtr>(t);
@@ -1640,7 +1662,7 @@ fdRead__(void *strm, char *buffer, int len)
     return ::read(fd, buffer, len);
 }
 
-typedef xmlDocPtr (*ReadIOFunc)(xmlInputReadCallback, 
+typedef xmlDoc *(*ReadIOFunc)(xmlInputReadCallback, 
                                 xmlInputCloseCallback,
                                 void *,
                                 const char *,
@@ -1658,7 +1680,7 @@ static ElementTree
 parse_(T obj)
 {
     ::xmlResetLastError();
-    xmlDocPtr doc = readIoFunc(readCbFunc, dummyClose_,
+    xmlDoc *doc = readIoFunc(readCbFunc, dummyClose_,
                                static_cast<void *>(obj), 0, 0, options);
 
     if(doc && doc->children) {
