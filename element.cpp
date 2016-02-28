@@ -1687,11 +1687,11 @@ fdRead__(void *strm, char *buffer, int len)
 }
 
 typedef xmlDoc *(*ReadIOFunc)(xmlInputReadCallback, 
-                                xmlInputCloseCallback,
-                                void *,
-                                const char *,
-                                const char *,
-                                int);
+                              xmlInputCloseCallback,
+                              void *,
+                              const char *,
+                              const char *,
+                              int);
 
 typedef int (*ReadCbFunc)(void *, char *, int);
 
@@ -1705,7 +1705,7 @@ parse_(T obj)
 {
     ::xmlResetLastError();
     xmlDoc *doc = readIoFunc(readCbFunc, dummyClose_,
-                               static_cast<void *>(obj), 0, 0, options);
+                             static_cast<void *>(obj), 0, 0, options);
 
     if(doc && doc->children) {
         return ElementTree(doc);
@@ -1755,7 +1755,9 @@ parse(int fd)
 // etree::html namespace
 // ---------------------
 
+
 namespace html {
+
 
 static const int options = (0
     |HTML_PARSE_RECOVER

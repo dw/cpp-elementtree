@@ -207,16 +207,6 @@ std::ostream &operator<< (std::ostream &out, const Element &elem);
  */
 std::ostream &operator<< (std::ostream &out, const QName &qname);
 
-/**
- * Return true if <strong>parent</strong> is an indirect parent of
- * <strong>child</strong>.
- *
- * @param parent        Potential parent.
- * @param child         Potential child.
- * @returns             True if \c child descends from \c parent.
- */
-bool isTransitiveParent(const Element &parent, const Element &child);
-
 
 /**
  * Lightweight wrapper to add nullable semantics to another type. This template
