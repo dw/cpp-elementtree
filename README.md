@@ -15,18 +15,20 @@ libxml2 management quirks should be hidden.
 When built with a C++11 compiler, uniform initializer lists may be used in
 various places to specify attribute lists:
 
-    using etree::Element;
-    using etree::SubElement;
-    
-    Element make_status_msg()
-    {
-        Element msg("status", {
-            {"first-attribute",          "first-value"},
-            {"{urn:some-namepace}attr2", "second-value"}
-        });
-        SubElement(msg, "system-load").text(get_system_load());
-        return msg;
-    }
+````cpp
+using etree::Element;
+using etree::SubElement;
+
+Element make_status_msg()
+{
+    Element msg("status", {
+        {"first-attribute",          "first-value"},
+        {"{urn:some-namepace}attr2", "second-value"}
+    });
+    SubElement(msg, "system-load").text(get_system_load());
+    return msg;
+}
+````
 
 The ``etree::feed`` namespace includes an incomplete RSS/ATOM feed
 parser/generator. It is a work in progress, but can already parse some basic
