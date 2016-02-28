@@ -15,6 +15,9 @@
 #   include <initializer_list>
 #   include <utility>
 #   define ETREE_0X
+#   define ETREE_EXPLICIT explicit
+#else
+#   define ETREE_EXPLICIT
 #endif
 
 
@@ -234,7 +237,9 @@ bool isTransitiveParent(const Element &parent, const Element &child);
  */
 template<typename T>
 class Nullable {
-    /// Storage for contained type. This hack needs removed.
+    /// Storage for contained type. This allows an unset nullable to truly have
+    //no constructed value, and also allows the value type to lack a default
+    //constructor.
     unsigned char val_[sizeof(T)];
 
     /// True if val_ contains a value.
@@ -278,7 +283,14 @@ class Nullable {
      * Return true if both nullables are empty, or both nullables contain the
      * same value.
      */
-    bool operator==(const Nullable<T> &other);
+
+    bool operator==(const Nullable<T> &other) const;
+
+    /**
+     * Return true if both nullables are empty, or both nullables contain the
+     * same value.
+     */
+    bool operator==(const T &other) const;
 
     /**
      * Copy the instance and its contained value, if any.
@@ -288,17 +300,27 @@ class Nullable {
     /**
      * Evaluate to true if this Nullable is set.
      */
-    operator bool() const;
+    ETREE_EXPLICIT operator bool() const;
 
     /**
      * Return the contained value, or throw missing_value_error().
      */
     T &operator *();
 
+    /*
+     * Return the contained value, or throw missing_value_error().
+     */
+    T *operator ->();
+
     /**
      * Return the contained value, or throw missing_value_error().
      */
     const T &operator *() const;
+
+    /**
+     * Return the contained value, or throw missing_value_error().
+     */
+    const T *operator ->() const;
 };
 
 /**

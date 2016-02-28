@@ -95,12 +95,22 @@ Nullable<T>::~Nullable()
 
 
 template<typename T>
-bool Nullable<T>::operator==(const Nullable<T> &other)
+bool Nullable<T>::operator==(const Nullable<T> &other) const
 {
     if(set_ && (set_ == other.set_)) {
         return **this == *other;
     }
     return set_ == other.set_;
+}
+
+
+template<typename T>
+bool Nullable<T>::operator==(const T &other) const
+{
+    if(! set_) {
+        return false;
+    }
+    return other == **this;
 }
 
 
@@ -135,12 +145,26 @@ T &Nullable<T>::operator *()
 
 
 template<typename T>
+T *Nullable<T>::operator ->()
+{
+    return &**this;
+}
+
+
+template<typename T>
 const T &Nullable<T>::operator *() const
 {
     if(! set_) {
         throw missing_value_error();
     }
     return *reinterpret_cast<const T *>(val_);
+}
+
+
+template<typename T>
+const T *Nullable<T>::operator ->() const
+{
+    return &**this;
 }
 
 

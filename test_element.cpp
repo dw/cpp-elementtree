@@ -312,7 +312,7 @@ MU_TEST(elemAncestorOfTrue)
 MU_TEST(elemAncestorOfFalse)
 {
     auto root = etree::fromstring("<a><b/></a>");
-    assert(! (*root.child("b")).ancestorOf(root));
+    assert(! root.child("b")->ancestorOf(root));
 }
 
 
@@ -366,7 +366,7 @@ MU_TEST(elemAppendNewTwice)
     root.append(child);
     root.append(child);
     assert(root.size() == 1);
-    assert(child == *root.child("child"));
+    assert(root.child("child") == child);
 }
 
 
@@ -415,21 +415,21 @@ MU_TEST(elemAppendMoveNsNested)
 MU_TEST(elemGetnextNone)
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(! (*root.child("c")).getnext());
+    assert(! root.child("c")->getnext());
 }
 
 
 MU_TEST(elemGetnext)
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
-    assert((*root.child("b")) == *(*root.child("a")).getnext());
+    assert(root.child("b") == root.child("a")->getnext());
 }
 
 
 MU_TEST(elemGetprevNone)
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(! (*root.child("a")).getprev());
+    assert(! root.child("a")->getprev());
 }
 
 
@@ -443,7 +443,7 @@ MU_TEST(elemGetParentRoot)
 MU_TEST(elemGetParentNotroot)
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(root == *(*root.child("a")).getparent());
+    assert(root.child("a")->getparent() == root);
 }
 
 
@@ -501,7 +501,7 @@ MU_TEST(elemInsertNew)
     auto child = etree::Element("child");
     root.insert(0, child);
     assert(root.size() == 1);
-    assert(child == *root.child("child"));
+    assert(root.child("child") == child);
 }
 
 
@@ -512,7 +512,7 @@ MU_TEST(elemInsertNewTwice)
     root.insert(0, child);
     root.insert(0, child);
     assert(root.size() == 1);
-    assert(child == *root.child("child"));
+    assert(root.child("child") == child);
 }
 
 
@@ -603,7 +603,7 @@ MU_TEST(elemRemoveArgNotParent)
     auto name = *root.find("person/name");
     root.remove(name);
     assert(root.size() == 1);
-    assert((*name.getparent()).tag() == "person");
+    assert(name.getparent()->tag() == "person");
     assert(! root.child("name"));
 }
 
@@ -684,8 +684,7 @@ MU_TEST(elemRemovePreservesTail)
 MU_TEST(elemRemovePreservesTailTextOnly)
 {
     auto elem = etree::fromstring("<a><b/><c/></a>");
-    auto e2 = *elem.child("b");
-    e2.remove();
+    elem.child("b")->remove();
     assert(etree::tostring(elem) == "<a><c/></a>");
 }
 
@@ -897,7 +896,7 @@ MU_TEST(qnameOpUnequalMissingNs)
 MU_TEST(elemGetNoNs)
 {
     auto root = etree::fromstring(DOC);
-    assert("human" == (*root.child("person")).get("type"));
+    assert("human" == root.child("person")->get("type"));
 }
 
 
@@ -905,7 +904,7 @@ MU_TEST(elemGetNs)
 {
     auto root = etree::fromstring(NS_DOC);
     #define NS "{urn:ns}"
-    assert("human" == (*root.child(NS "person")).get(NS "type"));
+    assert("human" == root.child(NS "person")->get(NS "type"));
 }
 
 
@@ -934,7 +933,7 @@ MU_TEST(nullableRvalConstructor)
 {
     auto val = etree::Nullable<etree::Element>(etree::Element("a"));
     assert(val);
-    assert((*val).tag() == "a");
+    assert(val->tag() == "a");
 }
 
 
@@ -1005,7 +1004,7 @@ MU_TEST(nullableDerefSet)
 {
     auto elem = etree::Element("a");
     auto val = etree::Nullable<etree::Element>(elem);
-    assert(*val == elem);
+    assert(val == elem);
 }
 
 
@@ -1110,7 +1109,7 @@ MU_TEST(xpathFindOrder)
 {
     auto elem = etree::fromstring("<root><a/><b/><c/></root>");
     auto xp = etree::XPath("./*");
-    assert(elem.child("a") == *xp.find(elem));
+    assert(elem.child("a") == xp.find(elem));
 }
 
 
