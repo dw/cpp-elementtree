@@ -74,6 +74,17 @@ MU_TEST(FindallNoMatch)
 }
 
 
+MU_TEST(removeall)
+{
+    auto elem = etree::fromstring("<root><a/><b/><c/></root>");
+    auto xp = etree::XPath("./b");
+    auto removed = xp.removeall(elem);
+    assert(removed.size() == 1);
+    assert(! removed[0].getparent());
+    assert(elem.children("b").size() == 0);
+}
+
+
 MU_TEST(FindText)
 {
     auto elem = etree::fromstring("<root><name>David</name></root>");

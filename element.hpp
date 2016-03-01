@@ -479,6 +479,12 @@ class XPath {
     vector<Element> findall(const Element &e) const;
 
     /**
+     * Like XPath::findall, except remove each discovered element before
+     * returning it.
+     */
+    vector<Element> removeall(Element &expr) const;
+
+    /**
      * Return the text part of the first matching element.
      *
      * @param e
@@ -845,6 +851,12 @@ class Element
      * @returns         Matching elements.
      */
     vector<Element> findall(const XPath &expr) const;
+
+    /**
+     * Like XPath::findall, except remove each discovered element before
+     * returning it.
+     */
+    vector<Element> removeall(const XPath &expr);
 
     /**
      * Append an element to this element.

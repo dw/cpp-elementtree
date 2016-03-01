@@ -781,9 +781,21 @@ XPath::findall(const Element &e) const
 }
 
 
+std::vector<Element>
+XPath::removeall(Element &e) const
+{
+    auto elems = findall(e);
+    for(auto &elem : elems) {
+        elem.remove();
+    }
+    return elems;
+}
+
+
 // -------------------
 // Attribute functions
 // -------------------
+
 
 Attribute::Attribute(xmlAttr *attr)
     : attr_(attr)
