@@ -1408,6 +1408,14 @@ Element::child(const QName &qn) const
 }
 
 
+Element
+Element::ensurechild(const QName &qn)
+{
+    auto maybe = child(qn);
+    return maybe ? *maybe : SubElement(*this, qn);
+}
+
+
 std::vector<Element>
 Element::children(const QName &qn) const
 {

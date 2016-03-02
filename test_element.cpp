@@ -253,6 +253,84 @@ MU_TEST(elemAppendMoveNsNested)
 
 
 //
+// Element::child()
+//
+
+
+MU_TEST(child)
+{
+    auto root = etree::fromstring("<root><child>x</child></root>");
+    auto child = root.child("child");
+    assert(child);
+    assert(child->text() == "x");
+}
+
+
+MU_TEST(childNs)
+{
+    auto root = etree::fromstring(
+        "<root>"
+        "<child xmlns=\"urn:foo\">x</child>"
+        "</root>");
+    auto child = root.child("{urn:foo}child");
+    assert(child);
+    assert(child->text() == "x");
+}
+
+
+MU_TEST(childAbsent)
+{
+    auto root = etree::fromstring("<root/>");
+    auto child = root.child("{urn:foo}child");
+    assert(! child);
+}
+
+
+//
+// Element::ensurechild()
+//
+
+
+MU_TEST(ensurechildPresent)
+{
+    auto root = etree::fromstring("<root><child>x</child></root>");
+    auto child = root.ensurechild("child");
+    assert(child.text() == "x");
+    assert(root.children("child").size() == 1);
+}
+
+
+MU_TEST(ensurechildNsPresent)
+{
+    auto root = etree::fromstring(
+        "<root>"
+        "<child xmlns=\"urn:foo\">x</child>"
+        "</root>");
+    auto child = root.ensurechild("{urn:foo}child");
+    assert(child.text() == "x");
+    assert(root.children("{urn:foo}child").size() == 1);
+}
+
+
+MU_TEST(ensurechildAbsent)
+{
+    auto root = etree::fromstring("<root/>");
+    auto child = root.ensurechild("child");
+    assert(child.getparent() == root);
+    assert(root.children("child").size() == 1);
+}
+
+
+MU_TEST(ensurechildAbsentNs)
+{
+    auto root = etree::fromstring("<root/>");
+    auto child = root.ensurechild("{urn:foo}child");
+    assert(child.getparent() == root);
+    assert(root.children("{urn:foo}child").size() == 1);
+}
+
+
+//
 // getnext / getparent / getprev / getroottreee
 //
 

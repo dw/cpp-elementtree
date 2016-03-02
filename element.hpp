@@ -851,10 +851,22 @@ class Element
     /**
      * Return the first child with the given name, if any.
      *
-     * @param qn        Name of the child to locate.
-     * @returns         Element, if any, otherwise an empty nullable.
+     * @param qn
+     *      Name of the child to locate.
+     * @returns
+     *      Element, if any, otherwise an empty nullable.
      */
     Nullable<Element> child(const QName &qn) const;
+
+    /*
+     * Like child(), except appends the element if it was missing.
+     *
+     * @param qn
+     *      Name of the child to create or locate.
+     * @returns
+     *      The element.
+     */
+    Element ensurechild(const QName &qn);
 
     /**
      * Return children with the given name.
