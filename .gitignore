@@ -2,3 +2,4 @@
 *.rss
 *.dSYM
 docs
+*.o
