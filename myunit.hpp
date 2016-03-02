@@ -28,7 +28,9 @@
 #include <algorithm>
 #include <cstdio>
 #include <iostream>
+#include <stdexcept>
 #include <string>
+#include <typeinfo>
 #include <vector>
 
 

@@ -8,7 +8,7 @@ endif
 
 CXXFLAGS += -g
 CXXFLAGS += -std=c++0x
-CXXFLAGS += -stdlib=libc++
+# CXXFLAGS += -stdlib=libc++
 CXXFLAGS += $(shell pkg-config --cflags libxml-2.0)
 
 LDFLAGS += -lz

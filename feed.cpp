@@ -199,7 +199,7 @@ void Feed::append(Item item) {
 #define READER_NS "{http://www.google.com/schemas/reader/atom/}"
 #define ATOM_NS "http://www.w3.org/2005/Atom"
 
-static const XPathContext kAtomContext = XPathContext({
+static const XPathContext kAtomContext = XPathContext(ns_list{
     {"atom", ATOM_NS}
 });
 
@@ -442,8 +442,8 @@ struct AtomFeedFormat
     std::vector<Item> items(const Element &e) const
     {
         std::vector<Item> out;
-        for(auto &e : kAtomEntryPath.findall(e)) {
-            out.push_back(Item(AtomItemFormat::instance, e));
+        for(auto &elem : kAtomEntryPath.findall(e)) {
+            out.push_back(Item(AtomItemFormat::instance, elem));
         }
         return out;
     }

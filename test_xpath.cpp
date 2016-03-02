@@ -19,7 +19,7 @@ MU_TEST(contextConstructorNoNs)
 
 MU_TEST(contextConstructor)
 {
-    etree::XPathContext ctx({
+    etree::XPathContext ctx(etree::ns_list{
       {"foo", "urn:foo"}
     });
 }
@@ -30,7 +30,7 @@ MU_TEST(contextNsListRespected)
     auto elem = etree::fromstring(
         "<root><child xmlns=\"urn:foo\"/></root>"
     );
-    etree::XPathContext ctx({
+    etree::XPathContext ctx(etree::ns_list{
         {"foo", "urn:foo"}
     });
 
