@@ -269,7 +269,11 @@ class AtomItemFormat
     void link(Element &e, const std::string &s) const
     {
         kAtomLinkPath.removeall(e);
-        etree::SubElement(e, kAtomLinkTag, {{"href", s}});
+        etree::SubElement(e, kAtomLinkTag, {
+            {"rel", "alternate"},
+            {"type", "text/html"},
+            {"href", s}
+        });
     }
 
     Nullable<Element> getContentTag_(const Element &e) const
@@ -361,7 +365,7 @@ class AtomItemFormat
 
     void published(Element &e, time_t) const
     {
-        assert(0);
+        //assert(0);
     }
 };
 
@@ -408,7 +412,11 @@ struct AtomFeedFormat
     void link(Element &e, const std::string &s) const
     {
         kAtomLinkPath.removeall(e);
-        etree::SubElement(e, kAtomLinkTag, {{"href", s}});
+        etree::SubElement(e, kAtomLinkTag, {
+            {"rel", "alternate"},
+            {"type", "text/html"},
+            {"href", s}
+        });
     }
 
     std::string icon(const Element &e) const
@@ -469,13 +477,13 @@ struct AtomFeedFormat
 static const XPath kRssLinkPath{"channel/link"};
 static const XPath kRssIconPath{"channel/image/url"};
 static const XPath kRssTitlePath{"channel/title"};
+static const XPath kRssItemLinkPath{"title"};
 static const XPath kRssItemTitlePath{"title"};
 
 static const NameList kRssContentPath{"channel", "description"};
 static const NameList kRssItemPublishedPath{"pubDate"};
 static const NameList kRssItemDescrPath{"description"};
 static const NameList kRssItemGuidPath{"guid"};
-static const NameList kRssItemLinkPath{"link"};
 static const NameList kRssItemsPath{"channel", "item"};
 
 
@@ -509,12 +517,12 @@ class Rss20ItemFormat
 
     std::string link(const Element &e) const
     {
-        return kRssLinkPath.findtext(e);
+        return kRssItemLinkPath.findtext(e);
     }
 
     void link(Element &e, const std::string &s) const
     {
-        kRssLinkPath.removeall(e);
+        kRssItemLinkPath.removeall(e);
         SubElement(e, "link").text(s);
     }
 
@@ -569,7 +577,7 @@ class Rss20ItemFormat
 
     void published(Element &e, time_t) const
     {
-        assert(0);
+        //assert(0);
     }
 };
 

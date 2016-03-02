@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" media="screen" href="/~d/styles/atom10full.xsl"?>
+<?xml-stylesheet type="text/css" media="screen" href="http://feeds.feedburner.com/~d/styles/itemcontent.css"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/"
+xmlns:blogger="http://schemas.google.com/blogger/2008"
+xmlns:georss="http://www.georss.org/georss"
+xmlns:gd="http://schemas.google.com/g/2005"
+xmlns:thr="http://purl.org/syndication/thread/1.0"
+xmlns:feedburner="http://rssnamespace.org/feedburner/ext/1.0">
+  <id>tag:blogger.com,1999:blog-3971202189709462152</id>
+  <updated>2016-02-28T10:58:21.029+01:00</updated>
+  <icon>http://example.org/favicon.ico</icon>
+  <category term="numpy" />
+  <category term="jit" />
+  <category term="pypy3" />
+  <category term="stm" />
+  <category term="pypy" />
+  <category term="cffi" />
+  <category term="speed" />
+  <category term="CPython" />
+  <category term="extension modules" />
+  <category term="sprint" />
+  <category term="PyQt4" />
+  <category term="RPyC" />
+  <category term="Smalltalk" />
+  <category term="Squeak" />
+  <category term="arm" />
+  <category term="cli" />
+  <category term="compiler" />
+  <category term="cpyext" />
+  <category term="ep2008" />
+  <category term="jython" />
+  <category term="kcachegrind" />
+  <category term="parser" />
+  <category term="profiling" />
+  <category term="roadmap" />
+  <category term="sun" />
+  <category term="valgrind" />
+  <title type="text">PyPy Status Blog</title>
+  <subtitle type="html">My subtitle</subtitle>
+  <link rel="alternate" type="text/html"
+  href="http://morepypy.blogspot.com/" />
+  <link rel="next" type="application/atom+xml"
+  href="http://www.blogger.com/feeds/3971202189709462152/posts/default?start-index=26&amp;max-results=25&amp;redirect=false" />
+  <author>
+    <name>Carl Friedrich Bolz</name>
+    <uri>http://www.blogger.com/profile/00518922641059511014</uri>
+    <email>noreply@blogger.com</email>
+    <gd:image rel="http://schemas.google.com/g/2005#thumbnail"
+    width="16" height="16"
+    src="http://img2.blogblog.com/img/b16-rounded.gif" />
+  </author>
+  <generator version="7.00" uri="http://www.blogger.com">
+  Blogger</generator>
+  <openSearch:totalResults>341</openSearch:totalResults>
+  <openSearch:startIndex>1</openSearch:startIndex>
+  <openSearch:itemsPerPage>25</openSearch:itemsPerPage>
+  <atom10:link xmlns:atom10="http://www.w3.org/2005/Atom"
+  rel="self" type="application/atom+xml"
+  href="http://feeds.feedburner.com/PyPyStatusBlog" />
+  <feedburner:info uri="pypystatusblog" />
+  <atom10:link xmlns:atom10="http://www.w3.org/2005/Atom" rel="hub"
+  href="http://pubsubhubbub.appspot.com/" />
+  <entry>
+    <id>
+    tag:blogger.com,1999:blog-3971202189709462152.post-8582726091670983181</id>
+    <published>2016-02-25T16:54:00.001+01:00</published>
+    <updated>2016-02-25T17:24:52.215+01:00</updated>
+    <title type="text">C-API Support update</title>
+    <content type="html">&lt;p&gt;As you know, PyPy can emulate the
+    CPython C API to some extent. In this post I will describe an
+    important optimization that we merged to improve the
+    performance and stability of the C-API emulation
+    layer.&lt;/p&gt; &lt;p&gt;The C-API is implemented by passing
+    around &lt;code&gt;PyObject *&lt;/code&gt; pointers in the C
+    code. The problem with providing the same interface with PyPy
+    is that objects don't natively have the same
+    &lt;code&gt;PyObject *&lt;/code&gt; structure at all; and
+    additionally their memory address can change. PyPy handles the
+    difference by maintaining two sets of objects. More precisely,
+    starting from a PyPy object, it can allocate on demand a
+    &lt;code&gt;PyObject&lt;/code&gt; structure and fill it with
+    information that points back to the original PyPy objects; and
+    conversely, starting from a C-level object, it can allocate a
+    PyPy-level object and fill it with information in the opposite
+    direction.&lt;/p&gt; &lt;p&gt;I have merged a rewrite of the
+    interaction between C-API C-level objects and PyPy's
+    interpreter level objects. This is mostly a simplification
+    based on a small hack in our garbage collector. This hack makes
+    the garbage collector aware of the reference-counted
+    &lt;code&gt;PyObject&lt;/code&gt; structures. When it considers
+    a pair consisting of a PyPy object and a
+    &lt;code&gt;PyObject&lt;/code&gt;, it will always free either
+    none or both of them at the same time. They both stay alive if
+    &lt;i&gt;either&lt;/i&gt; there is a regular GC reference to
+    the PyPy object, &lt;i&gt;or&lt;/i&gt; the reference counter in
+    the &lt;code&gt;PyObject&lt;/code&gt; is bigger than
+    zero.&lt;/p&gt; &lt;p&gt;This gives a more stable result.
+    Previously, a PyPy object might grow a corresponding
+    &lt;code&gt;PyObject&lt;/code&gt;, loose it (when its reference
+    counter goes to zero), and later have another corresponding
+    &lt;code&gt;PyObject&lt;/code&gt; re-created at a different
+    address. Now, once a link is created, it remains alive until
+    both objects die.&lt;/p&gt; &lt;p&gt;The rewrite significantly
+    simplifies our previous code (which used to be based on at
+    least 4 different dictionaries), and should make using the
+    C-API somewhat faster (though it is still slower than using
+    pure python or cffi).&lt;/p&gt; &lt;p&gt;A side effect of this
+    work is that now PyPy actually supports the upstream &lt;a
+    href="https://github.com/lxml/lxml"&gt;lxml&lt;/a&gt;
+    package---which is is one of the most popular packages on PyPI.
+    (Specifically, you need version 3.5.0 with &lt;a
+    href="https://github.com/lxml/lxml/pull/187"&gt;this pull
+    request&lt;/a&gt; to remove old PyPy-specific hacks that were
+    not really working. &lt;a
+    href="https://bitbucket.org/pypy/compatibility/wiki/lxml"&gt;See
+    details&lt;/a&gt;.) At this point, we no longer recommend using
+    the &lt;code&gt;cffi-lxml&lt;/code&gt; alternative: although it
+    may still be faster, it might be incomplete and old.&lt;/p&gt;
+    &lt;p&gt;We are actively working on extending our C-API
+    support, and hope to soon merge a branch to support more of the
+    C-API functions (some numpy news coming!). Please &lt;a
+    href="http://buildbot.pypy.org/nightly/trunk/"&gt;try it
+    out&lt;/a&gt; and let us know how it works for you.&lt;/p&gt;
+    &lt;p&gt;Armin Rigo and the PyPy team&lt;/p&gt; &lt;img
+    src="http://feeds.feedburner.com/~r/PyPyStatusBlog/~4/S2p48K40LA8"
+    height="1" width="1" alt=""/&gt;</content>
+    <link rel="replies" type="application/atom+xml"
+    href="http://morepypy.blogspot.com/feeds/8582726091670983181/comments/default"
+    title="Post Comments" />
+    <link rel="replies" type="text/html"
+    href="http://www.blogger.com/comment.g?blogID=3971202189709462152&amp;postID=8582726091670983181"
+    title="4 Comments" />
+    <link rel="edit" type="application/atom+xml"
+    href="http://www.blogger.com/feeds/3971202189709462152/posts/default/8582726091670983181" />
+    <link rel="self" type="application/atom+xml"
+    href="http://www.blogger.com/feeds/3971202189709462152/posts/default/8582726091670983181" />
+    <link rel="alternate" type="text/html"
+    href="http://feedproxy.google.com/~r/PyPyStatusBlog/~3/S2p48K40LA8/c-api-support-update.html"
+    title="C-API Support update" />
+    <author>
+      <name>Armin Rigo</name>
+      <uri>
+      http://www.blogger.com/profile/06300515270104686574</uri>
+      <email>noreply@blogger.com</email>
+      <gd:image rel="http://schemas.google.com/g/2005#thumbnail"
+      width="16" height="16"
+      src="http://img2.blogblog.com/img/b16-rounded.gif" />
+    </author>
+    <thr:total>4</thr:total>
+    <feedburner:origLink>
+    http://morepypy.blogspot.com/2016/02/c-api-support-update.html</feedburner:origLink>
+  </entry>
+  <entry>
+    <id>
+    tag:blogger.com,1999:blog-3971202189709462152.post-8493496761738752124</id>
+    <published>2016-01-06T12:17:00.000+01:00</published>
+    <updated>2016-01-06T12:17:40.406+01:00</updated>
+    <title type="text">Using CFFI for embedding</title>
+    <content type="html">&lt;h3&gt;Introduction&lt;/h3&gt;
+    &lt;p&gt;&lt;a
+    href="http://cffi.readthedocs.org/"&gt;CFFI&lt;/a&gt; has been
+    a great success so far to call C libraries in your Python
+    programs, in a way that is both simple and that works across
+    CPython 2.x and 3.x and PyPy.&lt;/p&gt; &lt;p&gt;This post
+    assumes that you know what CFFI is and how to use it in API
+    mode (&lt;tt class="docutils literal"&gt;ffi.cdef()&lt;/tt&gt;,
+    &lt;tt class="docutils literal"&gt;ffi.set_source()&lt;/tt&gt;,
+    &lt;tt class="docutils literal"&gt;ffi.compile()&lt;/tt&gt;). A
+    quick overview can be found &lt;a
+    href="http://cffi.readthedocs.org/en/latest/overview.html#real-example-api-level-out-of-line"&gt;in
+    this paragraph.&lt;/a&gt;&lt;/p&gt; &lt;p&gt;The major news of
+    CFFI 1.4, released last december, was that you can now declare
+    C functions with &lt;tt class="docutils literal"&gt;extern
+    &amp;quot;Python&amp;quot;&lt;/tt&gt; in the &lt;tt
+    class="docutils literal"&gt;cdef()&lt;/tt&gt;. These magic
+    keywords make the function callable from C (where it is defined
+    automatically), but calling it will call some Python code
+    (which you attach with the &lt;tt class="docutils
+    literal"&gt;&amp;#64;ffi.def_extern()&lt;/tt&gt; decorator).
+    This is useful because it gives a more straightforward, faster
+    and libffi-independent way to write callbacks. For more
+    details, see &lt;a
+    href="http://cffi.readthedocs.org/en/latest/using.html#extern-python-new-style-callbacks"&gt;the
+    documentation.&lt;/a&gt;&lt;/p&gt; &lt;p&gt;You are, in effect,
+    declaring a static family of C functions which call Python
+    code. The idea is to take pointers to them, and pass them
+    around to other C functions, as callbacks. However, the idea of
+    a set of C functions which call Python code opens another path:
+    &lt;em&gt;embedding&lt;/em&gt; Python code inside non-Python
+    programs.&lt;/p&gt; &lt;h3&gt;Embedding&lt;/h3&gt;
+    &lt;p&gt;Embedding is traditionally done using the CPython C
+    API: from C code, you call &lt;tt class="docutils
+    literal"&gt;Py_Initialize()&lt;/tt&gt; and then some other
+    functions like &lt;tt class="docutils
+    literal"&gt;PyRun_SimpleString()&lt;/tt&gt;. In the simple
+    cases it is, indeed, simple enough; but it can become a
+    complicated story if you throw in supporting
+    application-dependent object types; and a messy story if you
+    add correctly running on multiple threads, for
+    example.&lt;/p&gt; &lt;p&gt;Moreover, this approach is specific
+    to CPython (2.x or 3.x). It does not work at all on PyPy, which
+    has its own very different, minimal &lt;a
+    href="http://pypy.readthedocs.org/en/latest/embedding.html"&gt;embedding
+    API.&lt;/a&gt;&lt;/p&gt; &lt;p&gt;The new-and-coming thing
+    about CFFI 1.5, meant as replacement of the above solutions, is
+    direct embedding support---with no fixed API at all. The idea
+    is to write some Python script with a &lt;tt class="docutils
+    literal"&gt;cdef()&lt;/tt&gt; which declares a number of &lt;tt
+    class="docutils literal"&gt;extern
+    &amp;quot;Python&amp;quot;&lt;/tt&gt; functions. When running
+    the script, it creates the C source code and compiles it to a
+    dynamically-linked library (&lt;tt class="docutils
+    literal"&gt;.so&lt;/tt&gt; on Linux). This is the same as in
+    the regular API-mode usage. What is new is that these &lt;tt
+    class="docutils literal"&gt;extern
+    &amp;quot;Python&amp;quot;&lt;/tt&gt; can now also be
+    &lt;em&gt;exported&lt;/em&gt; from the &lt;tt class="docutils
+    literal"&gt;.so&lt;/tt&gt;, in the C sense. You also give a bit
+    of initialization-time Python code directly in the script,
+    which will be compiled into the &lt;tt class="docutils
+    literal"&gt;.so&lt;/tt&gt; too.&lt;/p&gt; &lt;p&gt;This library
+    can now be used directly from any C program (and it is still
+    importable in Python). It exposes the C API of your choice,
+    which you specified with the &lt;tt class="docutils
+    literal"&gt;extern &amp;quot;Python&amp;quot;&lt;/tt&gt;
+    declarations. You can use it to make whatever custom API makes
+    sense in your particular case. You can even directly make a
+    &amp;quot;plug-in&amp;quot; for any program that supports them,
+    just by exporting the API expected for such plugins.&lt;/p&gt;
+    &lt;h3&gt;Trying it out on CPython&lt;/h3&gt; &lt;p&gt;This is
+    still being finalized, but please try it out. You can see &lt;a
+    href="https://bitbucket.org/cffi/cffi/src/static-callback-embedding/demo/embedding.py"&gt;embedding.py&lt;/a&gt;
+    directly online for a quick glance. Or see below the
+    instructions on Linux with CPython 2.7 (CPython 3.x and
+    non-Linux platforms are still a work in progress right now, but
+    this should be quickly fixed):&lt;/p&gt; &lt;ul&gt;
+    &lt;li&gt;&lt;p class="first"&gt;get the branch &lt;tt
+    class="docutils literal"&gt;&lt;span
+    class="pre"&gt;static-callback-embedding&lt;/span&gt;&lt;/tt&gt;
+    of CFFI:&lt;/p&gt; &lt;pre class="literal-block"&gt; hg clone
+    https://bitbucket.org/cffi/cffi hg up static-callback-embedding
+    &lt;/pre&gt; &lt;/li&gt; &lt;li&gt;&lt;p class="first"&gt;make
+    the &lt;tt class="docutils
+    literal"&gt;_cffi_backend.so&lt;/tt&gt;:&lt;/p&gt; &lt;pre
+    class="literal-block"&gt; python setup_base.py build_ext -f -i
+    &lt;/pre&gt; &lt;/li&gt; &lt;li&gt;&lt;p class="first"&gt;run
+    &lt;tt class="docutils literal"&gt;embedding.py&lt;/tt&gt; in
+    the &lt;tt class="docutils literal"&gt;demo&lt;/tt&gt;
+    directory:&lt;/p&gt; &lt;pre class="literal-block"&gt; cd demo
+    PYTHONPATH=.. python embedding.py &lt;/pre&gt; &lt;/li&gt;
+    &lt;li&gt;&lt;p class="first"&gt;this produces &lt;tt
+    class="docutils literal"&gt;_embedding_cffi.c&lt;/tt&gt;. Run
+    &lt;tt class="docutils literal"&gt;gcc&lt;/tt&gt; to build it.
+    On Linux:&lt;/p&gt; &lt;pre class="literal-block"&gt; gcc
+    -shared -fPIC _embedding_cffi.c -o _embedding_cffi.so \
+    -lpython2.7 -I/usr/include/python2.7 &lt;/pre&gt; &lt;/li&gt;
+    &lt;li&gt;&lt;p class="first"&gt;try out the demo C program in
+    &lt;tt class="docutils
+    literal"&gt;embedding_test.c&lt;/tt&gt;:&lt;/p&gt; &lt;pre
+    class="literal-block"&gt; gcc embedding_test.c
+    _embedding_cffi.so PYTHONPATH=.. LD_LIBRARY_PATH=. ./a.out
+    &lt;/pre&gt; &lt;/li&gt; &lt;/ul&gt; &lt;p&gt;Note that if you
+    get &lt;tt class="docutils literal"&gt;ImportError: cffi
+    extension module '_embedding_cffi' has unknown version
+    0x2701&lt;/tt&gt;, it means that the &lt;tt class="docutils
+    literal"&gt;_cffi_backend&lt;/tt&gt; module loaded is a
+    pre-installed one instead of the more recent one in "&lt;tt
+    class="docutils literal"&gt;..&lt;/tt&gt;". Be sure to use
+    &lt;tt class="docutils literal"&gt;&lt;span
+    class="pre"&gt;PYTHONPATH=..&lt;/span&gt;&lt;/tt&gt; for now.
+    (Some installations manage to be confused enough to load the
+    system-wide cffi even if another version is in the PYTHONPATH.
+    I think a virtualenv can be used to work around this
+    issue.)&lt;/p&gt; &lt;h3&gt;Try it out on PyPy&lt;/h3&gt;
+    &lt;p&gt;Very similar steps can be followed on PyPy, but it
+    requires the &lt;tt class="docutils literal"&gt;&lt;span
+    class="pre"&gt;cffi-static-callback-embedding&lt;/span&gt;&lt;/tt&gt;
+    branch of PyPy, which you must first translate from sources.
+    The difference is then that you need to adapt the first &lt;tt
+    class="docutils literal"&gt;gcc&lt;/tt&gt; command line:
+    replace &lt;tt class="docutils literal"&gt;&lt;span
+    class="pre"&gt;-lpython2.7&lt;/span&gt;&lt;/tt&gt; with &lt;tt
+    class="docutils literal"&gt;&lt;span
+    class="pre"&gt;-lpypy-c&lt;/span&gt;&lt;/tt&gt; and to fix the
+    &lt;tt class="docutils literal"&gt;&lt;span
+    class="pre"&gt;-I&lt;/span&gt;&lt;/tt&gt; path (and possibly
+    add a &lt;tt class="docutils literal"&gt;&lt;span
+    class="pre"&gt;-L&lt;/span&gt;&lt;/tt&gt; path).&lt;/p&gt;
+    &lt;h3&gt;More details&lt;/h3&gt; &lt;p&gt;How it works, more
+    precisely, is by automatically initializing CPython/PyPy the
+    first time any of the &lt;tt class="docutils literal"&gt;extern
+    &amp;quot;Python&amp;quot;&lt;/tt&gt; functions is called from
+    the C program. This is done using locks in case of
+    multi-threading, so several threads can concurrently do this
+    "first call". This should work even if two different threads
+    call the first time a function from two
+    &lt;em&gt;different&lt;/em&gt; embedded CFFI extensions that
+    happen to be linked with the same program. Explicit
+    initialization is never needed.&lt;/p&gt; &lt;p&gt;The custom
+    initialization-time Python code you put in &lt;tt
+    class="docutils
+    literal"&gt;ffi.embedding_init_code()&lt;/tt&gt; is executed at
+    that time. If this code starts to be big, you can move it to
+    independent modules or packages. Then the initialization-time
+    Python code only needs to import them. In that case, you have
+    to carefully set up &lt;tt class="docutils
+    literal"&gt;sys.path&lt;/tt&gt; if the modules are not
+    installed in the usual Python way.&lt;/p&gt; &lt;p&gt;If the
+    Python code is big and full of dependencies, a better
+    alternative would be to use virtualenv. How to do that is not
+    fully fleshed out so far. You can certainly run the whole
+    program with the environment variables set up by the
+    virtualenv's &lt;tt class="docutils
+    literal"&gt;activate&lt;/tt&gt; script first. There are
+    probably other solutions that involve using gcc's &lt;tt
+    class="docutils literal"&gt;&lt;span
+    class="pre"&gt;-Wl,-rpath=\$ORIGIN/&lt;/span&gt;&lt;/tt&gt; or
+    &lt;tt class="docutils literal"&gt;&lt;span
+    class="pre"&gt;-Wl,-rpath=/fixed/path/&lt;/span&gt;&lt;/tt&gt;
+    options to load a specific libpython or libypypy-c library. If
+    you try it out and it doesn't work the way you would like,
+    please complain &lt;tt class="docutils literal"&gt;&lt;span
+    class="pre"&gt;:-)&lt;/span&gt;&lt;/tt&gt;&lt;/p&gt;
+    &lt;p&gt;Another point: right now this does not support
+    CPython's notion of multiple subinterpreters. The logic creates
+    a single global Python interpreter, and runs everything in that
+    context. Maybe a future version would have an explicit API to
+    do that &amp;mdash; or maybe it should be the job of a
+    3rd-party extension module to provide a Python interface over
+    the notion of subinterpreters...&lt;/p&gt; &lt;p&gt;More
+    generally, any feedback is appreciated.&lt;/p&gt; &lt;p&gt;Have
+    fun,&lt;/p&gt; &lt;p&gt;Armin&lt;/p&gt;&lt;img
+    src="http://feeds.feedburner.com/~r/PyPyStatusBlog/~4/ACOIDV_7Emc"
+    height="1" width="1" alt=""/&gt;</content>
+    <link rel="replies" type="application/atom+xml"
+    href="http://morepypy.blogspot.com/feeds/8493496761738752124/comments/default"
+    title="Post Comments" />
+    <link rel="replies" type="text/html"
+    href="http://www.blogger.com/comment.g?blogID=3971202189709462152&amp;postID=8493496761738752124"
+    title="6 Comments" />
+    <link rel="edit" type="application/atom+xml"
+    href="http://www.blogger.com/feeds/3971202189709462152/posts/default/8493496761738752124" />
+    <link rel="self" type="application/atom+xml"
+    href="http://www.blogger.com/feeds/3971202189709462152/posts/default/8493496761738752124" />
+    <link rel="alternate" type="text/html"
+    href="http://feedproxy.google.com/~r/PyPyStatusBlog/~3/ACOIDV_7Emc/using-cffi-for-embedding.html"
+    title="Using CFFI for embedding" />
+    <author>
+      <name>Armin Rigo</name>
+      <uri>
+      http://www.blogger.com/profile/06300515270104686574</uri>
+      <email>noreply@blogger.com</email>
+      <gd:image rel="http://schemas.google.com/g/2005#thumbnail"
+      width="16" height="16"
+      src="http://img2.blogblog.com/img/b16-rounded.gif" />
+    </author>
+    <thr:total>6</thr:total>
+    <feedburner:origLink>
+    http://morepypy.blogspot.com/2016/01/using-cffi-for-embedding.html</feedburner:origLink>
+  </entry>
+</feed>

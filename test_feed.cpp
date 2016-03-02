@@ -164,7 +164,35 @@ MU_TEST(atomAppend)
 {
     auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
     auto item = feed.append();
-    auto s = tostring(feed.element());
-    OUT(s);
-    assert(s == "<feed xmlns=\"http://www.w3.org/2005/Atom\"/>");
+    assert(tostring(feed.element()) == (
+        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+            "<entry>"
+                "<title type=\"text\"/>"
+                "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                "<content type=\"html\"/>"
+                "<author>"
+                    "<name/>"
+                "</author>"
+                "<id/>"
+            "</entry>"
+        "</feed>"
+    ));
+}
+
+
+MU_TEST(rss20Append)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+    auto item = feed.append();
+    TOSTRING(feed.element());
+    assert(tostring(feed.element()) == (
+        "<rss>"
+            "<entry>"
+                "<title/>"
+                "<link/>"
+                "<link/>"
+                "<guid/>"
+            "</entry>"
+        "</rss>"
+    ));
 }

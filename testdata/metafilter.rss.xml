@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" media="screen" href="/~d/styles/rss2full.xsl"?><?xml-stylesheet type="text/css" media="screen" href="http://feeds.feedburner.com/~d/styles/itemcontent.css"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:admin="http://webns.net/mvcb/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wfw="http://wellformedweb.org/CommentAPI/" xmlns:feedburner="http://rssnamespace.org/feedburner/ext/1.0" version="2.0">
+	<channel>
+	<title>MetaFilter</title>
+	<link>http://www.metafilter.com/</link>
+	<description>The past 24 hours of MetaFilter</description>
+    <image>
+        <url>http://www.lolcats.com/</url>
+        <title>MetaFilter</title>
+        <link>http://www.metafilter.com/</link>
+    </image>
+	<pubDate>Mon, 29 Feb 2016 02:33:40 GMT</pubDate>
+	<lastBuildDate>Mon, 29 Feb 2016 02:33:40 GMT</lastBuildDate>
+	<language>en-us</language>
+	<docs>http://blogs.law.harvard.edu/tech/rss</docs>
+	<ttl>60</ttl>
+	<atom10:link xmlns:atom10="http://www.w3.org/2005/Atom" rel="self" type="application/rss+xml" href="http://feeds.feedburner.com/Metafilter" /><feedburner:info uri="metafilter" /><atom10:link xmlns:atom10="http://www.w3.org/2005/Atom" rel="hub" href="http://pubsubhubbub.appspot.com/" /><feedburner:browserFriendly>This is an XML content feed. It is intended to be viewed in a newsreader or syndicated to another site.</feedburner:browserFriendly><item>
+		<title>Illinois Budget on hold</title>
+		<link>http://www.metafilter.com/157514/Illinois-Budget-on-hold</link>
+		<description>&lt;a href="http://interactive.wbez.org/rauner/"&gt;The state of the Illinois Budget.&lt;/a&gt; The current&lt;a href="http://www.npr.org/2016/01/27/464603548/illinois-gov-bruce-rauner-overlooks-budget-crisis"&gt; Illinois&lt;/a&gt;&lt;a href="http://www.chicagotribune.com/news/local/politics/ct-illinois-budget-impasse-met-20151227-story.html"&gt; Budget&lt;/a&gt; &lt;a href="http://www.nytimes.com/2015/10/27/us/illinois-budget-stalemate-rauner-and-democrats-divided.html?_r=0"&gt;Crisis&lt;/a&gt; started almost 8 months ago. While talks &lt;a href="http://chicago.suntimes.com/news/7/71/1240891/illinois-budget-legislative-session"&gt;continue&lt;/a&gt; services are slowly falling part without &lt;a href="http://www.chicagotribune.com/news/local/politics/ct-illinois-budget-impasse-met-20151227-story.html"&gt;funding.&lt;/a&gt;&lt;br&gt;&lt;br&gt; Impacts vary.  &lt;a href="http://www.msn.com/en-us/news/us/chicago-state-university-sends-layoff-notices-to-all-employees-amid-illinois-budget-battle/ar-BBq5kgX"&gt;Chicago State University&lt;/a&gt; sent out layoff notices to 900 staff this weekend. &lt;a href="https://www.insidehighered.com/news/2016/01/07/universities-left-footing-bill-budget-crisis-looms-illinois"&gt;Other Universities&lt;/a&gt; are not far behind.  &lt;a href="http://blogs.chicagotribune.com/news_columnists_ezorn/2013/07/cps-secrecy-fuels-parental-ire-over-school-cuts.html"&gt;Public schools&lt;/a&gt; have also been&lt;a href="http://ilraiseyourhand.org/content/budget-cuts-working-list-progress"&gt; impacted.&lt;/a&gt;&lt;br&gt;
+&lt;br&gt;
+&lt;a href="http://www.rebootillinois.com/2016/01/08/top-lists/rebootil/think-the-illinois-budget-crisis-isnt-having-an-effect-then-you-need-to-see-this/51102/"&gt;Social&lt;/a&gt; &lt;a href="http://socialimpactresearchcenter.issuelab.org/resource/racisms_toll_report_on_illinois_poverty_1_1"&gt;Impacts&lt;/a&gt; are far and wide. &lt;br&gt;
+&lt;a href="http://www.prnewswire.com/news-releases/illinois-budget-impasse-forces-program-closures-staffing-cuts-at-lutheran-social-services-of-illinois-300208617.html"&gt; &lt;br&gt;
+Social Services&lt;/a&gt;  have remained unpaid. There is no end in sight.&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/Metafilter?a=KPbaRgTUct4:UBcxs2carwk:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/Metafilter?i=KPbaRgTUct4:UBcxs2carwk:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;</description>
+		<guid isPermaLink="false">tag:metafilter.com,2016:site.157514</guid>
+		<pubDate>Mon, 29 Feb 2016 02:33:40 GMT</pubDate>
+		<category>highereducation</category>
+		<category>Illinois</category>
+		<category>socialservices</category>
+		<category>statebudget</category>
+		<dc:creator>AlexiaSky</dc:creator>
+		<wfw:commentRss>http://www.metafilter.com/157514/Illinois-Budget-on-hold/rss</wfw:commentRss>
+	</item>
+      <item>
+		<title>Finger-lickin' 8-bit</title>
+		<link>http://www.metafilter.com/157513/Finger-lickin-8-bit</link>
+		<description>Play &lt;a href="http://www.colonelsanders.com/#colonelquest"&gt;ColonelQuest&lt;/a&gt;, the 8-bit, "historically accurate" video game based on Colonel Harlan Sanders' mythological life, that is part of its &lt;a href="http://www.eater.com/2015/5/19/8625069/kfc-brand-makeover-colonel-quest-game-fried-chicken-hipsters"&gt;hipster makeover to improve flagging sales&lt;/a&gt;.&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/Metafilter?a=auQSC2eFE9g:VXsX0GgqvV4:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/Metafilter?i=auQSC2eFE9g:VXsX0GgqvV4:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;</description>
+		<guid isPermaLink="false">tag:metafilter.com,2016:site.157513</guid>
+		<pubDate>Mon, 29 Feb 2016 02:30:25 GMT</pubDate>
+		<category>colonelsanders</category>
+		<category>gaming</category>
+		<category>kfc</category>
+		<category>kfcblue</category>
+		<dc:creator>MoonOrb</dc:creator>
+		<wfw:commentRss>http://www.metafilter.com/157513/Finger-lickin-8-bit/rss</wfw:commentRss>
+	</item>
+	</channel>
+</rss>
