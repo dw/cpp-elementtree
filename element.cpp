@@ -1434,6 +1434,26 @@ Element::children() const
 }
 
 
+Element
+Element::copy()
+{
+    xmlDoc *doc = ::xmlNewDoc(0);
+    if(! doc) {
+        throw memory_error();
+    }
+
+    xmlDoc *sourceDoc = node_->doc;
+    xmlNode *newNode = ::xmlDocCopyNode(node_, doc, 1);
+    if(! newNode) {
+        ::xmlFreeDoc(doc);
+        throw memory_error();
+    }
+
+    ::xmlDocSetRootElement(doc, newNode);
+    return Element(newNode);
+}
+
+
 Nullable<Element>
 Element::find(const XPath &expr) const
 {

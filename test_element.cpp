@@ -657,6 +657,22 @@ MU_TEST(elemFindNoMatch)
 
 
 //
+// Element::copy()
+//
+
+
+MU_TEST(copy)
+{
+    auto e = etree::fromstring("<root><a/><b/><c/></root>");
+    auto e2 = e.copy();
+    assert(e != e2);
+    assert(e.getroottree() != e2.getroottree());
+    e.attrib().set("test", "test");
+    assert(e2.attrib().get("test") == "");
+}
+
+
+//
 // Element::findall()
 //
 

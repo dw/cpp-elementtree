@@ -958,6 +958,12 @@ class Element
     void remove();
 
     /**
+     * Copy this element and all elements below it to a new document, returning
+     * a reference to the newly copied element.
+     */
+    Element copy();
+
+    /**
      * Return true if this is an ancestor of some element.
      */
     bool ancestorOf(const Element &e) const;
