@@ -194,7 +194,7 @@ refCount_(T node) {
 }
 
 
-static xmlDocPtr
+static xmlDoc *
 ref(xmlDoc *doc)
 {
     // Relies on NULL (aka. initial state of _private) being (intptr_t)0, which
@@ -215,7 +215,7 @@ unref(xmlDoc *doc)
 }
 
 
-static xmlNodePtr
+static xmlNode *
 ref(xmlNode *node)
 {
     assert(node);
@@ -251,7 +251,7 @@ visit(bool visitAttrs, xmlNode *node, Function func)
 
     if(visitAttrs) {
         for(auto child = node->properties; child; child = child->next) {
-            func(reinterpret_cast<xmlNodePtr>(child));
+            func(reinterpret_cast<xmlNode *>(child));
         }
     }
 }
@@ -340,7 +340,7 @@ c_str(const string &s)
 }
 
 
-static xmlNsPtr
+static xmlNs *
 makeNs_(xmlNode *node, const string &uri)
 {
     xmlChar prefix[6];
@@ -367,7 +367,7 @@ makeNs_(xmlNode *node, const string &uri)
 }
 
 
-static xmlNsPtr
+static xmlNs *
 getNs_(xmlNode *node, xmlNode *target, const string &uri)
 {
     if(uri.empty()) {
@@ -375,7 +375,7 @@ getNs_(xmlNode *node, xmlNode *target, const string &uri)
     }
 
     // Look for existing definition.
-    xmlNode *doc_node = reinterpret_cast<xmlNodePtr>(node->doc);
+    xmlNode *doc_node = reinterpret_cast<xmlNode *>(node->doc);
     for(xmlNode *cur = node; cur && cur != doc_node; cur = cur->parent) {
         for(xmlNs *ns = node->nsDef; ns != 0; ns = ns->next) {
             if(uri == toChar_(ns->href)) {
@@ -829,7 +829,7 @@ XPath::findtext(const Element &e, const string &default_) const
 std::vector<Element>
 XPath::findall(const Element &e) const
 {
-    xmlNode *node = nodeFor__<xmlNodePtr>(e);
+    xmlNode *node = nodeFor__<xmlNode *>(e);
     xmlXPathObject *res;
 
     ::xmlResetLastError();
@@ -1230,7 +1230,7 @@ Element::Element(_xmlNode *node)
 }
 
 
-static xmlNodePtr
+static xmlNode *
 nodeFromQname_(const QName &qname)
 {
     xmlDoc *doc = ::xmlNewDoc(0);
@@ -1550,7 +1550,7 @@ Element::remove(Element &e)
 void
 Element::remove()
 {
-    if(node_->parent == reinterpret_cast<xmlNodePtr>(node_->doc)) {
+    if(node_->parent == reinterpret_cast<xmlNode *>(node_->doc)) {
         return;
     }
 
@@ -1574,8 +1574,8 @@ Element::remove()
 bool
 Element::ancestorOf(const Element &e) const
 {
-    xmlNode *parent = nodeFor__<xmlNodePtr>(*this);
-    xmlNode *child = nodeFor__<xmlNodePtr>(e);
+    xmlNode *parent = nodeFor__<xmlNode *>(*this);
+    xmlNode *child = nodeFor__<xmlNode *>(e);
 
     for(; child; child = child->parent) {
         if(parent == child) {
@@ -1703,7 +1703,7 @@ tostring(const Element &e)
     xmlSaveCtxt *ctx = ::xmlSaveToIO(writeCallback, closeCallback,
         static_cast<void *>(&out), 0, 0);
 
-    int ret = ::xmlSaveTree(ctx, nodeFor__<xmlNodePtr>(e));
+    int ret = ::xmlSaveTree(ctx, nodeFor__<xmlNode *>(e));
     ::xmlSaveClose(ctx);
     if(ret == -1) {
         throw serialization_error();
@@ -1719,8 +1719,8 @@ tostring(const ElementTree &t)
     xmlSaveCtxt *ctx = ::xmlSaveToIO(writeCallback, closeCallback,
         static_cast<void *>(&out), 0, 0);
 
-    auto doc = nodeFor__<xmlDocPtr>(t);
-    int ret = ::xmlSaveTree(ctx, reinterpret_cast<xmlNodePtr>(doc));
+    auto doc = nodeFor__<xmlDoc *>(t);
+    int ret = ::xmlSaveTree(ctx, reinterpret_cast<xmlNode *>(doc));
     ::xmlSaveClose(ctx);
     if(ret == -1) {
         throw serialization_error();
@@ -1934,7 +1934,7 @@ parse(int fd)
 ostream &
 operator<< (ostream &out, const ElementTree &tree)
 {
-    out << "<ElementTree at " << nodeFor__<xmlDocPtr>(tree) << ">";
+    out << "<ElementTree at " << nodeFor__<xmlDoc *>(tree) << ">";
     return out;
 }
 
@@ -1943,7 +1943,7 @@ ostream &
 operator<< (ostream &out, const Element &elem)
 {
     out << "<Element " << elem.qname().tostring() << " at ";
-    out << nodeFor__<xmlNodePtr>(elem);
+    out << nodeFor__<xmlNode *>(elem);
     out << " with " << elem.size() << " children>";
     return out;
 }
