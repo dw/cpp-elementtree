@@ -672,6 +672,14 @@ MU_TEST(copy)
 }
 
 
+MU_TEST(copyNs)
+{
+    auto e = etree::fromstring("<root xmlns:foo=\"urn:foo\"><foo:a/></root>");
+    auto e2 = e.child("{urn:foo}a")->copy();
+    assert(etree::tostring(e2) == "<foo:a xmlns:foo=\"urn:foo\"/>");
+}
+
+
 //
 // Element::findall()
 //
