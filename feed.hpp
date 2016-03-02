@@ -57,6 +57,12 @@ enum content_type {
 
 
 /**
+ * Create a new completely empty feed in the specified format.
+ */
+Feed create(enum feed_format format);
+
+
+/**
  * Wrap an Element containing a feed and return a reference.
  *
  * @param elem  Parsed feed as an Element.
@@ -246,12 +252,22 @@ class Feed
     /**
      * Set the feed icon URL.
      */
-    void icon(std::string s);
+    void icon(const std::string &s);
 
     /**
      * Fetch a vector of all the feed's items.
      */
     std::vector<Item> items() const;
+
+    /**
+     * Create an empty item in the correct format and append it to this feed.
+     * Avoids a potentially redundant conversion in the case of populating a
+     * brand new feed.
+     *
+     * @returns
+     *      The new item.
+     */
+    Item append();
 
     /**
      * Append an item to this feed, removing it from its present feed. If the

@@ -17,13 +17,15 @@ LDFLAGS += $(shell pkg-config --libs libxml-2.0)
 
 test_main: \
 		test_main.cpp \
-		test_attrib.cpp \
-		test_element.cpp \
-		test_feed.cpp \
-		test_nullable.cpp \
-		test_qname.cpp \
-		test_xpath.cpp \
-		element.cpp
+		test_attrib.o \
+		test_element.o \
+		test_feed.o \
+		test_nullable.o \
+		test_qname.o \
+		test_xpath.o \
+		element.o \
+		feed.o \
+		feed-util.o
 
 element.cpp: element.hpp
 feed.cpp: feed.hpp
