@@ -184,14 +184,134 @@ MU_TEST(rss20Append)
 {
     auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
     auto item = feed.append();
-    TOSTRING(feed.element());
     assert(tostring(feed.element()) == (
         "<rss>"
             "<entry>"
                 "<title/>"
                 "<link/>"
+                "<guid/>"
+            "</entry>"
+        "</rss>"
+    ));
+}
+
+
+MU_TEST(atomAppendExisting)
+{
+    //
+}
+
+
+MU_TEST(rss20AppendExisting)
+{
+    //
+}
+
+
+MU_TEST(atomItemTitle)
+{
+    auto feed = etree::feed::fromelement(atomFeed);
+    auto item = feed.items()[0];
+    assert(item.title() == "C-API Support update");
+}
+
+
+MU_TEST(atomTitleSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+    auto item = feed.append();
+    item.title("Example Title");
+    assert(tostring(feed.element()) == (
+        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+            "<entry>"
+                "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                "<content type=\"html\"/>"
+                "<author>"
+                    "<name/>"
+                "</author>"
+                "<id/>"
+                "<title type=\"text\">Example Title</title>"
+            "</entry>"
+        "</feed>"
+    ));
+}
+
+
+MU_TEST(rss20ItemTitle)
+{
+    auto feed = etree::feed::fromelement(rss20Feed);
+    auto item = feed.items()[0];
+    assert(item.title() == "Illinois Budget on hold");
+}
+
+
+MU_TEST(rss20ItemTitleSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+    auto item = feed.append();
+    item.title("Example Title");
+    assert(tostring(feed.element()) == (
+        "<rss>"
+            "<entry>"
                 "<link/>"
                 "<guid/>"
+                "<title>Example Title</title>"
+            "</entry>"
+        "</rss>"
+    ));
+}
+
+
+MU_TEST(atomItemLink)
+{
+    auto feed = etree::feed::fromelement(atomFeed);
+    auto item = feed.items()[0];
+    assert(item.link() == ("http://feedproxy.google.com/~r/PyPyStatusBlog/"
+                           "~3/S2p48K40LA8/c-api-support-update.html"));
+}
+
+
+MU_TEST(atomLinkSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+    auto item = feed.append();
+    item.link("http://www.example.com/");
+    TOSTRING(feed.element());
+    assert(tostring(feed.element()) == (
+        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+            "<entry>"
+                "<title type=\"text\"/>"
+                "<content type=\"html\"/>"
+                "<author>"
+                    "<name/>"
+                "</author>"
+                "<id/>"
+                "<link rel=\"alternate\" type=\"text/html\" href=\"http://www.example.com/\"/>"
+            "</entry>"
+        "</feed>"
+    ));
+}
+
+
+MU_TEST(rss20ItemLink)
+{
+    auto feed = etree::feed::fromelement(rss20Feed);
+    auto item = feed.items()[0];
+    assert(item.link() == "http://www.metafilter.com/157514/Illinois-Budget-on-hold");
+}
+
+
+MU_TEST(rss20ItemLinkSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+    auto item = feed.append();
+    item.link("http://www.example.com/");
+    assert(tostring(feed.element()) == (
+        "<rss>"
+            "<entry>"
+                "<title/>"
+                "<guid/>"
+                "<link>http://www.example.com/</link>"
             "</entry>"
         "</rss>"
     ));

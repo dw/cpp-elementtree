@@ -180,7 +180,6 @@ Item Feed::append() {
     auto item = format_.append(elem_);
     item.title("");
     item.link("");
-    item.link("");
     item.type(CTYPE_HTML);
     item.author("");
     item.guid("");
@@ -477,7 +476,7 @@ struct AtomFeedFormat
 static const XPath kRssLinkPath{"channel/link"};
 static const XPath kRssIconPath{"channel/image/url"};
 static const XPath kRssTitlePath{"channel/title"};
-static const XPath kRssItemLinkPath{"title"};
+static const XPath kRssItemLinkPath{"link"};
 static const XPath kRssItemTitlePath{"title"};
 
 static const NameList kRssContentPath{"channel", "description"};
