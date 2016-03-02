@@ -476,6 +476,7 @@ struct AtomFeedFormat
 static const XPath kRssLinkPath{"channel/link"};
 static const XPath kRssIconPath{"channel/image/url"};
 static const XPath kRssTitlePath{"channel/title"};
+static const XPath kRssItemContentPath{"description"};
 static const XPath kRssItemLinkPath{"link"};
 static const XPath kRssItemTitlePath{"title"};
 
@@ -527,12 +528,13 @@ class Rss20ItemFormat
 
     std::string content(const Element &e) const
     {
-        return getText_(e, kRssContentPath);
+        return kRssItemContentPath.findtext(e);
     }
 
     void content(Element &e, const std::string &s) const
     {
-        setText_(e, kRssContentPath, s);
+        kRssItemContentPath.removeall(e);
+        SubElement(e, "description").text(s);
     }
 
     enum content_type type(const Element &e) const

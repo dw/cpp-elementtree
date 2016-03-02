@@ -20,12 +20,16 @@ using std::string;
 etree::Element atomFeed("x");
 etree::Element rss20Feed("x");
 
-
 MU_SETUP(loadFeeds)
 {
     atomFeed = etree::parse("testdata/pypy.atom.xml").getroot();
     rss20Feed = etree::parse("testdata/metafilter.rss.xml").getroot();
 }
+
+
+//
+// feed::format()
+//
 
 
 MU_TEST(atomFormat)
@@ -42,6 +46,11 @@ MU_TEST(rss20Format)
 }
 
 
+//
+// feed::title()
+//
+
+
 MU_TEST(atomTitle)
 {
     auto feed = etree::feed::fromelement(atomFeed);
@@ -54,6 +63,11 @@ MU_TEST(rss20Title)
     auto feed = etree::feed::fromelement(rss20Feed);
     assert(feed.title() == "MetaFilter");
 }
+
+
+//
+// feed::link()
+//
 
 
 MU_TEST(atomLink)
@@ -70,6 +84,11 @@ MU_TEST(rss20Link)
 }
 
 
+//
+// feed::description()
+//
+
+
 MU_TEST(atomDescription)
 {
     auto feed = etree::feed::fromelement(atomFeed);
@@ -84,6 +103,11 @@ MU_TEST(rss20Description)
 }
 
 
+//
+// feed::icon()
+//
+
+
 MU_TEST(atomIcon)
 {
     auto feed = etree::feed::fromelement(atomFeed);
@@ -96,6 +120,11 @@ MU_TEST(rss20Icon)
     auto feed = etree::feed::fromelement(rss20Feed);
     assert(feed.icon() == "http://www.lolcats.com/");
 }
+
+
+//
+// feed::items()
+//
 
 
 MU_TEST(atomItems)
@@ -130,6 +159,11 @@ MU_TEST(rss20Items)
 }
 
 
+//
+// feed::fromelement()
+//
+
+
 MU_TEST(atomElement)
 {
     auto feed = etree::feed::fromelement(atomFeed);
@@ -142,6 +176,11 @@ MU_TEST(rss20Element)
     auto feed = etree::feed::fromelement(rss20Feed);
     assert(feed.element() == rss20Feed);
 }
+
+
+//
+// feed::create()
+//
 
 
 MU_TEST(atomCreate)
@@ -158,6 +197,11 @@ MU_TEST(rss20Create)
     auto s = tostring(feed.element());
     assert(s == "<rss/>");
 }
+
+
+//
+// Feed::append()
+//
 
 
 MU_TEST(atomAppend)
@@ -208,6 +252,11 @@ MU_TEST(rss20AppendExisting)
 }
 
 
+//
+// Item::title()
+//
+
+
 MU_TEST(atomItemTitle)
 {
     auto feed = etree::feed::fromelement(atomFeed);
@@ -216,7 +265,7 @@ MU_TEST(atomItemTitle)
 }
 
 
-MU_TEST(atomTitleSet)
+MU_TEST(atomItemTitleSet)
 {
     auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
     auto item = feed.append();
@@ -262,6 +311,11 @@ MU_TEST(rss20ItemTitleSet)
 }
 
 
+//
+// Item::link()
+//
+
+
 MU_TEST(atomItemLink)
 {
     auto feed = etree::feed::fromelement(atomFeed);
@@ -271,12 +325,11 @@ MU_TEST(atomItemLink)
 }
 
 
-MU_TEST(atomLinkSet)
+MU_TEST(atomItemLinkSet)
 {
     auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
     auto item = feed.append();
     item.link("http://www.example.com/");
-    TOSTRING(feed.element());
     assert(tostring(feed.element()) == (
         "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
             "<entry>"
@@ -286,7 +339,8 @@ MU_TEST(atomLinkSet)
                     "<name/>"
                 "</author>"
                 "<id/>"
-                "<link rel=\"alternate\" type=\"text/html\" href=\"http://www.example.com/\"/>"
+                "<link rel=\"alternate\" type=\"text/html\" "
+                    "href=\"http://www.example.com/\"/>"
             "</entry>"
         "</feed>"
     ));
@@ -315,4 +369,134 @@ MU_TEST(rss20ItemLinkSet)
             "</entry>"
         "</rss>"
     ));
+}
+
+
+//
+// Item::content()
+//
+
+
+MU_TEST(atomItemContent)
+{
+    auto feed = etree::feed::fromelement(atomFeed);
+    auto item = feed.items()[0];
+    std::string expect("<p>As you know, PyPy can emulate the");
+    assert(expect == item.content().substr(0, expect.size()));
+}
+
+
+MU_TEST(atomItemContentSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+    auto item = feed.append();
+    item.content("My content");
+    item.type(etree::feed::CTYPE_HTML);
+    assert(tostring(feed.element()) == (
+        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+            "<entry>"
+                "<title type=\"text\"/>"
+                "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                "<author>"
+                    "<name/>"
+                "</author>"
+                "<id/>"
+                "<content type=\"html\">My content</content>"
+            "</entry>"
+        "</feed>"
+    ));
+}
+
+
+MU_TEST(rss20ItemContent)
+{
+    auto feed = etree::feed::fromelement(rss20Feed);
+    auto item = feed.items()[0];
+    std::string expect("<a href=\"http://interactive.wbez.org/");
+    assert(item.content().substr(0, expect.size()) == expect);
+}
+
+
+MU_TEST(rss20ItemContentSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+    auto item = feed.append();
+    item.content("http://www.example.com/");
+    assert(tostring(feed.element()) == (
+        "<rss>"
+            "<entry>"
+                "<title/>"
+                "<link/>"
+                "<guid/>"
+                "<description>http://www.example.com/</description>"
+            "</entry>"
+        "</rss>"
+    ));
+}
+
+
+//
+// Item::content_type()
+//
+
+
+MU_TEST(atomItemContentType)
+{
+    auto feed = etree::feed::fromelement(atomFeed);
+    assert(feed.items()[0].type() == etree::feed::CTYPE_HTML);
+}
+
+
+MU_TEST(atomItemContentTypeSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+    auto item = feed.append();
+    item.content("");
+
+    item.type(etree::feed::CTYPE_HTML);
+    assert(tostring(feed.element()) == (
+        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+            "<entry>"
+                "<title type=\"text\"/>"
+                "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                "<author>"
+                    "<name/>"
+                "</author>"
+                "<id/>"
+                "<content type=\"html\"/>"
+            "</entry>"
+        "</feed>"
+    ));
+
+    item.type(etree::feed::CTYPE_TEXT);
+    assert(tostring(feed.element()) == (
+        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+            "<entry>"
+                "<title type=\"text\"/>"
+                "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                "<author>"
+                    "<name/>"
+                "</author>"
+                "<id/>"
+                "<content type=\"text\"/>"
+            "</entry>"
+        "</feed>"
+    ));
+}
+
+
+MU_TEST(rss20ItemContentType)
+{
+    auto feed = etree::feed::fromelement(rss20Feed);
+    assert(feed.items()[0].type() == etree::feed::CTYPE_HTML);
+    // ...
+}
+
+
+MU_TEST(rss20ItemContentTypeSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+    auto item = feed.append();
+    item.type(etree::feed::CTYPE_HTML);
+    // ...
 }
