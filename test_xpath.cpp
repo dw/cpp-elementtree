@@ -11,6 +11,37 @@
 #include "element.hpp"
 
 
+MU_TEST(contextConstructorNoNs)
+{
+    etree::XPathContext ctx;
+}
+
+
+MU_TEST(contextConstructor)
+{
+    etree::XPathContext ctx({
+      {"foo", "urn:foo"}
+    });
+}
+
+
+MU_TEST(contextNsListRespected)
+{
+    auto elem = etree::fromstring(
+        "<root><child xmlns=\"urn:foo\"/></root>"
+    );
+    etree::XPathContext ctx({
+        {"foo", "urn:foo"}
+    });
+
+    auto expr = etree::XPath("child", ctx);
+    assert(expr.findall(elem).size() == 0);
+
+    auto expr2 = etree::XPath("foo:child", ctx);
+    assert(expr2.findall(elem).size() == 1);
+}
+
+
 MU_TEST(Constructor)
 {
     auto xp = etree::XPath(".");

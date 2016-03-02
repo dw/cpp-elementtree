@@ -10,6 +10,8 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <mutex>
+
 
 #if __cplusplus >= 201103L
 #   include <initializer_list>
@@ -23,9 +25,11 @@
 
 // libxml forwards.
 struct _xmlAttr;
-struct _xmlNode;
 struct _xmlDoc;
+struct _xmlNode;
+struct _xmlNs;
 struct _xmlXPathCompExpr;
+struct _xmlXPathContext;
 
 
 /**
@@ -41,9 +45,12 @@ class Element;
 class ElementTree;
 class QName;
 class ChildIterator;
+class XPath;
+class XPathContext;
 
 #ifdef ETREE_0X
 typedef std::pair<string, string> kv_pair;
+typedef std::pair<string, string> ns_pair;
 typedef std::initializer_list<kv_pair> kv_list;
 #endif
 
@@ -413,10 +420,40 @@ class QName {
     bool operator!=(const QName &other) const;
 };
 
+
+/**
+ * Represent a list of namespaces and their associated prefixes that should be
+ * defined while executing an XPath expression.
+ */
+typedef std::vector<std::pair<std::string, std::string>> ns_list;
+
+
+/**
+ * Manages a set of registered XPath namespaces and extension functions. Note
+ * that this object is internally synchronized across threads, consider copying
+ * it in each thread.
+ */
+class XPathContext {
+    _xmlXPathContext *context_;
+    std::mutex mtx_;
+
+    // For mutex().
+    friend XPath;
+
+    public:
+    ~XPathContext();
+    XPathContext(const ns_list &ns_list = {});
+    XPathContext(const XPathContext &other);
+};
+
+
 /**
  * Manages a compiled XPath expression.
  */
 class XPath {
+    /** The context to execute within, or NULL for no context. */
+    const XPathContext *context_;
+
     /** The underlying compiled expression. */
     _xmlXPathCompExpr *expr_;
 
@@ -442,6 +479,16 @@ class XPath {
      * @param s         XPath expression.
      */
     XPath(const string &s);
+
+    /**
+     * Compile an expression from a STL string.
+     *
+     * @param s
+     *      XPath expression.
+     * @param context
+     *      XPathContext object.
+     */
+    XPath(const string &s, const XPathContext &context);
 
     /**
      * Copy an expression.

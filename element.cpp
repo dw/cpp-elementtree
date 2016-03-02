@@ -9,8 +9,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
-#include <unistd.h>
 #include <map>
+#include <mutex>
+#include <unistd.h>
 
 #include <libxml/HTMLparser.h>
 #include <libxml/parser.h>
@@ -666,18 +667,84 @@ QName::operator!=(const QName &other) const
 }
 
 
+// ----------------------
+// XPathContext functions
+// ----------------------
+
+
+static std::vector<Element>
+xpathNodesetToVector_(xmlNodeSet *set)
+{
+    std::vector<Element> out;
+    for(int i = 0; set && i < set->nodeNr; i++) {
+        xmlNode *node = set->nodeTab[i];
+        if(node->type == XML_ELEMENT_NODE) {
+            out.push_back(set->nodeTab[i]);
+        }
+    }
+    return out;
+}
+
+
+XPathContext::~XPathContext()
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    ::xmlXPathFreeContext(context_);
+    context_ = NULL;
+}
+
+
+XPathContext::XPathContext(const ns_list &ns_list)
+{
+    ::xmlResetLastError();
+
+    context_ = xmlXPathNewContext(NULL);
+    if(! context_) {
+        maybeThrow_();
+        throw internal_error();
+    }
+
+    for(auto &ns : ns_list) {
+        auto prefix = toXmlChar_(ns.first.c_str());
+        auto href = toXmlChar_(ns.second.c_str());
+        int rc = ::xmlXPathRegisterNs(context_, prefix, href);
+        if(rc) {
+            ::xmlXPathFreeContext(context_);
+            context_ = NULL;
+            maybeThrow_();
+            throw internal_error();
+        }
+    }
+}
+
+
+static ns_list
+xpathContextToNsList_(const _xmlXPathContext *context_)
+{
+    ns_list ns_list;
+
+    auto callback = [](void *payload, void *data, xmlChar *name) {
+        auto &ns_list = *reinterpret_cast<::etree::ns_list *>(data);
+        ns_list.emplace_back(reinterpret_cast<const char *>(name),
+                             reinterpret_cast<const char *>(payload));
+    };
+
+    auto context = const_cast<_xmlXPathContext *>(context_);
+    ::xmlHashScan(context->nsHash, callback, reinterpret_cast<void *>(&ns_list));
+
+    return ns_list;
+}
+
+
+XPathContext::XPathContext(const XPathContext &other)
+    : XPathContext(xpathContextToNsList_(other.context_))
+{
+}
+
+
 // ---------------
 // XPath functions
 // ---------------
-
-static xmlXPathCompExprPtr
-compileOrThrow(const string &s)
-{
-    ::xmlResetLastError();
-    xmlXPathCompExpr *expr = ::xmlXPathCompile(toXmlChar_(s.c_str()));
-    maybeThrow_();
-    return expr;
-}
 
 
 XPath::~XPath()
@@ -687,24 +754,31 @@ XPath::~XPath()
 
 
 XPath::XPath(const string &s)
+    : context_(NULL)
 {
-    expr_ = compileOrThrow(s);
+    ::xmlResetLastError();
+    expr_ = ::xmlXPathCompile(toXmlChar_(s.c_str()));
+    maybeThrow_();
     s_ = s;
 }
 
 
 XPath::XPath(const char *s)
+    : XPath(string(s))
 {
-    expr_ = compileOrThrow(s);
-    s_ = s;
 }
 
 
 XPath::XPath(const XPath &other)
+    : XPath(other.s_)
 {
-    // No _private, can't refcount.
-    expr_ = compileOrThrow(other.s_);
-    s_ = other.s_;
+}
+
+
+XPath::XPath(const string &s, const XPathContext &context)
+    : XPath(s)
+{
+    context_ = &context;
 }
 
 
@@ -718,8 +792,13 @@ XPath::expr() const
 XPath &
 XPath::operator =(const XPath &other)
 {
+    ::xmlResetLastError();
+    auto newExpr = ::xmlXPathCompile(toXmlChar_(other.s_.c_str()));
+    maybeThrow_();
+
     ::xmlXPathFreeCompExpr(expr_);
-    expr_ = compileOrThrow(other.s_);
+    expr_ = newExpr;
+
     s_ = other.s_;
     return *this;
 }
@@ -750,33 +829,31 @@ XPath::findtext(const Element &e, const string &default_) const
 std::vector<Element>
 XPath::findall(const Element &e) const
 {
-    std::vector<Element> out;
     xmlNode *node = nodeFor__<xmlNodePtr>(e);
-    xmlXPathContext *ctx = xmlXPathNewContext(node->doc);
-    if(! ctx) {
-        throw memory_error();
-    }
+    xmlXPathObject *res;
 
-    ctx->node = node;
-    xmlXPathObject *res = xmlXPathCompiledEval(expr_, ctx);
-    if(! res) {
-        ::xmlXPathFreeContext(ctx);
-        throw memory_error();
-    }
-
-    xmlNodeSet *set = res->nodesetval;
-    if(set) {
-        for(int i = 0; i < set->nodeNr; i++) {
-            xmlNode *node = set->nodeTab[i];
-            if(node->type == XML_ELEMENT_NODE) {
-                out.push_back(set->nodeTab[i]);
-            }
+    ::xmlResetLastError();
+    if(context_) {
+        auto context = const_cast<XPathContext *>(context_);
+        std::lock_guard<std::mutex> lock(context->mtx_);
+        context->context_->node = node;
+        res = xmlXPathCompiledEval(expr_, context->context_);
+    } else {
+        xmlXPathContext *ctx = xmlXPathNewContext(node->doc);
+        if(! ctx) {
+            throw memory_error();
         }
+        ctx->node = node;
+        res = xmlXPathCompiledEval(expr_, ctx);
+        ::xmlXPathFreeContext(ctx);
     }
 
+    if(! res) {
+        maybeThrow_();
+    }
+    auto out = xpathNodesetToVector_(res->nodesetval);
     //::xmlXPathDebugDumpObject(stdout, res, 0);
     ::xmlXPathFreeObject(res);
-    ::xmlXPathFreeContext(ctx);
     return out;
 }
 
