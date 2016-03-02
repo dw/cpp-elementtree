@@ -65,10 +65,34 @@ struct Test {
 };
 
 
+/**
+ * Internal descriptor for a function to be executed once during unit
+ * initialization.
+ */
+struct TestSetup {
+    test_func func;
+
+    TestSetup(test_func func_)
+        : func(func_)
+    {
+        TestSetup::getSetups().push_back(this);
+    }
+
+    static std::vector<TestSetup*> &getSetups() {
+        static std::vector<TestSetup*> setups;
+        return setups;
+    }
+};
+
+
 static inline int
 main(int argc, const char **argv)
 {
-    std::vector<Test *> filtered(Test::getTests());
+    for(auto setup : TestSetup::getSetups()) {
+        setup->func();
+    }
+
+    auto filtered(Test::getTests());
     filtered.erase(
         std::remove_if(filtered.begin(), filtered.end(),
             [&](const Test *x) {
@@ -165,6 +189,14 @@ raises(Expr expr)
 
 #define MU_DEBUG(x, ...) \
     fprintf(stderr, __FILE__ ": " x "\n", __VA_ARGS__);
+
+
+#define MU_SETUP(name) \
+    static void setup_##name(); \
+    namespace myunit { \
+        static TestSetup _##name##_testsetup (&setup_##name); \
+    } \
+    static void setup_##name()
 
 
 /**
