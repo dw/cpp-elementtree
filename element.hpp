@@ -1106,11 +1106,21 @@ class ChildIterator
  */
 template<typename Function>
 void
-visit(Element &elem, Function func)
+visit(const Element &start, Function func)
 {
-    func(elem);
-    for(auto &child : elem) {
-        visit(child, func);
+    Element e = start;
+    Nullable<Element> maybe;
+
+    for(;;) {
+        func(e);
+        if(! ((maybe = e.child()) ||
+              (maybe = e.getnext()) ||
+              ((maybe = e.getparent()) &&
+               (*maybe != start) &&
+               (maybe = maybe->getnext())))) {
+            return;
+        }
+        e = *maybe;
     }
 }
 
