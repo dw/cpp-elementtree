@@ -195,7 +195,11 @@ MU_TEST(rss20Create)
 {
     auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
     auto s = tostring(feed.element());
-    assert(s == "<rss/>");
+    assert(s == (
+        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" version=\"2.0\">"
+            "<channel/>"
+        "</rss>"
+    ));
 }
 
 
@@ -229,12 +233,15 @@ MU_TEST(rss20Append)
     auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
     auto item = feed.append();
     assert(tostring(feed.element()) == (
-        "<rss>"
-            "<entry>"
-                "<title/>"
-                "<link/>"
-                "<guid/>"
-            "</entry>"
+        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" version=\"2.0\">"
+            "<channel>"
+                "<item>"
+                    "<title/>"
+                    "<link/>"
+                    "<ns0:creator/>"
+                    "<guid/>"
+                "</item>"
+            "</channel>"
         "</rss>"
     ));
 }
@@ -300,12 +307,15 @@ MU_TEST(rss20ItemTitleSet)
     auto item = feed.append();
     item.title("Example Title");
     assert(tostring(feed.element()) == (
-        "<rss>"
-            "<entry>"
-                "<link/>"
-                "<guid/>"
-                "<title>Example Title</title>"
-            "</entry>"
+        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" version=\"2.0\">"
+            "<channel>"
+                "<item>"
+                    "<link/>"
+                    "<ns0:creator/>"
+                    "<guid/>"
+                    "<title>Example Title</title>"
+                "</item>"
+            "</channel>"
         "</rss>"
     ));
 }
@@ -361,12 +371,15 @@ MU_TEST(rss20ItemLinkSet)
     auto item = feed.append();
     item.link("http://www.example.com/");
     assert(tostring(feed.element()) == (
-        "<rss>"
-            "<entry>"
-                "<title/>"
-                "<guid/>"
-                "<link>http://www.example.com/</link>"
-            "</entry>"
+        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" version=\"2.0\">"
+            "<channel>"
+                "<item>"
+                    "<title/>"
+                    "<ns0:creator/>"
+                    "<guid/>"
+                    "<link>http://www.example.com/</link>"
+                "</item>"
+            "</channel>"
         "</rss>"
     ));
 }
@@ -423,13 +436,16 @@ MU_TEST(rss20ItemContentSet)
     auto item = feed.append();
     item.content("http://www.example.com/");
     assert(tostring(feed.element()) == (
-        "<rss>"
-            "<entry>"
-                "<title/>"
-                "<link/>"
-                "<guid/>"
-                "<description>http://www.example.com/</description>"
-            "</entry>"
+        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" version=\"2.0\">"
+            "<channel>"
+                "<item>"
+                    "<title/>"
+                    "<link/>"
+                    "<ns0:creator/>"
+                    "<guid/>"
+                    "<description>http://www.example.com/</description>"
+                "</item>"
+            "</channel>"
         "</rss>"
     ));
 }
@@ -499,4 +515,58 @@ MU_TEST(rss20ItemContentTypeSet)
     auto item = feed.append();
     item.type(etree::feed::CTYPE_HTML);
     // ...
+}
+
+
+//
+// Item::author()
+//
+
+
+MU_TEST(atomItemAuthor)
+{
+    auto feed = etree::feed::fromelement(atomFeed);
+    assert(feed.items()[0].author() == "Armin Rigo");
+}
+
+
+MU_TEST(atomItemAuthorSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+    auto item = feed.append();
+    item.author("My Author");
+    assert(tostring(item.element()) == (
+        "<entry>"
+            "<title type=\"text\"/>"
+            "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+            "<content type=\"html\"/>"
+            "<author>"
+                "<name>My Author</name>"
+            "</author>"
+            "<id/>"
+        "</entry>"
+    ));
+}
+
+
+MU_TEST(rss20ItemAuthor)
+{
+    auto feed = etree::feed::fromelement(rss20Feed);
+    assert(feed.items()[0].author() == "AlexiaSky");
+}
+
+
+MU_TEST(rss20ItemAuthorSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+    auto item = feed.append();
+    item.author("My Author");
+    assert(tostring(item.element()) == (
+        "<item>"
+            "<title/>"
+            "<link/>"
+            "<ns0:creator>My Author</ns0:creator>"
+            "<guid/>"
+        "</item>"
+    ));
 }

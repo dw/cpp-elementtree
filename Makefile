@@ -6,7 +6,7 @@ CXXFLAGS += -O2
 CXXFLAGS += -DNDEBUG
 endif
 
-CXXFLAGS += -g
+CXXFLAGS += -g -fno-omit-frame-pointer
 CXXFLAGS += -std=c++0x
 # CXXFLAGS += -stdlib=libc++
 CXXFLAGS += $(shell pkg-config --cflags libxml-2.0)

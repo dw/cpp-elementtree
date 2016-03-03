@@ -195,43 +195,63 @@ void Feed::append(Item item) {
 // Atom implementation
 // -------------------
 
-#define READER_NS "{http://www.google.com/schemas/reader/atom/}"
+#define READER_NS "http://www.google.com/schemas/reader/atom/"
+#define DUBLIN_CORE_NS "http://purl.org/dc/elements/1.1/"
 #define ATOM_NS "http://www.w3.org/2005/Atom"
 
-static const XPathContext kAtomContext = XPathContext(ns_list{
-    {"atom", ATOM_NS}
+static const XPathContext kContext(ns_list{
+    {"atom", ATOM_NS},
+    {"dc", DUBLIN_CORE_NS}
 });
 
 static const XPath kAtomLinkPath = XPath(
     "atom:link[@rel='alternate' and @type='text/html']",
-    kAtomContext);
+    kContext);
 static const XPath kAtomIconPath = XPath(
     "atom:icon | atom:image",
-    kAtomContext);
+    kContext);
 static const XPath kAtomEntryPath = XPath(
     "atom:entry",
-    kAtomContext);
+    kContext);
 static const XPath kAtomTitlePath = XPath(
     "atom:title",
-    kAtomContext);
+    kContext);
 static const XPath kAtomSubtitlePath = XPath(
     "atom:subtitle",
-    kAtomContext);
+    kContext);
+static const XPath kAtomContentPath = XPath(
+    "atom:content",
+    kContext);
+static const XPath kAtomAuthorPath(
+    "atom:author/atom:name",
+    kContext);
+static const XPath kRssLinkPath{"channel/link"};
+static const XPath kRssIconPath{"channel/image/url"};
+static const XPath kRssTitlePath{"channel/title"};
+static const XPath kRssItemContentPath{"description"};
+static const XPath kRssItemLinkPath{"link"};
+static const XPath kRssItemTitlePath{"title"};
+static const XPath kDublinCoreCreatorPath{"dc:creator", kContext};
 
-static const QName kAtomFeedTag(ATOM_NS, "feed");
-static const QName kAtomEntryTag(ATOM_NS, "entry");
+static const NameList kRssContentPath{"channel", "description"};
+static const NameList kRssItemPublishedPath{"pubDate"};
+static const NameList kRssItemDescrPath{"description"};
+static const NameList kRssItemGuidPath{"guid"};
+static const NameList kRssItemsPath{"channel", "item"};
+
+static const QName kAtomAuthorTag(ATOM_NS, "author");
 static const QName kAtomContentTag(ATOM_NS, "content");
+static const QName kAtomEntryTag(ATOM_NS, "entry");
+static const QName kAtomFeedTag(ATOM_NS, "feed");
+static const QName kAtomLinkTag(ATOM_NS, "link");
+static const QName kAtomNameTag(ATOM_NS, "name");
+static const QName kAtomRootTag(ATOM_NS, "feed");
+static const QName kAtomSubtitleTag(ATOM_NS, "subtitle");
 static const QName kAtomSummaryTag(ATOM_NS, "summary");
 static const QName kAtomTitleTag(ATOM_NS, "title");
-static const QName kAtomSubtitleTag(ATOM_NS, "subtitle");
-static const QName kAtomLinkTag(ATOM_NS, "link");
-static const QName kAtomRootTag(ATOM_NS, "feed");
 static const QName kAtomTypeAttr = "type";
-static const QName kAtomOriginalGuidAttr = READER_NS "original-id";
+static const QName kAtomOriginalGuidAttr{READER_NS, "original-id"};
 static const NameList kAtomSummaryPath{kAtomSummaryTag};
-static const NameList kAtomContentPath{kAtomContentTag};
-static const NameList kAtomAuthorPath({{ATOM_NS, "author"},
-                                       {ATOM_NS, "name"}});
 static const NameList kAtomGuidPath{{ATOM_NS, "id"}};
 static const NameList kAtomPublishedPath{{ATOM_NS, "published"}};
 
@@ -300,11 +320,9 @@ class AtomItemFormat
 
     void content(Element &e, const std::string &s) const
     {
-        Nullable<Element> content;
-        while((content = getContentTag_(e))) {
-            (*content).remove();
-        }
-        setText_(e, kAtomContentPath, s);
+        kAtomContentPath.removeall(e);
+        auto content = SubElement(e, kAtomContentTag);
+        content.text(s);
     }
 
     enum content_type type(const Element &e) const
@@ -327,12 +345,14 @@ class AtomItemFormat
 
     std::string author(const Element &e) const
     {
-        return getText_(e, kAtomAuthorPath);
+        return kAtomAuthorPath.findtext(e);
     }
 
     void author(Element &e, const std::string &s) const
     {
-        setText_(e, kAtomAuthorPath, s);
+        auto author = e.ensurechild(kAtomAuthorTag);
+        auto name = author.ensurechild(kAtomNameTag);
+        name.text(s);
     }
 
     std::string guid(const Element &e) const
@@ -473,18 +493,6 @@ struct AtomFeedFormat
 // Rss20Feed implementation
 // ------------------------
 //
-static const XPath kRssLinkPath{"channel/link"};
-static const XPath kRssIconPath{"channel/image/url"};
-static const XPath kRssTitlePath{"channel/title"};
-static const XPath kRssItemContentPath{"description"};
-static const XPath kRssItemLinkPath{"link"};
-static const XPath kRssItemTitlePath{"title"};
-
-static const NameList kRssContentPath{"channel", "description"};
-static const NameList kRssItemPublishedPath{"pubDate"};
-static const NameList kRssItemDescrPath{"description"};
-static const NameList kRssItemGuidPath{"guid"};
-static const NameList kRssItemsPath{"channel", "item"};
 
 
 static Element
@@ -549,11 +557,13 @@ class Rss20ItemFormat
 
     std::string author(const Element &e) const
     {
-        return "";
+        return kDublinCoreCreatorPath.findtext(e);
     }
 
     void author(Element &e, const std::string &s) const
     {
+        auto creator = e.ensurechild({DUBLIN_CORE_NS, "creator"});
+        creator.text(s);
     }
 
     std::string guid(const Element &e) const
@@ -591,7 +601,9 @@ class Rss20FeedFormat
 
     bool identify(const Element &e) const
     {
-        return e.tag() == "rss" && e.get("version", "2.0") == "2.0";
+        return (e.tag() == "rss" &&
+                e.get("version", "2.0") == "2.0" &&
+                e.child("channel"));
     }
 
     enum feed_format format() const
@@ -664,14 +676,19 @@ class Rss20FeedFormat
 
     Feed create() const
     {
-        return Feed(Rss20FeedFormat::instance,
-            Element("rss"));
+        auto rss = Element("rss", {
+            {"version", "2.0"}
+        });
+        rss.ensurens(DUBLIN_CORE_NS);
+        SubElement(rss, "channel");
+        return Feed(Rss20FeedFormat::instance, rss);
     }
 
     Item append(Element &e) const
     {
+        auto channel = getRssChannel_(e);
         return Item(Rss20ItemFormat::instance,
-            SubElement(e, kAtomEntryTag));
+            SubElement(channel, "item"));
     }
 };
 

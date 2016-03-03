@@ -248,7 +248,7 @@ MU_TEST(elemAppendMoveNsNested)
     auto root = etree::fromstring(DOC);
     auto root2 = etree::fromstring(DOC);
     root.append(*root2.find("person/name"));
-    TOSTRING(root)
+    // ASsert(0)
 }
 
 
