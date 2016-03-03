@@ -148,6 +148,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a class="el" href="classetree_1_1_child_iterator.html">ChildIterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#a7dc3605cc6af61c0f62e57e8e9137851">end</a> () const </td></tr>
 <tr class="memdesc:a7dc3605cc6af61c0f62e57e8e9137851"><td class="mdescLeft">&#160;</td><td class="mdescRight">Produce a <a class="el" href="classetree_1_1_child_iterator.html" title="Represents iteration position produced by Element::begin() and Element::end(). ">ChildIterator</a> pointing past the final child. <br /></td></tr>
 <tr class="separator:a7dc3605cc6af61c0f62e57e8e9137851"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fa7f7760d3a29f95e6e941216589c9c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1_element.html">Element</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#a8fa7f7760d3a29f95e6e941216589c9c">ensurechild</a> (const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;qn)</td></tr>
+<tr class="memdesc:a8fa7f7760d3a29f95e6e941216589c9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Like <a class="el" href="classetree_1_1_element.html#ae68e760847508f151b962c089033c5ee" title="Return the first child with the given name, if any. ">child()</a>, except appends the element if it was missing.  <a href="#a8fa7f7760d3a29f95e6e941216589c9c">More...</a><br /></td></tr>
+<tr class="separator:a8fa7f7760d3a29f95e6e941216589c9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaefe149333c54d77f8fb4969965a0772"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#aaefe149333c54d77f8fb4969965a0772">ensurens</a> (const string &amp;uri)</td></tr>
 <tr class="memdesc:aaefe149333c54d77f8fb4969965a0772"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ensure a namespace is in scope for this element, or is defined on this element.  <a href="#aaefe149333c54d77f8fb4969965a0772">More...</a><br /></td></tr>
 <tr class="separator:aaefe149333c54d77f8fb4969965a0772"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -425,6 +428,31 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 <p>Return all children. </p>
 <dl class="section return"><dt>Returns</dt><dd>Vector of elements. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a8fa7f7760d3a29f95e6e941216589c9c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classetree_1_1_element.html">Element</a> etree::Element::ensurechild </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;&#160;</td>
+          <td class="paramname"><em>qn</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Like <a class="el" href="classetree_1_1_element.html#ae68e760847508f151b962c089033c5ee" title="Return the first child with the given name, if any. ">child()</a>, except appends the element if it was missing. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">qn</td><td>Name of the child to create or locate. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The element. </dd></dl>
 
 </div>
 </div>
