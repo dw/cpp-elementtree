@@ -27,6 +27,12 @@ test_main: \
 		feed.o \
 		feed-util.o
 
+convert_feed: \
+	convert_feed.cpp \
+	element.o \
+	feed.o \
+	feed-util.o
+
 element.cpp: element.hpp
 feed.cpp: feed.hpp
 

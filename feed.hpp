@@ -192,6 +192,19 @@ class Item
      */
     void published(time_t published);
 
+    /**
+     * Return the item's updated date as a UNIX timestamp.
+     */
+    time_t updated() const;
+
+    /**
+     * Set the item's updated date as a UNIX timestamp.
+     *
+     * @param updated
+     *      updated date.
+     */
+    void updated(time_t updated);
+
     Element element() const;
 };
 

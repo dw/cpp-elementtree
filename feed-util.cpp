@@ -163,7 +163,7 @@ formatRfc822_(time_t t)
 {
     char buf[128];
     auto tm = gmtime(&t);
-    strftime(buf, sizeof buf, "%d %b %Y %H:%M:%S", tm);
+    strftime(buf, sizeof buf, "%a, %d %b %Y %H:%M:%S %z", tm);
     buf[sizeof buf - 1] = 0;
     return std::string(buf);
 }

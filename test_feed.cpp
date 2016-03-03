@@ -196,7 +196,9 @@ MU_TEST(rss20Create)
     auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
     auto s = tostring(feed.element());
     assert(s == (
-        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" version=\"2.0\">"
+        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                "version=\"2.0\">"
             "<channel/>"
         "</rss>"
     ));
@@ -223,6 +225,7 @@ MU_TEST(atomAppend)
                 "</author>"
                 "<id/>"
                 "<published>1970-01-01T00:00:00Z</published>"
+                "<updated>1970-01-01T00:00:00Z</updated>"
             "</entry>"
         "</feed>"
     ));
@@ -234,14 +237,17 @@ MU_TEST(rss20Append)
     auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
     auto item = feed.append();
     assert(tostring(feed.element()) == (
-        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" version=\"2.0\">"
+        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                "version=\"2.0\">"
             "<channel>"
                 "<item>"
                     "<title/>"
                     "<link/>"
                     "<ns0:creator/>"
-                    "<guid/>"
-                    "<pubDate>01 Jan 1970 00:00:00</pubDate>"
+                    "<guid isPermaLink=\"false\"/>"
+                    "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+                    "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
                 "</item>"
             "</channel>"
         "</rss>"
@@ -289,6 +295,7 @@ MU_TEST(atomItemTitleSet)
                 "</author>"
                 "<id/>"
                 "<published>1970-01-01T00:00:00Z</published>"
+                "<updated>1970-01-01T00:00:00Z</updated>"
                 "<title type=\"text\">Example Title</title>"
             "</entry>"
         "</feed>"
@@ -310,14 +317,17 @@ MU_TEST(rss20ItemTitleSet)
     auto item = feed.append();
     item.title("Example Title");
     assert(tostring(feed.element()) == (
-        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" version=\"2.0\">"
+        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                "version=\"2.0\">"
             "<channel>"
                 "<item>"
                     "<title>Example Title</title>"
                     "<link/>"
                     "<ns0:creator/>"
-                    "<guid/>"
-                    "<pubDate>01 Jan 1970 00:00:00</pubDate>"
+                    "<guid isPermaLink=\"false\"/>"
+                    "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+                    "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
                 "</item>"
             "</channel>"
         "</rss>"
@@ -354,6 +364,7 @@ MU_TEST(atomItemLinkSet)
                 "</author>"
                 "<id/>"
                 "<published>1970-01-01T00:00:00Z</published>"
+                "<updated>1970-01-01T00:00:00Z</updated>"
                 "<link rel=\"alternate\" type=\"text/html\" "
                     "href=\"http://www.example.com/\"/>"
             "</entry>"
@@ -376,14 +387,17 @@ MU_TEST(rss20ItemLinkSet)
     auto item = feed.append();
     item.link("http://www.example.com/");
     assert(tostring(feed.element()) == (
-        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" version=\"2.0\">"
+        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                "version=\"2.0\">"
             "<channel>"
                 "<item>"
                     "<title/>"
                     "<link>http://www.example.com/</link>"
                     "<ns0:creator/>"
-                    "<guid/>"
-                    "<pubDate>01 Jan 1970 00:00:00</pubDate>"
+                    "<guid isPermaLink=\"false\"/>"
+                    "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+                    "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
                 "</item>"
             "</channel>"
         "</rss>"
@@ -416,12 +430,13 @@ MU_TEST(atomItemContentSet)
             "<entry>"
                 "<title type=\"text\"/>"
                 "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                "<content type=\"html\">My content</content>"
                 "<author>"
                     "<name/>"
                 "</author>"
                 "<id/>"
                 "<published>1970-01-01T00:00:00Z</published>"
-                "<content type=\"html\">My content</content>"
+                "<updated>1970-01-01T00:00:00Z</updated>"
             "</entry>"
         "</feed>"
     ));
@@ -443,14 +458,17 @@ MU_TEST(rss20ItemContentSet)
     auto item = feed.append();
     item.content("http://www.example.com/");
     assert(tostring(feed.element()) == (
-        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" version=\"2.0\">"
+        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                "version=\"2.0\">"
             "<channel>"
                 "<item>"
                     "<title/>"
                     "<link/>"
                     "<ns0:creator/>"
-                    "<guid/>"
-                    "<pubDate>01 Jan 1970 00:00:00</pubDate>"
+                    "<guid isPermaLink=\"false\"/>"
+                    "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+                    "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
                     "<description>http://www.example.com/</description>"
                 "</item>"
             "</channel>"
@@ -483,12 +501,13 @@ MU_TEST(atomItemContentTypeSet)
             "<entry>"
                 "<title type=\"text\"/>"
                 "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                "<content type=\"html\"/>"
                 "<author>"
                     "<name/>"
                 "</author>"
                 "<id/>"
                 "<published>1970-01-01T00:00:00Z</published>"
-                "<content type=\"html\"/>"
+                "<updated>1970-01-01T00:00:00Z</updated>"
             "</entry>"
         "</feed>"
     ));
@@ -499,12 +518,13 @@ MU_TEST(atomItemContentTypeSet)
             "<entry>"
                 "<title type=\"text\"/>"
                 "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                "<content type=\"text\"/>"
                 "<author>"
                     "<name/>"
                 "</author>"
                 "<id/>"
                 "<published>1970-01-01T00:00:00Z</published>"
-                "<content type=\"text\"/>"
+                "<updated>1970-01-01T00:00:00Z</updated>"
             "</entry>"
         "</feed>"
     ));
@@ -555,6 +575,7 @@ MU_TEST(atomItemAuthorSet)
             "</author>"
             "<id/>"
             "<published>1970-01-01T00:00:00Z</published>"
+            "<updated>1970-01-01T00:00:00Z</updated>"
         "</entry>"
     ));
 }
@@ -577,8 +598,9 @@ MU_TEST(rss20ItemAuthorSet)
             "<title/>"
             "<link/>"
             "<ns0:creator>My Author</ns0:creator>"
-            "<guid/>"
-            "<pubDate>01 Jan 1970 00:00:00</pubDate>"
+            "<guid isPermaLink=\"false\"/>"
+            "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+            "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
         "</item>"
     ));
 }
@@ -614,6 +636,7 @@ MU_TEST(atomItemGuidSet)
             "</author>"
             "<id>x</id>"
             "<published>1970-01-01T00:00:00Z</published>"
+            "<updated>1970-01-01T00:00:00Z</updated>"
         "</entry>"
     ));
 }
@@ -636,8 +659,9 @@ MU_TEST(rss20ItemGuidSet)
             "<title/>"
             "<link/>"
             "<ns0:creator/>"
-            "<guid>x</guid>"
-            "<pubDate>01 Jan 1970 00:00:00</pubDate>"
+            "<guid isPermaLink=\"false\">x</guid>"
+            "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+            "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
         "</item>"
     ));
 }
@@ -671,6 +695,7 @@ MU_TEST(atomItemPublishedSet)
             "</author>"
             "<id/>"
             "<published>1970-01-01T00:00:01Z</published>"
+            "<updated>1970-01-01T00:00:00Z</updated>"
         "</entry>"
     ));
 }
@@ -693,8 +718,68 @@ MU_TEST(rss20ItemPublishedSet)
             "<title/>"
             "<link/>"
             "<ns0:creator/>"
-            "<guid/>"
-            "<pubDate>01 Jan 1970 00:00:01</pubDate>"
+            "<guid isPermaLink=\"false\"/>"
+            "<pubDate>Thu, 01 Jan 1970 00:00:01 +0000</pubDate>"
+            "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
+        "</item>"
+    ));
+}
+
+
+//
+// Item::updated()
+//
+
+
+MU_TEST(atomItemUpdated)
+{
+    auto feed = etree::feed::fromelement(atomFeed);
+    auto t = feed.items()[0].updated();
+    assert(feed.items()[0].updated() == 1456417492);
+}
+
+
+MU_TEST(atomItemUpdatedSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+    auto item = feed.append();
+    item.updated(1);
+    assert(tostring(item.element()) == (
+        "<entry>"
+            "<title type=\"text\"/>"
+            "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+            "<content type=\"html\"/>"
+            "<author>"
+                "<name/>"
+            "</author>"
+            "<id/>"
+            "<published>1970-01-01T00:00:00Z</published>"
+            "<updated>1970-01-01T00:00:01Z</updated>"
+        "</entry>"
+    ));
+}
+
+
+MU_TEST(rss20ItemUpdated)
+{
+    auto feed = etree::feed::fromelement(rss20Feed);
+    assert(feed.items()[0].updated() == 0);
+}
+
+
+MU_TEST(rss20ItemUpdatedSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+    auto item = feed.append();
+    item.updated(1);
+    assert(tostring(item.element()) == (
+        "<item>"
+            "<title/>"
+            "<link/>"
+            "<ns0:creator/>"
+            "<guid isPermaLink=\"false\"/>"
+            "<pubDate>Thu, 01 Jan 1970 00:00:01 +0000</pubDate>"
+            "<ns1:updated>1970-01-01T00:00:01Z</ns1:updated>"
         "</item>"
     ));
 }

@@ -54,6 +54,9 @@ static const XPath kAtomGuidPath(
 static const XPath kAtomPublishedPath(
     "atom:published",
     kContext);
+static const XPath kAtomUpdatedPath(
+    "atom:updated",
+    kContext);
 
 static const XPath kDublinCoreCreatorPath{"dc:creator", kContext};
 static const XPath kRssIconPath{"channel/image/url"};
@@ -77,6 +80,7 @@ static const QName kAtomRootTag(ATOM_NS, "feed");
 static const QName kAtomSubtitleTag(ATOM_NS, "subtitle");
 static const QName kAtomSummaryTag(ATOM_NS, "summary");
 static const QName kAtomTitleTag(ATOM_NS, "title");
+static const QName kAtomUpdatedTag(ATOM_NS, "updated");
 
 
 // ----------------
@@ -129,6 +133,8 @@ class ItemFormat
     virtual std::string originalGuid(const Element &) const = 0;
     virtual time_t published(const Element &) const = 0;
     virtual void published(Element &, time_t) const = 0;
+    virtual time_t updated(const Element &) const = 0;
+    virtual void updated(Element &, time_t) const = 0;
 };
 
 
@@ -234,6 +240,18 @@ Item::published() const {
 void
 Item::published(time_t published) {
     format_.published(elem_, published);
+}
+
+
+time_t
+Item::updated() const {
+    return format_.updated(elem_);
+}
+
+
+void
+Item::updated(time_t updated) {
+    format_.updated(elem_, updated);
 }
 
 
@@ -357,8 +375,7 @@ class AtomItemFormat
 
     void content(Element &e, const std::string &s) const
     {
-        kAtomContentPath.removeall(e);
-        auto content = SubElement(e, kAtomContentTag);
+        auto content = e.ensurechild(kAtomContentTag);
         content.text(s);
     }
 
@@ -423,6 +440,23 @@ class AtomItemFormat
     {
         auto s = formatIso8601_(t);
         e.ensurechild(kAtomPublishedTag).text(s);
+        if(! updated(e)) {
+            updated(e, t);
+        }
+    }
+
+    time_t updated(const Element &e) const
+    {
+        return parseIso8601Date_(kAtomUpdatedPath.findtext(e));
+    }
+
+    void updated(Element &e, time_t t) const
+    {
+        auto s = formatIso8601_(t);
+        e.ensurechild(kAtomUpdatedTag).text(s);
+        if(! published(e)) {
+            published(e, t);
+        }
     }
 };
 
@@ -607,7 +641,9 @@ class Rss20ItemFormat
 
     void guid(Element &e, const std::string &s) const
     {
-        e.ensurechild("guid").text(s);
+        auto guid = e.ensurechild("guid");
+        guid.attrib().set("isPermaLink", "false");
+        guid.text(s);
     }
 
     std::string originalGuid(const Element &e) const
@@ -624,6 +660,23 @@ class Rss20ItemFormat
     {
         auto s = formatRfc822_(t);
         e.ensurechild("pubDate").text(s);
+        if(! updated(e)) {
+            updated(e, t);
+        }
+    }
+
+    time_t updated(const Element &e) const
+    {
+        return parseIso8601Date_(kAtomUpdatedPath.findtext(e));
+    }
+
+    void updated(Element &e, time_t t) const
+    {
+        auto s = formatIso8601_(t);
+        e.ensurechild(kAtomUpdatedTag).text(s);
+        if(! published(e)) {
+            published(e, t);
+        }
     }
 };
 
@@ -718,6 +771,7 @@ class Rss20FeedFormat
             {"version", "2.0"}
         });
         rss.ensurens(DUBLIN_CORE_NS);
+        rss.ensurens(ATOM_NS);
         SubElement(rss, "channel");
         return Feed(Rss20FeedFormat::instance, rss);
     }
