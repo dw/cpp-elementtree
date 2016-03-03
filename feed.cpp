@@ -15,8 +15,6 @@ namespace feed {
 
 using namespace etree;
 
-typedef const std::vector<QName> NameList;
-
 
 // ----------------
 // Helper functions
@@ -27,55 +25,6 @@ template<typename T>
 const FeedFormat &formatFor__(const T &item)
 {
     return item.format_;
-}
-
-static Element getChild_(Element &parent, const QName &qn)
-{
-    Nullable<Element> maybe = parent.child(qn);
-    return maybe ? *maybe : SubElement(parent, qn);
-}
-
-
-static std::string getText_(const Element cur, const NameList &names)
-{
-    for(int i = 0; i < names.size(); i++) {
-        Nullable<Element> maybe = cur.child(names[i]);
-        if(! maybe) {
-            return "";
-        }
-        const_cast<Element &>(cur) = *maybe;
-    }
-    return cur.text();
-}
-
-
-static void setText_(Element cur, const NameList &names, const std::string &s)
-{
-    for(int i = 0; i < names.size(); i++) {
-        cur = getChild_(cur, names[i]);
-    }
-    cur.text(s);
-}
-
-
-static std::vector<Item> itemsFromPath_(const ItemFormat &format,
-    const Element &elem, const NameList &names)
-{
-    std::vector<Item> out;
-
-    Element cur = const_cast<Element&>(elem);
-    for(int i = 0; i < (names.size() - 1); i++) {
-        Nullable<Element> maybe = cur.child(names[i]);
-        if(! maybe) {
-            return out;
-        }
-        cur = *maybe;
-    }
-
-    for(auto &elem : cur.children(names.back())) {
-        out.push_back(Item(format, elem));
-    }
-    return out;
 }
 
 
@@ -225,35 +174,34 @@ static const XPath kAtomContentPath = XPath(
 static const XPath kAtomAuthorPath(
     "atom:author/atom:name",
     kContext);
-static const XPath kRssLinkPath{"channel/link"};
-static const XPath kRssIconPath{"channel/image/url"};
-static const XPath kRssTitlePath{"channel/title"};
-static const XPath kRssItemContentPath{"description"};
-static const XPath kRssItemLinkPath{"link"};
-static const XPath kRssItemTitlePath{"title"};
-static const XPath kDublinCoreCreatorPath{"dc:creator", kContext};
+static const XPath kAtomGuidPath(
+    "atom:id",
+    kContext);
+static const XPath kAtomPublishedPath(
+    "atom:published",
+    kContext);
 
-static const NameList kRssContentPath{"channel", "description"};
-static const NameList kRssItemPublishedPath{"pubDate"};
-static const NameList kRssItemDescrPath{"description"};
-static const NameList kRssItemGuidPath{"guid"};
-static const NameList kRssItemsPath{"channel", "item"};
+static const XPath kDublinCoreCreatorPath{"dc:creator", kContext};
+static const XPath kRssIconPath{"channel/image/url"};
+static const XPath kRssItemContentPath{"description"};
+static const XPath kRssItemGuidPath{"guid"};
+static const XPath kRssPublishedPath{"pubDate"};
+static const XPath kRssItemsPath{"channel/item"};
+static const XPath kRssLinkPath{"link"};
+static const XPath kRssTitlePath{"title"};
 
 static const QName kAtomAuthorTag(ATOM_NS, "author");
 static const QName kAtomContentTag(ATOM_NS, "content");
 static const QName kAtomEntryTag(ATOM_NS, "entry");
 static const QName kAtomFeedTag(ATOM_NS, "feed");
+static const QName kAtomIdTag(ATOM_NS, "id");
 static const QName kAtomLinkTag(ATOM_NS, "link");
 static const QName kAtomNameTag(ATOM_NS, "name");
+static const QName kAtomOriginalGuidAttr{READER_NS, "original-id"};
 static const QName kAtomRootTag(ATOM_NS, "feed");
 static const QName kAtomSubtitleTag(ATOM_NS, "subtitle");
 static const QName kAtomSummaryTag(ATOM_NS, "summary");
 static const QName kAtomTitleTag(ATOM_NS, "title");
-static const QName kAtomTypeAttr = "type";
-static const QName kAtomOriginalGuidAttr{READER_NS, "original-id"};
-static const NameList kAtomSummaryPath{kAtomSummaryTag};
-static const NameList kAtomGuidPath{{ATOM_NS, "id"}};
-static const NameList kAtomPublishedPath{{ATOM_NS, "published"}};
 
 
 class AtomItemFormat
@@ -329,7 +277,7 @@ class AtomItemFormat
     {
         Nullable<Element> content = e.child(kAtomContentTag);
         if(content) {
-            std::string type = (*content).get(kAtomTypeAttr);
+            std::string type = (*content).get("type");
             if(type == "html" || type == "xhtml") {
                 return CTYPE_HTML;
             }
@@ -340,7 +288,7 @@ class AtomItemFormat
     void type(Element &e, enum content_type type) const
     {
         const char *s = (type == CTYPE_HTML) ? "html" : "text";
-        getChild_(e, kAtomContentTag).attrib().set(kAtomTypeAttr, s);
+        e.ensurechild(kAtomContentTag).attrib().set("type", s);
     }
 
     std::string author(const Element &e) const
@@ -357,12 +305,12 @@ class AtomItemFormat
 
     std::string guid(const Element &e) const
     {
-        return getText_(e, kAtomGuidPath);
+        return kAtomGuidPath.findtext(e);
     }
 
     void guid(Element &e, const std::string &s) const
     {
-        setText_(e, kAtomGuidPath, s);
+        e.ensurechild(kAtomIdTag).text(s);
     }
 
     std::string originalGuid(const Element &e) const
@@ -379,7 +327,7 @@ class AtomItemFormat
 
     time_t published(const Element &e) const
     {
-        return parseIso8601Date_(getText_(e, kAtomPublishedPath));
+        return parseIso8601Date_(kAtomPublishedPath.findtext(e));
     }
 
     void published(Element &e, time_t) const
@@ -495,14 +443,14 @@ struct AtomFeedFormat
 //
 
 
-static Element
-getRssChannel_(Element &e)
+static string
+channelFindText_(const Element &e, const XPath &xp)
 {
     auto maybe = e.child("channel");
     if(maybe) {
-        return *maybe;
+        return xp.findtext(*maybe);
     }
-    return SubElement(e, "channel");
+    return "";
 }
 
 
@@ -514,24 +462,22 @@ class Rss20ItemFormat
 
     std::string title(const Element &e) const
     {
-        return kRssItemTitlePath.findtext(e);
+        return kRssTitlePath.findtext(e);
     }
 
     void title(Element &e, const std::string &s) const
     {
-        kRssItemTitlePath.removeall(e);
-        SubElement(e, "title").text(s);
+        e.ensurechild("title").text(s);
     }
 
     std::string link(const Element &e) const
     {
-        return kRssItemLinkPath.findtext(e);
+        return kRssLinkPath.findtext(e);
     }
 
     void link(Element &e, const std::string &s) const
     {
-        kRssItemLinkPath.removeall(e);
-        SubElement(e, "link").text(s);
+        e.ensurechild("link").text(s);
     }
 
     std::string content(const Element &e) const
@@ -541,8 +487,7 @@ class Rss20ItemFormat
 
     void content(Element &e, const std::string &s) const
     {
-        kRssItemContentPath.removeall(e);
-        SubElement(e, "description").text(s);
+        e.ensurechild("description").text(s);
     }
 
     enum content_type type(const Element &e) const
@@ -568,12 +513,12 @@ class Rss20ItemFormat
 
     std::string guid(const Element &e) const
     {
-        return getText_(e, kRssItemGuidPath);
+        return kRssItemGuidPath.findtext(e);
     }
 
     void guid(Element &e, const std::string &s) const
     {
-        setText_(e, kRssItemGuidPath, s);
+        e.ensurechild("guid").text(s);
     }
 
     std::string originalGuid(const Element &e) const
@@ -583,7 +528,7 @@ class Rss20ItemFormat
 
     time_t published(const Element &e) const
     {
-        return parseRfc822Date_(getText_(e, kRssItemPublishedPath));
+        return parseRfc822Date_(kRssPublishedPath.findtext(e));
     }
 
     void published(Element &e, time_t) const
@@ -613,36 +558,35 @@ class Rss20FeedFormat
 
     std::string title(const Element &e) const
     {
-        return kRssTitlePath.findtext(e);
+        return channelFindText_(e, kRssTitlePath);
     }
 
     void title(Element &e, const std::string &s) const
     {
-        kRssTitlePath.removeall(e);
-        auto channel = getRssChannel_(e);
-        SubElement(channel, "title").text(s);
+        auto chan = e.ensurechild("channel");
+        chan.ensurechild("title").text(s);
     }
 
     std::string link(const Element &e) const
     {
-        return kRssLinkPath.findtext(e);
+        return channelFindText_(e, kRssLinkPath);
     }
 
     void link(Element &e, const std::string &s) const
     {
-        kRssLinkPath.removeall(e);
-        auto channel = getRssChannel_(e);
-        SubElement(channel, "link").text(s);
+        auto chan = e.ensurechild("channel");
+        chan.ensurechild("link").text(s);
     }
 
     std::string description(const Element &e) const
     {
-        return getText_(e, kRssContentPath);
+        return channelFindText_(e, kRssItemContentPath);
     }
 
     void description(Element &e, const std::string &s) const
     {
-        setText_(e, kRssContentPath, s);
+        auto chan = e.ensurechild("channel");
+        chan.ensurechild("description").text(s);
     }
 
     std::string icon(const Element &e) const
@@ -656,7 +600,7 @@ class Rss20FeedFormat
 
     time_t published(const Element &e) const
     {
-        return parseRfc822Date_(getText_(e, kRssItemPublishedPath));
+        return parseRfc822Date_(kRssPublishedPath.findtext(e));
     }
 
     void published(Element &e, time_t) const
@@ -671,7 +615,11 @@ class Rss20FeedFormat
 
     std::vector<Item> items(const Element &e) const
     {
-        return itemsFromPath_(Rss20ItemFormat::instance, e, kRssItemsPath);
+        std::vector<Item> out;
+        for(auto &elem : kRssItemsPath.findall(e)) {
+            out.push_back(Item(Rss20ItemFormat::instance, elem));
+        }
+        return out;
     }
 
     Feed create() const
@@ -686,9 +634,9 @@ class Rss20FeedFormat
 
     Item append(Element &e) const
     {
-        auto channel = getRssChannel_(e);
+        auto chan = e.ensurechild("channel");
         return Item(Rss20ItemFormat::instance,
-            SubElement(channel, "item"));
+            SubElement(chan, "item"));
     }
 };
 
