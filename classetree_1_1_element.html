@@ -131,6 +131,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a class="el" href="classetree_1_1_child_iterator.html">ChildIterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#a565125f576e9c0e8bdeb5e60825e1dbb">begin</a> () const </td></tr>
 <tr class="memdesc:a565125f576e9c0e8bdeb5e60825e1dbb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Produce a <a class="el" href="classetree_1_1_child_iterator.html" title="Represents iteration position produced by Element::begin() and Element::end(). ">ChildIterator</a> pointing at the first child. <br /></td></tr>
 <tr class="separator:a565125f576e9c0e8bdeb5e60825e1dbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7cafb7a54a741e837229a79a4bcc46bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1_nullable.html">Nullable</a>&lt; <a class="el" href="classetree_1_1_element.html">Element</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#a7cafb7a54a741e837229a79a4bcc46bc">child</a> () const </td></tr>
+<tr class="memdesc:a7cafb7a54a741e837229a79a4bcc46bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the first, if any exist.  <a href="#a7cafb7a54a741e837229a79a4bcc46bc">More...</a><br /></td></tr>
+<tr class="separator:a7cafb7a54a741e837229a79a4bcc46bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae68e760847508f151b962c089033c5ee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1_nullable.html">Nullable</a>&lt; <a class="el" href="classetree_1_1_element.html">Element</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#ae68e760847508f151b962c089033c5ee">child</a> (const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;qn) const </td></tr>
 <tr class="memdesc:ae68e760847508f151b962c089033c5ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the first child matching a name, if any exist.  <a href="#ae68e760847508f151b962c089033c5ee">More...</a><br /></td></tr>
 <tr class="separator:ae68e760847508f151b962c089033c5ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -149,7 +152,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memdesc:a7dc3605cc6af61c0f62e57e8e9137851"><td class="mdescLeft">&#160;</td><td class="mdescRight">Produce a <a class="el" href="classetree_1_1_child_iterator.html" title="Represents iteration position produced by Element::begin() and Element::end(). ">ChildIterator</a> pointing past the final child. <br /></td></tr>
 <tr class="separator:a7dc3605cc6af61c0f62e57e8e9137851"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8fa7f7760d3a29f95e6e941216589c9c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1_element.html">Element</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#a8fa7f7760d3a29f95e6e941216589c9c">ensurechild</a> (const <a class="el" href="classetree_1_1_q_name.html">QName</a> &amp;qn)</td></tr>
-<tr class="memdesc:a8fa7f7760d3a29f95e6e941216589c9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Like <a class="el" href="classetree_1_1_element.html#ae68e760847508f151b962c089033c5ee" title="Return the first child matching a name, if any exist. ">child()</a>, except appends the element if it was missing.  <a href="#a8fa7f7760d3a29f95e6e941216589c9c">More...</a><br /></td></tr>
+<tr class="memdesc:a8fa7f7760d3a29f95e6e941216589c9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Like <a class="el" href="classetree_1_1_element.html#a7cafb7a54a741e837229a79a4bcc46bc" title="Return the first, if any exist. ">child()</a>, except appends the element if it was missing.  <a href="#a8fa7f7760d3a29f95e6e941216589c9c">More...</a><br /></td></tr>
 <tr class="separator:a8fa7f7760d3a29f95e6e941216589c9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaefe149333c54d77f8fb4969965a0772"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#aaefe149333c54d77f8fb4969965a0772">ensurens</a> (const string &amp;uri)</td></tr>
 <tr class="memdesc:aaefe149333c54d77f8fb4969965a0772"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ensure a namespace is in scope for this element, or is defined on this element.  <a href="#aaefe149333c54d77f8fb4969965a0772">More...</a><br /></td></tr>
@@ -182,6 +185,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a class="el" href="classetree_1_1_element_tree.html">ElementTree</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#a7f5f1c4143b67ca5ac2b9c02a3ad4120">getroottree</a> () const </td></tr>
 <tr class="memdesc:a7f5f1c4143b67ca5ac2b9c02a3ad4120"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the <a class="el" href="classetree_1_1_element_tree.html" title="Represents a reference to the root of an XML tree, the document itself. ">ElementTree</a> this element belongs to. <br /></td></tr>
 <tr class="separator:a7f5f1c4143b67ca5ac2b9c02a3ad4120"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae4ffb0d604b108a3b49c2a686fd9a48"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#aae4ffb0d604b108a3b49c2a686fd9a48">graft</a> ()</td></tr>
+<tr class="memdesc:aae4ffb0d604b108a3b49c2a686fd9a48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove this element from its parent, moving any child nodes to the element's old place in the DOM tree.  <a href="#aae4ffb0d604b108a3b49c2a686fd9a48">More...</a><br /></td></tr>
+<tr class="separator:aae4ffb0d604b108a3b49c2a686fd9a48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e4655b8e6bfda2424a58328ba76c11b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_element.html#a3e4655b8e6bfda2424a58328ba76c11b">insert</a> (size_t i, <a class="el" href="classetree_1_1_element.html">Element</a> &amp;e)</td></tr>
 <tr class="memdesc:a3e4655b8e6bfda2424a58328ba76c11b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert an element as a child of this element at a specific position.  <a href="#a3e4655b8e6bfda2424a58328ba76c11b">More...</a><br /></td></tr>
 <tr class="separator:a3e4655b8e6bfda2424a58328ba76c11b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -363,6 +369,24 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
+<a class="anchor" id="a7cafb7a54a741e837229a79a4bcc46bc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classetree_1_1_nullable.html">Nullable</a>&lt; <a class="el" href="classetree_1_1_element.html">Element</a> &gt; etree::Element::child </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return the first, if any exist. </p>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classetree_1_1_element.html" title="Represents a reference to a single XML element. ">Element</a>, if any, otherwise an empty nullable. </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="ae68e760847508f151b962c089033c5ee"></a>
 <div class="memitem">
 <div class="memproto">
@@ -445,7 +469,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
       </table>
 </div><div class="memdoc">
 
-<p>Like <a class="el" href="classetree_1_1_element.html#ae68e760847508f151b962c089033c5ee" title="Return the first child matching a name, if any exist. ">child()</a>, except appends the element if it was missing. </p>
+<p>Like <a class="el" href="classetree_1_1_element.html#a7cafb7a54a741e837229a79a4bcc46bc" title="Return the first, if any exist. ">child()</a>, except appends the element if it was missing. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">qn</td><td>Name of the child to create or locate. </td></tr>
@@ -601,6 +625,24 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>String attribute value, or the default. </dd></dl>
 
+</div>
+</div>
+<a class="anchor" id="aae4ffb0d604b108a3b49c2a686fd9a48"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::Element::graft </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Remove this element from its parent, moving any child nodes to the element's old place in the DOM tree. </p>
+<p>You cannot graft the root node.</p>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> elem = <a class="code" href="namespaceetree.html#a2a2b6a496c64fe10b5ebfc489e208217">etree::fromstring</a>(</div><div class="line">    <span class="stringliteral">&quot;&lt;root&gt;&quot;</span></div><div class="line">        <span class="stringliteral">&quot;&lt;tag1/&gt; Hello&quot;</span></div><div class="line">        <span class="stringliteral">&quot;&lt;tag2&gt;&quot;</span></div><div class="line">            <span class="stringliteral">&quot;&lt;tag3/&gt;&quot;</span></div><div class="line">        <span class="stringliteral">&quot;&lt;/tag2&gt; there&quot;</span></div><div class="line">    <span class="stringliteral">&quot;&lt;/root&gt;&quot;</span></div><div class="line">);</div><div class="line">elem.child(<span class="stringliteral">&quot;tag2&quot;</span>)-&gt;graft();</div><div class="line">assert(<a class="code" href="namespaceetree.html#a9af8da3c2473806c6f5d0f82e39ef252">etree::tostring</a>(elem) == (</div><div class="line">    <span class="stringliteral">&quot;&lt;root&gt;&quot;</span></div><div class="line">        <span class="stringliteral">&quot;&lt;tag1/&gt; Hello&quot;</span></div><div class="line">        <span class="stringliteral">&quot;&lt;tag3/&gt; there&quot;</span></div><div class="line">    <span class="stringliteral">&quot;&lt;/root&gt;&quot;</span></div><div class="line">));</div></div><!-- fragment --> 
 </div>
 </div>
 <a class="anchor" id="a3e4655b8e6bfda2424a58328ba76c11b"></a>

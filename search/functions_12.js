@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['value',['value',['../classetree_1_1_attribute.html#a2c95c0642bcc00561f7717efee9d4fac',1,'etree::Attribute']]],
-  ['visit',['visit',['../namespaceetree.html#af02a0910b28f9a60b8b0e32cf797ff8b',1,'etree']]]
+  ['updated',['updated',['../classetree_1_1feed_1_1_item.html#a168a484ca91fbe41371528cc4c8a5a65',1,'etree::feed::Item::updated() const '],['../classetree_1_1feed_1_1_item.html#a56b6be148eb1b8799a3ff719e5c8c312',1,'etree::feed::Item::updated(time_t updated)']]]
 ];

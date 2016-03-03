@@ -159,6 +159,13 @@ enum <a class="el" href="namespaceetree_1_1feed.html#a6e62e8519e23dff25a60512a41
 <tr class="memitem:aa757ca95883620c6b2d607dbc72ad4b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#aa757ca95883620c6b2d607dbc72ad4b2">type</a> (enum <a class="el" href="namespaceetree_1_1feed.html#a6e62e8519e23dff25a60512a413dc228">content_type</a>)</td></tr>
 <tr class="memdesc:aa757ca95883620c6b2d607dbc72ad4b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the item content's content type.  <a href="#aa757ca95883620c6b2d607dbc72ad4b2">More...</a><br /></td></tr>
 <tr class="separator:aa757ca95883620c6b2d607dbc72ad4b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a168a484ca91fbe41371528cc4c8a5a65"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a168a484ca91fbe41371528cc4c8a5a65"></a>
+time_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#a168a484ca91fbe41371528cc4c8a5a65">updated</a> () const </td></tr>
+<tr class="memdesc:a168a484ca91fbe41371528cc4c8a5a65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the item's updated date as a UNIX timestamp. <br /></td></tr>
+<tr class="separator:a168a484ca91fbe41371528cc4c8a5a65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56b6be148eb1b8799a3ff719e5c8c312"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_item.html#a56b6be148eb1b8799a3ff719e5c8c312">updated</a> (time_t updated)</td></tr>
+<tr class="memdesc:a56b6be148eb1b8799a3ff719e5c8c312"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the item's updated date as a UNIX timestamp.  <a href="#a56b6be148eb1b8799a3ff719e5c8c312">More...</a><br /></td></tr>
+<tr class="separator:a56b6be148eb1b8799a3ff719e5c8c312"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Represent a single feed item. </p>
@@ -344,6 +351,30 @@ enum <a class="el" href="namespaceetree_1_1feed.html#a6e62e8519e23dff25a60512a41
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">content_type</td><td>New content type. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a56b6be148eb1b8799a3ff719e5c8c312"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void etree::feed::Item::updated </td>
+          <td>(</td>
+          <td class="paramtype">time_t&#160;</td>
+          <td class="paramname"><em>updated</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the item's updated date as a UNIX timestamp. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">updated</td><td>updated date. </td></tr>
   </table>
   </dd>
 </dl>

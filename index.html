@@ -96,6 +96,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <ul>
 <li>Given the choice of repeatedly heap-allocating potentially short-lived proxies, or casting a <code>void *</code> for use as an integer, the latter path was chosen.</li>
 </ul>
+<h3>Object Sizes</h3>
+<p>Element objects are one word, i.e. 8 bytes on 64bit, and may be copied very cheaply. Copying an element copies only this word and causes a reference count to be incremented.</p>
+<h3>Reference Counting</h3>
+<p>Element, ElementTree and AttrMap each call ref() during construction and unref() during destruction.</p>
+<p>When called on a non-document node, ref() treats the node's private user data pointer as an integer and increments it. If it was previously 0, ref() calls ref() again on the node's document.</p>
+<p>When called on a non-documnt node, unref() decrements the pointer. When it reaches 0, unref() calls unref() again on the node's document.</p>
+<p>When unref() on a document node reaches zero, ::xmlFreeDoc() is invoked to destroy the document.</p>
+<p>Due to this approach, it is possible to update a node's associated document (e.g. during append(), remove(), graft()) without having to update every Element value in existence, since regardless of how many exist, only one ref() was ever called on the node document. Once an element has moved to a new document, the mutation function need only call unref() once on the old document and ref() once on the new document.</p>
 <h2>TODO</h2>
 <ul>
 <li>Remove items from <em>Horrors</em> section.</li>
@@ -104,7 +112,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>Disable libxml2 stderr logs (seemingly requires TLS tricks).</li>
 <li>Fix up const usage everywhere (findall/removeall/etc)</li>
 <li>Internally copy XPathContext for each thread (e.g. boost::thread_local_ptr)</li>
-<li><a class="el" href="namespaceetree.html#a9af8da3c2473806c6f5d0f82e39ef252" title="Serialize an element. ">etree::tostring()</a> should copy up namespaces to subelements like lxml </li>
+<li><a class="el" href="namespaceetree.html#a9af8da3c2473806c6f5d0f82e39ef252" title="Serialize an element. ">etree::tostring()</a> should copy up namespaces to subelements like lxml</li>
+<li>Make child/attr iterators mutation-safe</li>
+<li>Handle comments better.</li>
+<li>Rewrite &amp; better tests for Element::graft(). </li>
 </ul>
 </div></div><!-- contents -->
 <!-- start footer part -->
