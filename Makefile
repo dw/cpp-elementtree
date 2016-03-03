@@ -39,6 +39,12 @@ convert_feed: \
 	feed.o \
 	feed-util.o
 
+sanitize: \
+	sanitize.cpp \
+	element.o \
+	feed.o \
+	feed-util.o
+
 element.cpp: element.hpp
 feed.cpp: feed.hpp
 
