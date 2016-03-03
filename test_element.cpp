@@ -829,3 +829,28 @@ MU_TEST(elemFindtextDefault)
     auto elem = etree::fromstring("<root><name>David</name></root>");
     assert("Unknown" == elem.findtext("age", "Unknown"));
 }
+
+
+//
+// Element::graft()
+//
+
+
+MU_TEST(graft)
+{
+    auto elem = etree::fromstring(
+        "<root>"
+            "<tag1/> Hello"
+            "<tag2>"
+                "<tag3/>"
+            "</tag2> there"
+        "</root>"
+    );
+    elem.child("tag2")->graft();
+    assert(etree::tostring(elem) == (
+        "<root>"
+            "<tag1/> Hello"
+            "<tag3/> there"
+        "</root>"
+    ));
+}

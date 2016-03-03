@@ -989,6 +989,30 @@ class Element
     void remove();
 
     /**
+     * Remove this element from its parent, moving any child nodes to the
+     * element's old place in the DOM tree. You cannot graft the root node.
+     *
+     * \code{.cpp}
+     *      auto elem = etree::fromstring(
+     *          "<root>"
+     *              "<tag1/> Hello"
+     *              "<tag2>"
+     *                  "<tag3/>"
+     *              "</tag2> there"
+     *          "</root>"
+     *      );
+     *      elem.child("tag2")->graft();
+     *      assert(etree::tostring(elem) == (
+     *          "<root>"
+     *              "<tag1/> Hello"
+     *              "<tag3/> there"
+     *          "</root>"
+     *      ));
+     * \endcode
+     */
+    void graft();
+
+    /**
      * Copy this element and all elements below it to a new document, returning
      * a reference to the newly copied element.
      */
@@ -1106,21 +1130,11 @@ class ChildIterator
  */
 template<typename Function>
 void
-visit(const Element &start, Function func)
+visit(Element elem, Function func)
 {
-    Element e = start;
-    Nullable<Element> maybe;
-
-    for(;;) {
-        func(e);
-        if(! ((maybe = e.child()) ||
-              (maybe = e.getnext()) ||
-              ((maybe = e.getparent()) &&
-               (*maybe != start) &&
-               (maybe = maybe->getnext())))) {
-            return;
-        }
-        e = *maybe;
+    func(elem);
+    for(auto &child : elem.children()) {
+        visit(child, func);
     }
 }
 
@@ -1155,5 +1169,15 @@ struct xml_error : public std::runtime_error
 
 
 } // namespace
+
+
+namespace std {
+    template<>
+    struct hash<etree::QName>
+    {
+        size_t operator()(const etree::QName &x) const;
+    };
+} // namespace
+
 
 #endif

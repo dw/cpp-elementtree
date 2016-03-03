@@ -1581,6 +1581,55 @@ Element::remove()
 }
 
 
+void
+Element::graft()
+{
+    if(node_->parent == reinterpret_cast<xmlNode *>(node_->doc)) {
+        return;
+    }
+
+    xmlDoc *doc = ::xmlNewDoc(0);
+    if(! doc) {
+        throw memory_error();
+    }
+
+    xmlNode *last = 0;
+    for(xmlNode *cur = node_->children; cur; cur = cur->next) {
+        cur->parent = node_->parent;
+        reparent_(cur);
+        last = cur;
+    }
+
+    if(node_->children) {
+        node_->children->prev = node_->prev;
+    }
+    if(node_->prev) {
+        node_->prev->next = node_->children;
+    } else {
+        node_->parent->children = node_->children;
+    }
+
+    if(last) {
+        last->next = node_->next;
+    }
+    if(node_->next) {
+        node_->next->prev = last;
+    }
+
+    node_->parent = 0;
+    node_->children = 0;
+    node_->prev = 0;
+    node_->next = 0;
+
+    xmlDoc *sourceDoc = node_->doc;
+    ::xmlDocSetRootElement(doc, node_);
+    reparent_(node_);
+
+    ref(doc);
+    unref(sourceDoc);
+}
+
+
 bool
 Element::ancestorOf(const Element &e) const
 {
@@ -1977,4 +2026,12 @@ operator<< (ostream& out, const QName& qname)
 }
 
 
+} // namespace
+
+
+namespace std {
+    size_t hash<etree::QName>::operator()(const etree::QName &x) const
+    {
+        return hash<std::string>()(x.tag()) ^ (hash<std::string>()(x.ns()) << 1);
+    }
 } // namespace
