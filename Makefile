@@ -12,6 +12,11 @@ CXXFLAGS += -std=c++0x
 # CXXFLAGS += -stdlib=libc++
 CXXFLAGS += $(shell pkg-config --cflags libxml-2.0)
 
+ifdef LTO
+CXXFLAGS += -flto
+LDFLAGS += -flto
+endif
+
 LDFLAGS += -lz
 LDFLAGS += -lxml2
 LDFLAGS += $(shell pkg-config --libs libxml-2.0)
