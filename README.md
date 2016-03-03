@@ -78,3 +78,4 @@ dependency (e.g. Boost), ``etree::feed`` is UNIX-only for the time being.
 * Disable libxml2 stderr logs (seemingly requires TLS tricks).
 * Fix up const usage everywhere (findall/removeall/etc)
 * Internally copy XPathContext for each thread (e.g. boost::thread_local_ptr)
+* etree::tostring() should copy up namespaces to subelements like lxml
