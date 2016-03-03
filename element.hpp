@@ -253,14 +253,14 @@ class Nullable {
     Nullable();
 
     /**
-     * Construct an unset Nullable containing a copy of the given value.
+     * Construct a set Nullable containing a value.
      *
      * @param val       Value to copy.
      */
     Nullable(const T &val);
 
     /**
-     * Construct a set Nullable containing a copy of the given value.
+     * Copy the value from another Nullable.
      *
      * @param val       Value to copy.
      */
@@ -268,7 +268,7 @@ class Nullable {
 
     #ifdef ETREE_0X
     /**
-     * C++11: construct a set Nullable by moving the given value.
+     * C++11: construct a set Nullable by moving a value.
      *
      * @param val       Value to copy.
      */
@@ -695,14 +695,14 @@ class ElementTree
     Element getroot() const;
 
     /**
-     * Return true if the identity of this element is equal to the given
-     * element, i.e. both references refer to the same DOM node.
+     * Return true if the identity of this element is equal to another element,
+     * i.e. both refer to the same DOM node in the same document.
      */
     bool operator==(const ElementTree &other) const;
 
     /**
-     * Return false if the identity of this element is equal to the given
-     * element, i.e. both references refer to the same DOM node.
+     * Return true if the identity of this element is equal to another element,
+     * i.e. both refer to the same DOM node in the same document.
      */
     bool operator!=(const ElementTree &other) const;
 
@@ -745,31 +745,32 @@ class Element
 
     /**
      * \internal
-     * Construct a new reference to the given internal node implementation.
+     * Construct a reference to a DOM node.
      *
      * @param node  Element to reference.
      */
     Element(_xmlNode *node);
 
     /**
-     * Construct an element with the given name, creating a dummy ElementTree
-     * to contain it. Due to the need to have a dummy document to contain
-     * orphaned elements, it is often better to use SubElement() instead.
+     * Construct an element, creating a dummy ElementTree to contain it. Due to
+     * the need to have a dummy document to contain orphaned elements, it is
+     * better to use SubElement() when possible.
      *
-     * @param qname     New element name.
+     * @param qname
+     *      New element name.
      */
     Element(const QName &qname);
 
     #ifdef ETREE_0X
     /**
-     * C++11: construct an element with the given name and attributes, creating
-     * a dummy ElementTree to contain it. Due to the need to have a dummy
-     * document to contain orphaned elements, it is often better to use
-     * SubElement() instead.
+     * C++11: construct an element, creating a dummy ElementTree to contain it.
+     * Due to the need to have a dummy document to contain orphaned elements,
+     * it is better to use SubElement() when possible.
      *
-     * @param qname     New element name.
-     * @param attribs   List of attribute name-value pairs from initialization
-     *                  list.
+     * @param qname
+     *      New element name.
+     * @param attribs
+     *      List of attribute name-value pairs from initialization list.
      */
     Element(const QName &qname, kv_list attribs);
     #endif
@@ -840,14 +841,14 @@ class Element
     Element operator[] (size_t i);
 
     /**
-     * Return true if the identity of this element is equal to the given
-     * element, i.e. both references refer to the same DOM node.
+     * Return true if the identity of this element is equal to another Element,
+     * i.e. both refer to the same DOM node.
      */
     bool operator==(const Element &other) const;
 
     /**
-     * Return false if the identity of this element is equal to the given
-     * element, i.e. both references refer to the same DOM node.
+     * Return false if the identity of this Element is equal to another
+     * Element, i.e. both refer to the same DOM node.
      */
     bool operator!=(const Element &other) const;
 
@@ -859,7 +860,7 @@ class Element
     Element &operator=(const Element&);
 
     /**
-     * Return the first child with the given name, if any.
+     * Return the first child matching a name, if any exist.
      *
      * @param qn
      *      Name of the child to locate.
@@ -879,7 +880,7 @@ class Element
     Element ensurechild(const QName &qn);
 
     /**
-     * Return children with the given name.
+     * Return children matching a name.
      *
      * @param qn        Name of the children to locate.
      * @returns         Vector of elements.
