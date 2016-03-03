@@ -1593,27 +1593,32 @@ Element::graft()
         throw memory_error();
     }
 
-    xmlNode *last = 0;
+    xmlNode *lastChild = 0;
     for(xmlNode *cur = node_->children; cur; cur = cur->next) {
         cur->parent = node_->parent;
         reparent_(cur);
-        last = cur;
+        lastChild = cur;
     }
 
+    xmlNode *nodeNext;
     if(node_->children) {
         node_->children->prev = node_->prev;
-    }
-    if(node_->prev) {
-        node_->prev->next = node_->children;
+        nodeNext = node_->children;
     } else {
-        node_->parent->children = node_->children;
+        nodeNext = node_->next;
     }
 
-    if(last) {
-        last->next = node_->next;
+    if(node_->prev) {
+        node_->prev->next = nodeNext;
+    } else {
+        node_->parent->children = nodeNext;
+    }
+
+    if(lastChild) {
+        lastChild->next = node_->next;
     }
     if(node_->next) {
-        node_->next->prev = last;
+        node_->next->prev = lastChild;
     }
 
     node_->parent = 0;
