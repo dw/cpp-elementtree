@@ -128,7 +128,7 @@ MU_TEST(elemChildIter)
 MU_TEST(visit)
 {
     auto root = etree::fromstring(DOC);
-    std::vector<std::string> qnames, expect {
+    std::vector<std::string> got, expect {
         { "who" },
         { "person" },
         { "name" },
@@ -136,9 +136,9 @@ MU_TEST(visit)
         { "{urn:ns}attr2" }
     };
     visit(root, [&](Element &e) {
-        qnames.push_back(e.qname().tostring());
+        got.push_back(e.qname().tostring());
     });
-    assert(qnames == expect);
+    assert(got == expect);
 }
 
 

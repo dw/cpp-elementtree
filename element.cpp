@@ -1395,6 +1395,17 @@ Element::operator=(const Element &e)
 
 
 Nullable<Element>
+Element::child() const
+{
+    xmlNode *p = node_->children;
+    if(nextElement_(p)) {
+        return Element(p);
+    }
+    return Nullable<Element>();
+}
+
+
+Nullable<Element>
 Element::child(const QName &qn) const
 {
     for(xmlNode *cur = node_->children; cur; cur = cur->next) {

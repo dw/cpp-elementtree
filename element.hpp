@@ -860,6 +860,14 @@ class Element
     Element &operator=(const Element&);
 
     /**
+     * Return the first, if any exist.
+     *
+     * @returns
+     *      Element, if any, otherwise an empty nullable.
+     */
+    Nullable<Element> child() const;
+
+    /**
      * Return the first child matching a name, if any exist.
      *
      * @param qn
