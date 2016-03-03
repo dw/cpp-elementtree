@@ -111,3 +111,5 @@ and ref() once on the new document.
 * Internally copy XPathContext for each thread (e.g. boost::thread_local_ptr)
 * etree::tostring() should copy up namespaces to subelements like lxml
 * Make child/attr iterators mutation-safe
+* Handle comments better.
+* Rewrite & better tests for Element::graft().
