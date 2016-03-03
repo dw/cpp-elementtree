@@ -775,6 +775,16 @@ class Element
     #endif
 
     /**
+     * Ensure a namespace is in scope for this element, or is defined on this
+     * element. Consider calling this if you're going to be defining lots of
+     * subelements or attributes on this element belonging to the namespace.
+     *
+     * @param uri
+     *      The namespace URI.
+     */
+    void ensurens(const string &uri);
+
+    /**
      * Return the element's QName.
      */
     QName qname() const;

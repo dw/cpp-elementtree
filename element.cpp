@@ -377,7 +377,7 @@ getNs_(xmlNode *node, xmlNode *target, const string &uri)
     // Look for existing definition.
     xmlNode *doc_node = reinterpret_cast<xmlNode *>(node->doc);
     for(xmlNode *cur = node; cur && cur != doc_node; cur = cur->parent) {
-        for(xmlNs *ns = node->nsDef; ns != 0; ns = ns->next) {
+        for(xmlNs *ns = cur->nsDef; ns != 0; ns = ns->next) {
             if(uri == toChar_(ns->href)) {
                 return ns;
             }
@@ -1285,6 +1285,13 @@ size_t
 Element::size() const
 {
     return ::xmlChildElementCount(node_);
+}
+
+
+void
+Element::ensurens(const string &uri)
+{
+    getNs_(node_, node_, uri);
 }
 
 

@@ -331,6 +331,41 @@ MU_TEST(ensurechildAbsentNs)
 
 
 //
+// Element::ensurens()
+//
+
+MU_TEST(ensurens)
+{
+    auto root = etree::fromstring("<root/>");
+    root.ensurens("urn:foo");
+    assert(etree::tostring(root) == "<root xmlns:ns0=\"urn:foo\"/>");
+}
+
+
+MU_TEST(ensurensExisting)
+{
+    auto root = etree::fromstring("<root xmlns:ns0=\"urn:foo\"/>");
+    root.ensurens("urn:foo");
+    assert(etree::tostring(root) == "<root xmlns:ns0=\"urn:foo\"/>");
+}
+
+
+MU_TEST(ensurensOnParent)
+{
+    auto root = etree::fromstring(
+        "<root xmlns:ns0=\"urn:foo\">"
+            "<child/>"
+        "</root>");
+    root.child("child")->ensurens("urn:foo");
+    assert(etree::tostring(root) == (
+        "<root xmlns:ns0=\"urn:foo\">"
+            "<child/>"
+        "</root>"
+    ));
+}
+
+
+//
 // getnext / getparent / getprev / getroottreee
 //
 
