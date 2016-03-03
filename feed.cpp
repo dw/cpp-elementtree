@@ -137,30 +137,113 @@ class ItemFormat
 
 
 Item::Item(const ItemFormat &format, const Element &elem)
-    : format_(format), elem_(elem) {}
+    : format_(format)
+    , elem_(elem)
+{}
+
 
 Item::Item(const Item &other)
     : format_(other.format_)
-    , elem_(other.elem_) {}
+    , elem_(other.elem_)
+{}
 
-std::string Item::title() const              { return format_.title(elem_); }
-void Item::title(const std::string &s)       { format_.title(elem_, s); }
-std::string Item::link() const               { return format_.link(elem_); }
-void Item::link(const std::string &s)        { format_.link(elem_, s); }
-std::string Item::content() const            { return format_.content(elem_); }
-void Item::content(const std::string &s)     { format_.content(elem_, s); }
-content_type Item::type() const         { return format_.type(elem_); }
-void Item::type(content_type type)      { format_.type(elem_, type); }
-std::string Item::author() const             { return format_.author(elem_); }
-void Item::author(const std::string &s)      { format_.author(elem_, s); }
-std::string Item::guid() const               { return format_.guid(elem_); }
-void Item::guid(const std::string &s)        { format_.guid(elem_, s); }
-std::string Item::originalGuid() const       { return format_.originalGuid(elem_); }
-time_t Item::published() const          { return format_.published(elem_); }
-void Item::published(time_t published)  { format_.published(elem_, published); }
-Element Item::element() const           { return elem_; }
 
-void Item::remove() {
+std::string
+Item::title() const {
+    return stripWs_(format_.title(elem_));
+}
+
+
+void
+Item::title(const std::string &s) {
+    format_.title(elem_, s);
+}
+
+
+std::string
+Item::link() const {
+    return stripWs_(format_.link(elem_));
+}
+
+
+void Item::link(const std::string &s) {
+    format_.link(elem_, s);
+}
+
+
+std::string
+Item::content() const {
+    return stripWs_(format_.content(elem_));
+}
+
+
+void
+Item::content(const std::string &s) {
+    format_.content(elem_, s);
+}
+
+
+content_type Item::type() const {
+    return format_.type(elem_);
+}
+
+
+void
+Item::type(content_type type) {
+    format_.type(elem_, type);
+}
+
+
+std::string
+Item::author() const {
+    return stripWs_(format_.author(elem_));
+}
+
+
+void
+Item::author(const std::string &s) {
+    format_.author(elem_, s);
+}
+
+
+std::string
+Item::guid() const {
+    return stripWs_(format_.guid(elem_));
+}
+
+
+void
+Item::guid(const std::string &s) {
+    format_.guid(elem_, s);
+}
+
+
+std::string
+Item::originalGuid() const {
+    return stripWs_(format_.originalGuid(elem_));
+}
+
+
+time_t
+Item::published() const {
+    return format_.published(elem_);
+}
+
+
+void
+Item::published(time_t published) {
+    format_.published(elem_, published);
+}
+
+
+Element
+Item::element() const {
+    return elem_;
+}
+
+
+void
+Item::remove() {
     elem_.remove();
 }
 

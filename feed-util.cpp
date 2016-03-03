@@ -54,12 +54,12 @@ static struct tzinfo {
 static const int tzOffsetsCount_ = sizeof tzOffsets_ / sizeof tzOffsets_[0];
 
 
-void stripWs_(std::string &s)
+std::string stripWs_(const std::string &s)
 {
     int start, end;
     for(start = 0; isspace(s[start]) && start < s.size(); start++);
     for(end = s.size() - 1; isspace(s[end]) && end >= 0; end--);
-    s = s.substr(start, 1 + end - start);
+    return s.substr(start, 1 + end - start);
 }
 
 

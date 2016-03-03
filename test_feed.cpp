@@ -375,9 +375,9 @@ MU_TEST(rss20ItemLinkSet)
             "<channel>"
                 "<item>"
                     "<title/>"
+                    "<link>http://www.example.com/</link>"
                     "<ns0:creator/>"
                     "<guid/>"
-                    "<link>http://www.example.com/</link>"
                 "</item>"
             "</channel>"
         "</rss>"
@@ -567,6 +567,63 @@ MU_TEST(rss20ItemAuthorSet)
             "<link/>"
             "<ns0:creator>My Author</ns0:creator>"
             "<guid/>"
+        "</item>"
+    ));
+}
+
+
+//
+// Item::guid()
+//
+
+
+MU_TEST(atomItemGuid)
+{
+    auto feed = etree::feed::fromelement(atomFeed);
+    assert(feed.items()[0].guid() == (
+        "tag:blogger.com,1999:blog-3971202189709462152"
+        ".post-8582726091670983181"
+    ));
+}
+
+
+MU_TEST(atomItemGuidSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+    auto item = feed.append();
+    item.guid("x");
+    assert(tostring(item.element()) == (
+        "<entry>"
+            "<title type=\"text\"/>"
+            "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+            "<content type=\"html\"/>"
+            "<author>"
+                "<name/>"
+            "</author>"
+            "<id>x</id>"
+        "</entry>"
+    ));
+}
+
+
+MU_TEST(rss20ItemGuid)
+{
+    auto feed = etree::feed::fromelement(rss20Feed);
+    assert(feed.items()[0].guid() == "tag:metafilter.com,2016:site.157514");
+}
+
+
+MU_TEST(rss20ItemGuidSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+    auto item = feed.append();
+    item.guid("x");
+    assert(tostring(item.element()) == (
+        "<item>"
+            "<title/>"
+            "<link/>"
+            "<ns0:creator/>"
+            "<guid>x</guid>"
         "</item>"
     ));
 }
