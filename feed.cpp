@@ -71,6 +71,7 @@ static const QName kAtomAuthorTag(ATOM_NS, "author");
 static const QName kAtomContentTag(ATOM_NS, "content");
 static const QName kAtomEntryTag(ATOM_NS, "entry");
 static const QName kAtomFeedTag(ATOM_NS, "feed");
+static const QName kAtomIconTag(ATOM_NS, "icon");
 static const QName kAtomIdTag(ATOM_NS, "id");
 static const QName kAtomLinkTag(ATOM_NS, "link");
 static const QName kAtomNameTag(ATOM_NS, "name");
@@ -324,10 +325,8 @@ class AtomItemFormat
 
     void title(Element &e, const std::string &s) const
     {
-        kAtomTitlePath.removeall(e);
-        auto title = SubElement(e, kAtomTitleTag, {
-            {"type", "text"}
-        });
+        auto title = e.ensurechild(kAtomTitleTag);
+        title.attrib().set("type", "text");
         title.text(s);
     }
 
@@ -342,8 +341,8 @@ class AtomItemFormat
 
     void link(Element &e, const std::string &s) const
     {
-        kAtomLinkPath.removeall(e);
-        etree::SubElement(e, kAtomLinkTag, {
+        auto link = e.ensurechild(kAtomLinkTag);
+        link.attrib().set({
             {"rel", "alternate"},
             {"type", "text/html"},
             {"href", s}
@@ -484,10 +483,8 @@ struct AtomFeedFormat
 
     void title(Element &e, const std::string &s) const
     {
-        kAtomTitlePath.removeall(e);
-        auto title = SubElement(e, kAtomTitleTag, {
-            {"type", "text"}
-        });
+        auto title = e.ensurechild(kAtomTitleTag);
+        title.attrib().set("type", "text");
         title.text(s);
     }
 
@@ -502,8 +499,8 @@ struct AtomFeedFormat
 
     void link(Element &e, const std::string &s) const
     {
-        kAtomLinkPath.removeall(e);
-        etree::SubElement(e, kAtomLinkTag, {
+        auto link = e.ensurechild(kAtomLinkTag);
+        link.attrib().set({
             {"rel", "alternate"},
             {"type", "text/html"},
             {"href", s}
@@ -517,6 +514,7 @@ struct AtomFeedFormat
 
     void icon(Element &e, const std::string &s) const
     {
+        e.ensurechild(kAtomIconTag).text(s);
     }
 
     std::string description(const Element &e) const
@@ -526,10 +524,8 @@ struct AtomFeedFormat
 
     void description(Element &e, const std::string &s) const
     {
-        kAtomSubtitlePath.removeall(e);
-        auto subtitle = SubElement(e, kAtomSubtitleTag, {
-            {"type", "text"}
-        });
+        auto subtitle = e.ensurechild(kAtomSubtitleTag);
+        subtitle.attrib().set("type", "text");
         subtitle.text(s);
     }
 
@@ -708,6 +704,7 @@ class Rss20FeedFormat
     {
         auto chan = e.ensurechild("channel");
         chan.ensurechild("title").text(s);
+        icon(e, icon(e)); // update title.
     }
 
     std::string link(const Element &e) const
@@ -719,6 +716,7 @@ class Rss20FeedFormat
     {
         auto chan = e.ensurechild("channel");
         chan.ensurechild("link").text(s);
+        icon(e, icon(e)); // update link.
     }
 
     std::string description(const Element &e) const
@@ -739,6 +737,11 @@ class Rss20FeedFormat
 
     void icon(Element &e, const std::string &s) const
     {
+        auto chan = e.ensurechild("channel");
+        auto img = chan.ensurechild("image");
+        img.ensurechild("title").text(title(e));
+        img.ensurechild("link").text(link(e));
+        img.ensurechild("url").text(s);
     }
 
     time_t published(const Element &e) const

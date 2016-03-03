@@ -115,10 +115,48 @@ MU_TEST(atomIcon)
 }
 
 
+MU_TEST(atomIconSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+    feed.icon("http://www.lolcats.com/");
+    auto s = tostring(feed.element());
+    assert(s == (
+        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+            "<icon>http://www.lolcats.com/</icon>"
+        "</feed>"
+    ));
+}
+
+
 MU_TEST(rss20Icon)
 {
     auto feed = etree::feed::fromelement(rss20Feed);
     assert(feed.icon() == "http://www.lolcats.com/");
+}
+
+
+MU_TEST(rss20IconSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+    feed.icon("http://www.lolcats.com/");
+    feed.title("foo");
+    feed.link("foobar");
+    auto s = tostring(feed.element());
+    assert(s == (
+        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                "version=\"2.0\">"
+            "<channel>"
+                "<image>"
+                    "<title>foo</title>"
+                    "<link>foobar</link>"
+                    "<url>http://www.lolcats.com/</url>"
+                "</image>"
+                "<title>foo</title>"
+                "<link>foobar</link>"
+            "</channel>"
+        "</rss>"
+    ));
 }
 
 
@@ -288,6 +326,7 @@ MU_TEST(atomItemTitleSet)
     assert(tostring(feed.element()) == (
         "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
             "<entry>"
+                "<title type=\"text\">Example Title</title>"
                 "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
                 "<content type=\"html\"/>"
                 "<author>"
@@ -296,7 +335,6 @@ MU_TEST(atomItemTitleSet)
                 "<id/>"
                 "<published>1970-01-01T00:00:00Z</published>"
                 "<updated>1970-01-01T00:00:00Z</updated>"
-                "<title type=\"text\">Example Title</title>"
             "</entry>"
         "</feed>"
     ));
@@ -358,6 +396,8 @@ MU_TEST(atomItemLinkSet)
         "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
             "<entry>"
                 "<title type=\"text\"/>"
+                "<link rel=\"alternate\" type=\"text/html\" "
+                    "href=\"http://www.example.com/\"/>"
                 "<content type=\"html\"/>"
                 "<author>"
                     "<name/>"
@@ -365,8 +405,6 @@ MU_TEST(atomItemLinkSet)
                 "<id/>"
                 "<published>1970-01-01T00:00:00Z</published>"
                 "<updated>1970-01-01T00:00:00Z</updated>"
-                "<link rel=\"alternate\" type=\"text/html\" "
-                    "href=\"http://www.example.com/\"/>"
             "</entry>"
         "</feed>"
     ));
@@ -675,7 +713,6 @@ MU_TEST(rss20ItemGuidSet)
 MU_TEST(atomItemPublished)
 {
     auto feed = etree::feed::fromelement(atomFeed);
-    auto t = feed.items()[0].published();
     assert(feed.items()[0].published() == 1456415640);
 }
 
@@ -734,7 +771,6 @@ MU_TEST(rss20ItemPublishedSet)
 MU_TEST(atomItemUpdated)
 {
     auto feed = etree::feed::fromelement(atomFeed);
-    auto t = feed.items()[0].updated();
     assert(feed.items()[0].updated() == 1456417492);
 }
 

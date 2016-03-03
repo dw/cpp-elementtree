@@ -296,13 +296,6 @@ toXmlChar_(const char *s)
 }
 
 
-static xmlChar *
-toXmlChar_(char *s)
-{
-    return reinterpret_cast<xmlChar *>(s);
-}
-
-
 static void
 maybeThrow_()
 {
@@ -1457,7 +1450,6 @@ Element::copy()
         throw memory_error();
     }
 
-    xmlDoc *sourceDoc = node_->doc;
     xmlNode *newNode = ::xmlDocCopyNode(node_, doc, 1);
     if(! newNode) {
         ::xmlFreeDoc(doc);
@@ -1608,7 +1600,6 @@ Element::getprev() const
 Nullable<Element>
 Element::getnext() const
 {
-    xmlNode *cur = node_->next;
     for(auto cur = node_->next; cur; cur = cur->next) {
        if(cur->type == XML_ELEMENT_NODE) {
             return Element(cur);

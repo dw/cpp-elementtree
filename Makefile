@@ -6,6 +6,7 @@ CXXFLAGS += -O2
 CXXFLAGS += -DNDEBUG
 endif
 
+CXXFLAGS += -Wunused -Wall
 CXXFLAGS += -g -fno-omit-frame-pointer
 CXXFLAGS += -std=c++0x
 # CXXFLAGS += -stdlib=libc++
