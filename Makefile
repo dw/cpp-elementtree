@@ -13,6 +13,7 @@ CXXFLAGS += -std=c++0x
 CXXFLAGS += $(shell pkg-config --cflags libxml-2.0)
 
 ifdef LTO
+CXXFLAGS += -Os
 CXXFLAGS += -flto
 LDFLAGS += -flto
 endif
@@ -21,6 +22,10 @@ LDFLAGS += -lz
 LDFLAGS += -lxml2
 LDFLAGS += $(shell pkg-config --libs libxml-2.0)
 
+all: targets
+
+
+TARGETS += test_main
 test_main: \
 		test_main.cpp \
 		test_attrib.o \
@@ -33,12 +38,14 @@ test_main: \
 		feed.o \
 		feed-util.o
 
+TARGETS += convert_feed
 convert_feed: \
 	convert_feed.cpp \
 	element.o \
 	feed.o \
 	feed-util.o
 
+TARGETS += sanitize
 sanitize: \
 	sanitize.cpp \
 	element.o \
@@ -73,4 +80,6 @@ pushdocs: noexist
 	git pull
 
 clean:
-	rm -rf test_main *.o *.a output *.gcda *.gcno cov.info docs *.dSYM
+	rm -rf $(TARGETS) *.o *.a output *.gcda *.gcno cov.info docs *.dSYM
+
+targets: $(TARGETS)
