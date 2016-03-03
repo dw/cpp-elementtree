@@ -109,6 +109,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa2214f1b1865d320ee78e3d9d931c2bf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_x_path.html#aa2214f1b1865d320ee78e3d9d931c2bf">XPath</a> (const string &amp;s)</td></tr>
 <tr class="memdesc:aa2214f1b1865d320ee78e3d9d931c2bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile an expression from a STL string.  <a href="#aa2214f1b1865d320ee78e3d9d931c2bf">More...</a><br /></td></tr>
 <tr class="separator:aa2214f1b1865d320ee78e3d9d931c2bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d88985ea4d34e62bd939cd18ff99ec8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_x_path.html#a5d88985ea4d34e62bd939cd18ff99ec8">XPath</a> (const string &amp;s, const <a class="el" href="classetree_1_1_x_path_context.html">XPathContext</a> &amp;context)</td></tr>
+<tr class="memdesc:a5d88985ea4d34e62bd939cd18ff99ec8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile an expression from a STL string.  <a href="#a5d88985ea4d34e62bd939cd18ff99ec8">More...</a><br /></td></tr>
+<tr class="separator:a5d88985ea4d34e62bd939cd18ff99ec8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2030cb3627cb0cdff8f53a5ad039ebf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_x_path.html#af2030cb3627cb0cdff8f53a5ad039ebf">XPath</a> (const <a class="el" href="classetree_1_1_x_path.html">XPath</a> &amp;other)</td></tr>
 <tr class="memdesc:af2030cb3627cb0cdff8f53a5ad039ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy an expression.  <a href="#af2030cb3627cb0cdff8f53a5ad039ebf">More...</a><br /></td></tr>
 <tr class="separator:af2030cb3627cb0cdff8f53a5ad039ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -132,6 +135,10 @@ const string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <tr class="memitem:a876c897c747c458c08c6064d9f44ffda"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1_x_path.html">XPath</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_x_path.html#a876c897c747c458c08c6064d9f44ffda">operator=</a> (const <a class="el" href="classetree_1_1_x_path.html">XPath</a> &amp;other)</td></tr>
 <tr class="memdesc:a876c897c747c458c08c6064d9f44ffda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace this expression with another.  <a href="#a876c897c747c458c08c6064d9f44ffda">More...</a><br /></td></tr>
 <tr class="separator:a876c897c747c458c08c6064d9f44ffda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc12b36adc6c60cf8555af36820d0294"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acc12b36adc6c60cf8555af36820d0294"></a>
+vector&lt; <a class="el" href="classetree_1_1_element.html">Element</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1_x_path.html#acc12b36adc6c60cf8555af36820d0294">removeall</a> (<a class="el" href="classetree_1_1_element.html">Element</a> &amp;<a class="el" href="classetree_1_1_x_path.html#afe3004d3ac36030f77baff88d293accb">expr</a>) const </td></tr>
+<tr class="memdesc:acc12b36adc6c60cf8555af36820d0294"><td class="mdescLeft">&#160;</td><td class="mdescRight">Like <a class="el" href="classetree_1_1_x_path.html#a3699e78e4286e695f8b8ec24cc50b1cb" title="Return all Elements matching the expression. ">XPath::findall</a>, except remove each discovered element before returning it. <br /></td></tr>
+<tr class="separator:acc12b36adc6c60cf8555af36820d0294"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Manages a compiled <a class="el" href="classetree_1_1_x_path.html" title="Manages a compiled XPath expression. ">XPath</a> expression. </p>
@@ -178,6 +185,41 @@ const string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td><a class="el" href="classetree_1_1_x_path.html" title="Manages a compiled XPath expression. ">XPath</a> expression. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a5d88985ea4d34e62bd939cd18ff99ec8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">etree::XPath::XPath </td>
+          <td>(</td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classetree_1_1_x_path_context.html">XPathContext</a> &amp;&#160;</td>
+          <td class="paramname"><em>context</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Compile an expression from a STL string. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td><a class="el" href="classetree_1_1_x_path.html" title="Manages a compiled XPath expression. ">XPath</a> expression. </td></tr>
+    <tr><td class="paramname">context</td><td><a class="el" href="classetree_1_1_x_path_context.html" title="Manages a set of registered XPath namespaces and extension functions. ">XPathContext</a> object. </td></tr>
   </table>
   </dd>
 </dl>

@@ -103,6 +103,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a7f0c340869b7928f3b1913c810f1a37c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classetree_1_1feed_1_1_item.html">Item</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_feed.html#a7f0c340869b7928f3b1913c810f1a37c">append</a> ()</td></tr>
+<tr class="memdesc:a7f0c340869b7928f3b1913c810f1a37c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an empty item in the correct format and append it to this feed.  <a href="#a7f0c340869b7928f3b1913c810f1a37c">More...</a><br /></td></tr>
+<tr class="separator:a7f0c340869b7928f3b1913c810f1a37c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a33ac595ec5fee65c418d67762c90717e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_feed.html#a33ac595ec5fee65c418d67762c90717e">append</a> (<a class="el" href="classetree_1_1feed_1_1_item.html">Item</a> item)</td></tr>
 <tr class="memdesc:a33ac595ec5fee65c418d67762c90717e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Append an item to this feed, removing it from its present feed.  <a href="#a33ac595ec5fee65c418d67762c90717e">More...</a><br /></td></tr>
 <tr class="separator:a33ac595ec5fee65c418d67762c90717e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -126,10 +129,10 @@ enum <a class="el" href="namespaceetree_1_1feed.html#ab3c8782985e645306a9e202c2e
 std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_feed.html#a0199afdcebf73d5b0bf608d2eace0be0">icon</a> () const </td></tr>
 <tr class="memdesc:a0199afdcebf73d5b0bf608d2eace0be0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch the feed icon URL. <br /></td></tr>
 <tr class="separator:a0199afdcebf73d5b0bf608d2eace0be0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a5afa96f56a41485f46bdce81e072e1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4a5afa96f56a41485f46bdce81e072e1"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_feed.html#a4a5afa96f56a41485f46bdce81e072e1">icon</a> (std::string s)</td></tr>
-<tr class="memdesc:a4a5afa96f56a41485f46bdce81e072e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the feed icon URL. <br /></td></tr>
-<tr class="separator:a4a5afa96f56a41485f46bdce81e072e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3078b394871bde657b977b6f37845bd7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3078b394871bde657b977b6f37845bd7"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_feed.html#a3078b394871bde657b977b6f37845bd7">icon</a> (const std::string &amp;s)</td></tr>
+<tr class="memdesc:a3078b394871bde657b977b6f37845bd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the feed icon URL. <br /></td></tr>
+<tr class="separator:a3078b394871bde657b977b6f37845bd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0fb4ff8d9d0cd1fc12d26fcee08019ca"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0fb4ff8d9d0cd1fc12d26fcee08019ca"></a>
 std::vector&lt; <a class="el" href="classetree_1_1feed_1_1_item.html">Item</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classetree_1_1feed_1_1_feed.html#a0fb4ff8d9d0cd1fc12d26fcee08019ca">items</a> () const </td></tr>
 <tr class="memdesc:a0fb4ff8d9d0cd1fc12d26fcee08019ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch a vector of all the feed's items. <br /></td></tr>
@@ -155,6 +158,25 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <div class="textblock"><p>Represents a feed. </p>
 <p>Use etree::makeFeed() to create a blank feed. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a7f0c340869b7928f3b1913c810f1a37c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classetree_1_1feed_1_1_item.html">Item</a> etree::feed::Feed::append </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create an empty item in the correct format and append it to this feed. </p>
+<p>Avoids a potentially redundant conversion in the case of populating a brand new feed.</p>
+<dl class="section return"><dt>Returns</dt><dd>The new item. </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a33ac595ec5fee65c418d67762c90717e"></a>
 <div class="memitem">
 <div class="memproto">

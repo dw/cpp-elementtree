@@ -100,7 +100,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <ul>
 <li>Remove items from <em>Horrors</em> section.</li>
 <li>Use libxml2 parser string interning.</li>
-<li>Preserve namespace prefixes better. </li>
+<li>Preserve namespace prefixes better.</li>
+<li>Disable libxml2 stderr logs (seemingly requires TLS tricks).</li>
+<li>Fix up const usage everywhere (findall/removeall/etc)</li>
+<li>Internally copy XPathContext for each thread (e.g. boost::thread_local_ptr)</li>
+<li><a class="el" href="namespaceetree.html#a9af8da3c2473806c6f5d0f82e39ef252" title="Serialize an element. ">etree::tostring()</a> should copy up namespaces to subelements like lxml </li>
 </ul>
 </div></div><!-- contents -->
 <!-- start footer part -->
