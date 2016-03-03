@@ -1672,11 +1672,14 @@ Element::getnext() const
 Nullable<Element>
 Element::getparent() const
 {
-    xmlNode *parent = node_->parent;
-    if(parent->type != XML_DOCUMENT_NODE) {
-        return Nullable<Element>(parent);
+    switch(node_->parent->type) {
+        case XML_DOCUMENT_NODE:
+        case XML_HTML_DOCUMENT_NODE:
+        case XML_DOCB_DOCUMENT_NODE:
+            return Nullable<Element>();
+        default:
+            return Nullable<Element>(node_->parent);
     }
-    return Nullable<Element>();
 }
 
 
