@@ -82,7 +82,7 @@ static time_t parseTz_(const char *token)
             }
         }
     }
-    return 60 * ((offset / 100) * 60 + (offset % 100));
+    return 60 * (60 * ((offset / 100) * 60 + (offset % 100)));
 }
 
 
@@ -129,17 +129,43 @@ time_t parseRfc822Date_(std::string s)
 time_t parseIso8601Date_(std::string s)
 {
     c_locale_scope locale;
-    tm tm;
+    tm tm = {0};
     const char *endpos = ::strptime(s.c_str(), "%Y-%m-%dT%H:%M:%S", &tm);
     if(endpos == 0) {
         return 0;
     }
 
     time_t out = mktime(&tm);
+    if(*endpos == '.' && strlen(endpos) >= 4) {
+        endpos += 4;
+    }
+
     if(*endpos != 'z' && *endpos != 'Z') {
         out -= parseTz_(endpos);
     }
     return out;
+}
+
+
+std::string
+formatIso8601_(time_t t)
+{
+    char buf[128];
+    auto tm = gmtime(&t);
+    strftime(buf, sizeof buf, "%Y-%m-%dT%H:%M:%SZ", tm);
+    buf[sizeof buf - 1] = 0;
+    return std::string(buf);
+}
+
+
+std::string
+formatRfc822_(time_t t)
+{
+    char buf[128];
+    auto tm = gmtime(&t);
+    strftime(buf, sizeof buf, "%d %b %Y %H:%M:%S", tm);
+    buf[sizeof buf - 1] = 0;
+    return std::string(buf);
 }
 
 

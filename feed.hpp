@@ -32,6 +32,10 @@ class ItemFormat;
 time_t parseRfc822Date_(std::string);
 time_t parseIso8601Date_(std::string s);
 std::string stripWs_(const std::string &s);
+std::string
+formatIso8601_(time_t t);
+std::string
+formatRfc822_(time_t t);
 
 
 /**

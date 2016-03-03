@@ -222,6 +222,7 @@ MU_TEST(atomAppend)
                     "<name/>"
                 "</author>"
                 "<id/>"
+                "<published>1970-01-01T00:00:00Z</published>"
             "</entry>"
         "</feed>"
     ));
@@ -240,6 +241,7 @@ MU_TEST(rss20Append)
                     "<link/>"
                     "<ns0:creator/>"
                     "<guid/>"
+                    "<pubDate>01 Jan 1970 00:00:00</pubDate>"
                 "</item>"
             "</channel>"
         "</rss>"
@@ -286,6 +288,7 @@ MU_TEST(atomItemTitleSet)
                     "<name/>"
                 "</author>"
                 "<id/>"
+                "<published>1970-01-01T00:00:00Z</published>"
                 "<title type=\"text\">Example Title</title>"
             "</entry>"
         "</feed>"
@@ -314,6 +317,7 @@ MU_TEST(rss20ItemTitleSet)
                     "<link/>"
                     "<ns0:creator/>"
                     "<guid/>"
+                    "<pubDate>01 Jan 1970 00:00:00</pubDate>"
                 "</item>"
             "</channel>"
         "</rss>"
@@ -349,6 +353,7 @@ MU_TEST(atomItemLinkSet)
                     "<name/>"
                 "</author>"
                 "<id/>"
+                "<published>1970-01-01T00:00:00Z</published>"
                 "<link rel=\"alternate\" type=\"text/html\" "
                     "href=\"http://www.example.com/\"/>"
             "</entry>"
@@ -378,6 +383,7 @@ MU_TEST(rss20ItemLinkSet)
                     "<link>http://www.example.com/</link>"
                     "<ns0:creator/>"
                     "<guid/>"
+                    "<pubDate>01 Jan 1970 00:00:00</pubDate>"
                 "</item>"
             "</channel>"
         "</rss>"
@@ -414,6 +420,7 @@ MU_TEST(atomItemContentSet)
                     "<name/>"
                 "</author>"
                 "<id/>"
+                "<published>1970-01-01T00:00:00Z</published>"
                 "<content type=\"html\">My content</content>"
             "</entry>"
         "</feed>"
@@ -443,6 +450,7 @@ MU_TEST(rss20ItemContentSet)
                     "<link/>"
                     "<ns0:creator/>"
                     "<guid/>"
+                    "<pubDate>01 Jan 1970 00:00:00</pubDate>"
                     "<description>http://www.example.com/</description>"
                 "</item>"
             "</channel>"
@@ -479,6 +487,7 @@ MU_TEST(atomItemContentTypeSet)
                     "<name/>"
                 "</author>"
                 "<id/>"
+                "<published>1970-01-01T00:00:00Z</published>"
                 "<content type=\"html\"/>"
             "</entry>"
         "</feed>"
@@ -494,6 +503,7 @@ MU_TEST(atomItemContentTypeSet)
                     "<name/>"
                 "</author>"
                 "<id/>"
+                "<published>1970-01-01T00:00:00Z</published>"
                 "<content type=\"text\"/>"
             "</entry>"
         "</feed>"
@@ -544,6 +554,7 @@ MU_TEST(atomItemAuthorSet)
                 "<name>My Author</name>"
             "</author>"
             "<id/>"
+            "<published>1970-01-01T00:00:00Z</published>"
         "</entry>"
     ));
 }
@@ -567,6 +578,7 @@ MU_TEST(rss20ItemAuthorSet)
             "<link/>"
             "<ns0:creator>My Author</ns0:creator>"
             "<guid/>"
+            "<pubDate>01 Jan 1970 00:00:00</pubDate>"
         "</item>"
     ));
 }
@@ -601,6 +613,7 @@ MU_TEST(atomItemGuidSet)
                 "<name/>"
             "</author>"
             "<id>x</id>"
+            "<published>1970-01-01T00:00:00Z</published>"
         "</entry>"
     ));
 }
@@ -624,6 +637,64 @@ MU_TEST(rss20ItemGuidSet)
             "<link/>"
             "<ns0:creator/>"
             "<guid>x</guid>"
+            "<pubDate>01 Jan 1970 00:00:00</pubDate>"
+        "</item>"
+    ));
+}
+
+
+//
+// Item::published()
+//
+
+
+MU_TEST(atomItemPublished)
+{
+    auto feed = etree::feed::fromelement(atomFeed);
+    auto t = feed.items()[0].published();
+    assert(feed.items()[0].published() == 1456415640);
+}
+
+
+MU_TEST(atomItemPublishedSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+    auto item = feed.append();
+    item.published(1);
+    assert(tostring(item.element()) == (
+        "<entry>"
+            "<title type=\"text\"/>"
+            "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+            "<content type=\"html\"/>"
+            "<author>"
+                "<name/>"
+            "</author>"
+            "<id/>"
+            "<published>1970-01-01T00:00:01Z</published>"
+        "</entry>"
+    ));
+}
+
+
+MU_TEST(rss20ItemPublished)
+{
+    auto feed = etree::feed::fromelement(rss20Feed);
+    assert(feed.items()[0].published() == 1456713220);
+}
+
+
+MU_TEST(rss20ItemPublishedSet)
+{
+    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+    auto item = feed.append();
+    item.published(1);
+    assert(tostring(item.element()) == (
+        "<item>"
+            "<title/>"
+            "<link/>"
+            "<ns0:creator/>"
+            "<guid/>"
+            "<pubDate>01 Jan 1970 00:00:01</pubDate>"
         "</item>"
     ));
 }

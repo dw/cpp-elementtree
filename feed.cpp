@@ -72,6 +72,7 @@ static const QName kAtomIdTag(ATOM_NS, "id");
 static const QName kAtomLinkTag(ATOM_NS, "link");
 static const QName kAtomNameTag(ATOM_NS, "name");
 static const QName kAtomOriginalGuidAttr{READER_NS, "original-id"};
+static const QName kAtomPublishedTag(ATOM_NS, "published");
 static const QName kAtomRootTag(ATOM_NS, "feed");
 static const QName kAtomSubtitleTag(ATOM_NS, "subtitle");
 static const QName kAtomSummaryTag(ATOM_NS, "summary");
@@ -418,9 +419,10 @@ class AtomItemFormat
         return parseIso8601Date_(kAtomPublishedPath.findtext(e));
     }
 
-    void published(Element &e, time_t) const
+    void published(Element &e, time_t t) const
     {
-        //assert(0);
+        auto s = formatIso8601_(t);
+        e.ensurechild(kAtomPublishedTag).text(s);
     }
 };
 
@@ -618,9 +620,10 @@ class Rss20ItemFormat
         return parseRfc822Date_(kRssPublishedPath.findtext(e));
     }
 
-    void published(Element &e, time_t) const
+    void published(Element &e, time_t t) const
     {
-        //assert(0);
+        auto s = formatRfc822_(t);
+        e.ensurechild("pubDate").text(s);
     }
 };
 
