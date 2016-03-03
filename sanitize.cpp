@@ -13,14 +13,14 @@ static const char tagWhitelist_[] = (
     "caption\0" "cite\0" "code\0" "col\0" "colgroup\0" "command\0" "datagrid\0"
     "datalist\0" "dd\0" "del\0" "details\0" "dfn\0" "dialog\0" "dir\0" "div\0"
     "dl\0" "dt\0" "em\0" "event-source\0" "fieldset\0" "figure\0" "font\0"
-    "footer\0" "form\0" "h1\0" "h2\0" "h3\0" "h4\0" "h5\0" "h6\0" "header\0"
-    "hr\0" "html\0" "i\0" "img\0" "input\0" "ins\0" "kbd\0" "keygen\0"
-    "label\0" "legend\0" "li\0" "m\0" "map\0" "menu\0" "meter\0" "multicol\0"
-    "nav\0" "nextid\0" "noscript\0" "ol\0" "optgroup\0" "option\0" "output\0"
-    "p\0" "pre\0" "progress\0" "q\0" "s\0" "samp\0" "section\0" "select\0"
-    "sound\0" "source\0" "spacer\0" "span\0" "strike\0" "strong\0" "sub\0"
-    "sup\0" "table\0" "tbody\0" "td\0" "textarea\0" "tfoot\0" "th\0" "thead\0"
-    "time\0" "tr\0" "tt\0" "u\0" "ul\0" "var\0" "video\0"
+    "footer\0" "form\0" "h1\0" "h2\0" "h3\0" "h4\0" "h5\0" "h6\0"  "head\0"
+    "header\0" "hr\0" "html\0" "i\0" "img\0" "input\0" "ins\0" "kbd\0"
+    "keygen\0" "label\0" "legend\0" "li\0" "m\0" "map\0" "menu\0" "meter\0"
+    "multicol\0" "nav\0" "nextid\0" "noscript\0" "ol\0" "optgroup\0" "option\0"
+    "output\0" "p\0" "pre\0" "progress\0" "q\0" "s\0" "samp\0" "section\0"
+    "select\0" "sound\0" "source\0" "spacer\0" "span\0" "strike\0" "strong\0"
+    "sub\0" "sup\0" "table\0" "tbody\0" "td\0" "textarea\0" "tfoot\0" "th\0"
+    "thead\0" "time\0" "title\0" "tr\0" "tt\0" "u\0" "ul\0" "var\0" "video\0"
 );
 
 static const char attrWhitelist_[] = (
