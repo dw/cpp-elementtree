@@ -70,6 +70,37 @@ dependency (e.g. Boost), ``etree::feed`` is UNIX-only for the time being.
    chosen.
 
 
+
+### Object Sizes
+
+Element objects are one word, i.e. 8 bytes on 64bit, and may be copied very
+cheaply. Copying an element copies only this word and causes a reference count
+to be incremented.
+
+
+### Reference Counting
+
+Element, ElementTree and AttrMap each call ref() during construction and
+unref() during destruction.
+
+When called on a non-document node, ref() treats the node's private user data
+pointer as an integer and increments it. If it was previously 0, ref() calls
+ref() again on the node's document.
+
+When called on a non-documnt node, unref() decrements the pointer. When it
+reaches 0, unref() calls unref() again on the node's document.
+
+When unref() on a document node reaches zero, ::xmlFreeDoc() is invoked to
+destroy the document.
+
+Due to this approach, it is possible to update a node's associated document
+(e.g. during append(), remove(), graft()) without having to update every
+Element value in existence, since regardless of how many exist, only one ref()
+was ever called on the node document. Once an element has moved to a new
+document, the mutation function need only call unref() once on the old document
+and ref() once on the new document.
+
+
 ## TODO
 
 * Remove items from *Horrors* section.
@@ -79,3 +110,4 @@ dependency (e.g. Boost), ``etree::feed`` is UNIX-only for the time being.
 * Fix up const usage everywhere (findall/removeall/etc)
 * Internally copy XPathContext for each thread (e.g. boost::thread_local_ptr)
 * etree::tostring() should copy up namespaces to subelements like lxml
+* Make child/attr iterators mutation-safe
