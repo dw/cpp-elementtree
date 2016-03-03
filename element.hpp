@@ -868,7 +868,7 @@ class Element
      */
     Nullable<Element> child(const QName &qn) const;
 
-    /*
+    /**
      * Like child(), except appends the element if it was missing.
      *
      * @param qn
