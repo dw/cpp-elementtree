@@ -113,3 +113,5 @@ and ref() once on the new document.
 * Make child/attr iterators mutation-safe
 * Handle comments better.
 * Rewrite & better tests for Element::graft().
+* reparent() must update refcounts when the document has changed, if there are
+  any exitent Elements for deeply nested child nodes.
