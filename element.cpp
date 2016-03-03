@@ -1743,9 +1743,17 @@ tostring(const ElementTree &t)
 Element
 SubElement(Element &parent, const QName &qname)
 {
-    Element elem(qname);
-    parent.append(elem);
-    return elem;
+    auto parentNode = nodeFor__<xmlNode *>(parent);
+    auto tagStr = qname.tag();
+    auto nsCstr = toXmlChar_(tagStr.c_str());
+    auto node = ::xmlNewDocNode(parentNode->doc, 0, nsCstr, 0);
+    ::xmlAddChild(parentNode, node);
+
+    if(qname.ns().size()) {
+        node->ns = getNs_(node, node, qname.ns()); // exceptions
+    }
+
+    return Element(node);
 }
 
 
