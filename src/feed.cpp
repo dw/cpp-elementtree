@@ -329,14 +329,14 @@ class AtomItemFormat
         });
     }
 
-    Nullable<Element> getContentTag_(const Element &e) const
+    optional<Element> getContentTag_(const Element &e) const
     {
         static const std::vector<const QName *> tags = {
             &kAtomContentTag,
             &kAtomSummaryTag
         };
 
-        Nullable<Element> out;
+        optional<Element> out;
         for(auto &tag : tags) {
             out = e.child(*tag);
             if(out) {
@@ -348,7 +348,7 @@ class AtomItemFormat
 
     std::string content(const Element &e) const
     {
-        Nullable<Element> content = getContentTag_(e);
+        optional<Element> content = getContentTag_(e);
         return content ? (*content).text() : "";
     }
 
@@ -360,7 +360,7 @@ class AtomItemFormat
 
     enum content_type type(const Element &e) const
     {
-        Nullable<Element> content = e.child(kAtomContentTag);
+        optional<Element> content = e.child(kAtomContentTag);
         if(content) {
             std::string type = (*content).get("type");
             if(type == "html" || type == "xhtml") {
@@ -400,7 +400,7 @@ class AtomItemFormat
 
     std::string originalGuid(const Element &e) const
     {
-        Nullable<Element> idElem = e.child({ATOM_NS, "id"});
+        optional<Element> idElem = e.child({ATOM_NS, "id"});
         if(idElem) {
             std::string out = (*idElem).get(kAtomOriginalGuidAttr);
             if(out.size()) {

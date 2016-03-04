@@ -4,7 +4,6 @@ add_executable(test_main
     test_attrib.cpp
     test_element.cpp
     test_feed.cpp
-    test_nullable.cpp
     test_parse.cpp
     test_qname.cpp
     test_xpath.cpp)
