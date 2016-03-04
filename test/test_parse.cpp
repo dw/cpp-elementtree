@@ -1,4 +1,4 @@
-#include <cassert>
+
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
@@ -8,7 +8,8 @@
 
 #include <elementtree.hpp>
 
-#include "myunit.hpp"
+#include "catch.hpp"
+
 #include "test_consts.hpp"
 
 
@@ -20,29 +21,25 @@ using etree::Element;
 //
 
 
-MU_TEST(fromstringEmpty)
+TEST_CASE("fromstringEmpty", "[parse]")
 {
-    auto e = myunit::raises<etree::xml_error>([&]() {
-        etree::fromstring("");
-    });
-    assert(std::string("Start tag expected, '<' not found") == e.what());
+    REQUIRE_THROWS_AS(etree::fromstring(""), etree::xml_error);
+    //REQUIRE(std::string("Start tag expected, '<' not found") == e.what());
 }
 
 
-MU_TEST(fromstring)
+TEST_CASE("fromstring", "[parse]")
 {
     auto e = etree::fromstring("<root/>");
-    assert(e.tag() == "root");
+    REQUIRE(e.tag() == "root");
 }
 
 
-MU_TEST(fromstringParseError)
+TEST_CASE("fromstringParseError", "[parse]")
 {
-    auto e = myunit::raises<etree::xml_error>([&]() {
-        etree::fromstring("corrupt");
-    });
-    auto expect = "Start tag expected, '<' not found";
-    assert(e.what() == std::string(expect));
+    REQUIRE_THROWS_AS(etree::fromstring("corrupt"), etree::xml_error);
+    //auto expect = "Start tag expected, '<' not found";
+    //REQUIRE(e.what() == std::string(expect));
 }
 
 
@@ -51,61 +48,55 @@ MU_TEST(fromstringParseError)
 //
 
 
-MU_TEST(parseIstream)
+TEST_CASE("parseIstream", "[parse]")
 {
     std::ifstream ifs;
     ifs.open("testdata/metafilter.rss.xml");
-    assert(ifs.is_open());
+    REQUIRE(ifs.is_open());
     auto e = etree::parse(ifs);
     ifs.close();
-    assert(e.getroot().tag() == "rss");
+    REQUIRE(e.getroot().tag() == "rss");
 }
 
 
-MU_TEST(parseIstreamCorrupt)
+TEST_CASE("parseIstreamCorrupt", "[parse]")
 {
     std::ifstream ifs;
     ifs.open("testdata/corrupt.xml");
-    assert(ifs.is_open());
-    myunit::raises<etree::xml_error>([&]() {
-        etree::parse(ifs);
-    });
+    REQUIRE(ifs.is_open());
+    REQUIRE_THROWS_AS(etree::parse(ifs), etree::xml_error);
     ifs.close();
 }
 
 
-MU_TEST(parsePath)
+TEST_CASE("parsePath", "[parse]")
 {
     auto e = etree::parse("testdata/metafilter.rss.xml");
-    assert(e.getroot().tag() == "rss");
+    REQUIRE(e.getroot().tag() == "rss");
 }
 
 
-MU_TEST(parsePathCorrupt)
+TEST_CASE("parsePathCorrupt", "[parse]")
 {
-    myunit::raises<etree::xml_error>([&]() {
-        etree::parse("testdata/corrupt.xml");
-    });
+    REQUIRE_THROWS_AS(etree::parse("testdata/corrupt.xml"), etree::xml_error);
 }
 
 
-MU_TEST(parseFd)
+TEST_CASE("parseFd", "[parse]")
 {
     int fd = ::open("testdata/metafilter.rss.xml", O_RDONLY);
-    assert(fd != -1);
+    REQUIRE(fd != -1);
     auto e = etree::parse(fd);
     ::close(fd);
-    assert(e.getroot().tag() == "rss");
+    REQUIRE(e.getroot().tag() == "rss");
 }
 
 
-MU_TEST(parseFdCorrupt)
+TEST_CASE("parseFdCorrupt", "[parse]")
 {
     int fd = ::open("testdata/corrupt.xml", O_RDONLY);
-    assert(fd != -1);
-    myunit::raises<etree::xml_error>([&]() {
-        etree::parse(fd);
-    });
+    REQUIRE(fd != -1);
+    REQUIRE_THROWS_AS(etree::parse(fd), etree::xml_error);
     ::close(fd);
 }
 
@@ -115,17 +106,15 @@ MU_TEST(parseFdCorrupt)
 //
 
 
-MU_TEST(htmlFromstringEmpty)
+TEST_CASE("htmlFromstringEmpty", "[parse]")
 {
-    auto e = myunit::raises<etree::xml_error>([&]() {
-        etree::html::fromstring("");
-    });
-    assert(std::string("Document is empty") == e.what());
+    REQUIRE_THROWS_AS(etree::html::fromstring(""), etree::xml_error);
+    //REQUIRE(std::string("Document is empty") == e.what());
 }
 
 
-MU_TEST(htmlFromstring)
+TEST_CASE("htmlFromstring", "[parse]")
 {
     auto e = etree::html::fromstring("<p>Hello</p>");
-    assert(e.findall(".//p").size() == 1);
+    REQUIRE(e.findall(".//p").size() == 1);
 }

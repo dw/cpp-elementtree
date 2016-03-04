@@ -3,14 +3,13 @@
  * License: http://opensource.org/licenses/MIT
  */
 
-#include <cassert>
 #include <utility>
 #include <vector>
 
 #include <elementtree.hpp>
 
-#include "myunit.hpp"
-#include "test_consts.hpp"
+#include "catch.hpp"
+
 
 using std::pair;
 using std::vector;
@@ -19,30 +18,27 @@ using std::string;
 etree::Element atomFeed("x");
 etree::Element rss20Feed("x");
 
-MU_SETUP(loadFeeds)
+TEST_CASE("loadFeeds", "[feed]")
 {
     atomFeed = etree::parse("testdata/pypy.atom.xml").getroot();
     rss20Feed = etree::parse("testdata/metafilter.rss.xml").getroot();
-}
-
 
 //
 // feed::format()
 //
 
 
-MU_TEST(atomFormat)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    assert(feed.format() == etree::feed::FORMAT_ATOM);
-}
+    SECTION("atomFormat")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        REQUIRE(feed.format() == etree::feed::FORMAT_ATOM);
+    }
 
-
-MU_TEST(rss20Format)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    assert(feed.format() == etree::feed::FORMAT_RSS20);
-}
+    SECTION("rss20Format")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        REQUIRE(feed.format() == etree::feed::FORMAT_RSS20);
+    }
 
 
 //
@@ -50,18 +46,17 @@ MU_TEST(rss20Format)
 //
 
 
-MU_TEST(atomTitle)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    assert(feed.title() == "PyPy Status Blog");
-}
+    SECTION("atomTitle")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        REQUIRE(feed.title() == "PyPy Status Blog");
+    }
 
-
-MU_TEST(rss20Title)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    assert(feed.title() == "MetaFilter");
-}
+    SECTION("rss20Title")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        REQUIRE(feed.title() == "MetaFilter");
+    }
 
 
 //
@@ -69,18 +64,17 @@ MU_TEST(rss20Title)
 //
 
 
-MU_TEST(atomLink)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    assert(feed.link() == "http://morepypy.blogspot.com/");
-}
+    SECTION("atomLink")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        REQUIRE(feed.link() == "http://morepypy.blogspot.com/");
+    }
 
-
-MU_TEST(rss20Link)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    assert(feed.link() == "http://www.metafilter.com/");
-}
+    SECTION("rss20Link")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        REQUIRE(feed.link() == "http://www.metafilter.com/");
+    }
 
 
 //
@@ -88,18 +82,17 @@ MU_TEST(rss20Link)
 //
 
 
-MU_TEST(atomDescription)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    assert(feed.description() == "My subtitle");
-}
+    SECTION("atomDescription")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        REQUIRE(feed.description() == "My subtitle");
+    }
 
-
-MU_TEST(rss20Description)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    assert(feed.description() == "The past 24 hours of MetaFilter");
-}
+    SECTION("rss20Description")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        REQUIRE(feed.description() == "The past 24 hours of MetaFilter");
+    }
 
 
 //
@@ -107,56 +100,53 @@ MU_TEST(rss20Description)
 //
 
 
-MU_TEST(atomIcon)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    assert(feed.icon() == "http://example.org/favicon.ico");
-}
+    SECTION("atomIcon")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        REQUIRE(feed.icon() == "http://example.org/favicon.ico");
+    }
 
+    SECTION("atomIconSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+        feed.icon("http://www.lolcats.com/");
+        auto s = tostring(feed.element());
+        REQUIRE(s == (
+                "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+                        "<icon>http://www.lolcats.com/</icon>"
+                        "</feed>"
+        ));
+    }
 
-MU_TEST(atomIconSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
-    feed.icon("http://www.lolcats.com/");
-    auto s = tostring(feed.element());
-    assert(s == (
-        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
-            "<icon>http://www.lolcats.com/</icon>"
-        "</feed>"
-    ));
-}
+    SECTION("rss20Icon")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        REQUIRE(feed.icon() == "http://www.lolcats.com/");
+    }
 
-
-MU_TEST(rss20Icon)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    assert(feed.icon() == "http://www.lolcats.com/");
-}
-
-
-MU_TEST(rss20IconSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
-    feed.icon("http://www.lolcats.com/");
-    feed.title("foo");
-    feed.link("foobar");
-    auto s = tostring(feed.element());
-    assert(s == (
-        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
-                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
-                "version=\"2.0\">"
-            "<channel>"
-                "<image>"
-                    "<title>foo</title>"
-                    "<link>foobar</link>"
-                    "<url>http://www.lolcats.com/</url>"
-                "</image>"
-                "<title>foo</title>"
-                "<link>foobar</link>"
-            "</channel>"
-        "</rss>"
-    ));
-}
+    SECTION("rss20IconSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+        feed.icon("http://www.lolcats.com/");
+        feed.title("foo");
+        feed.link("foobar");
+        auto s = tostring(feed.element());
+        REQUIRE(s == (
+                "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                        "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                        "version=\"2.0\">"
+                        "<channel>"
+                        "<image>"
+                        "<title>foo</title>"
+                        "<link>foobar</link>"
+                        "<url>http://www.lolcats.com/</url>"
+                        "</image>"
+                        "<title>foo</title>"
+                        "<link>foobar</link>"
+                        "</channel>"
+                        "</rss>"
+        ));
+    }
 
 
 //
@@ -164,36 +154,35 @@ MU_TEST(rss20IconSet)
 //
 
 
-MU_TEST(atomItems)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    std::vector<std::string> got, expect {
-        "C-API Support update",
-        "Using CFFI for embedding",
-    };
+    SECTION("atomItems")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        std::vector<std::string> got, expect{
+                "C-API Support update",
+                "Using CFFI for embedding",
+        };
 
-    for(auto &item : feed.items()) {
-        got.push_back(item.title());
+        for (auto& item : feed.items()) {
+            got.push_back(item.title());
+        }
+
+        REQUIRE(got == expect);
     }
 
-    assert(got == expect);
-}
+    SECTION("rss20Items")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        std::vector<std::string> got, expect{
+                "Illinois Budget on hold",
+                "Finger-lickin' 8-bit"
+        };
 
+        for (auto& item : feed.items()) {
+            got.push_back(item.title());
+        }
 
-MU_TEST(rss20Items)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    std::vector<std::string> got, expect {
-		"Illinois Budget on hold",
-		"Finger-lickin' 8-bit"
-    };
-
-    for(auto &item : feed.items()) {
-        got.push_back(item.title());
+        REQUIRE(got == expect);
     }
-
-    assert(got == expect);
-}
 
 
 //
@@ -201,18 +190,17 @@ MU_TEST(rss20Items)
 //
 
 
-MU_TEST(atomElement)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    assert(feed.element() == atomFeed);
-}
+    SECTION("atomElement")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        REQUIRE(feed.element() == atomFeed);
+    }
 
-
-MU_TEST(rss20Element)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    assert(feed.element() == rss20Feed);
-}
+    SECTION("rss20Element")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        REQUIRE(feed.element() == rss20Feed);
+    }
 
 
 //
@@ -220,26 +208,25 @@ MU_TEST(rss20Element)
 //
 
 
-MU_TEST(atomCreate)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
-    auto s = tostring(feed.element());
-    assert(s == "<feed xmlns=\"http://www.w3.org/2005/Atom\"/>");
-}
+    SECTION("atomCreate")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+        auto s = tostring(feed.element());
+        REQUIRE(s == "<feed xmlns=\"http://www.w3.org/2005/Atom\"/>");
+    }
 
-
-MU_TEST(rss20Create)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
-    auto s = tostring(feed.element());
-    assert(s == (
-        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
-                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
-                "version=\"2.0\">"
-            "<channel/>"
-        "</rss>"
-    ));
-}
+    SECTION("rss20Create")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+        auto s = tostring(feed.element());
+        REQUIRE(s == (
+                "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                        "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                        "version=\"2.0\">"
+                        "<channel/>"
+                        "</rss>"
+        ));
+    }
 
 
 //
@@ -247,61 +234,58 @@ MU_TEST(rss20Create)
 //
 
 
-MU_TEST(atomAppend)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
-    auto item = feed.append();
-    assert(tostring(feed.element()) == (
-        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
-            "<entry>"
-                "<title type=\"text\"/>"
-                "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
-                "<content type=\"html\"/>"
-                "<author>"
-                    "<name/>"
-                "</author>"
-                "<id/>"
-                "<published>1970-01-01T00:00:00Z</published>"
-                "<updated>1970-01-01T00:00:00Z</updated>"
-            "</entry>"
-        "</feed>"
-    ));
-}
+    SECTION("atomAppend")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+        auto item = feed.append();
+        REQUIRE(tostring(feed.element()) == (
+                "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+                        "<entry>"
+                        "<title type=\"text\"/>"
+                        "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                        "<content type=\"html\"/>"
+                        "<author>"
+                        "<name/>"
+                        "</author>"
+                        "<id/>"
+                        "<published>1970-01-01T00:00:00Z</published>"
+                        "<updated>1970-01-01T00:00:00Z</updated>"
+                        "</entry>"
+                        "</feed>"
+        ));
+    }
 
+    SECTION("rss20Append")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+        auto item = feed.append();
+        REQUIRE(tostring(feed.element()) == (
+                "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                        "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                        "version=\"2.0\">"
+                        "<channel>"
+                        "<item>"
+                        "<title/>"
+                        "<link/>"
+                        "<ns0:creator/>"
+                        "<guid isPermaLink=\"false\"/>"
+                        "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+                        "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
+                        "</item>"
+                        "</channel>"
+                        "</rss>"
+        ));
+    }
 
-MU_TEST(rss20Append)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
-    auto item = feed.append();
-    assert(tostring(feed.element()) == (
-        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
-                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
-                "version=\"2.0\">"
-            "<channel>"
-                "<item>"
-                    "<title/>"
-                    "<link/>"
-                    "<ns0:creator/>"
-                    "<guid isPermaLink=\"false\"/>"
-                    "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
-                    "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
-                "</item>"
-            "</channel>"
-        "</rss>"
-    ));
-}
+    SECTION("atomAppendExisting")
+    {
+        //
+    }
 
-
-MU_TEST(atomAppendExisting)
-{
-    //
-}
-
-
-MU_TEST(rss20AppendExisting)
-{
-    //
-}
+    SECTION("rss20AppendExisting")
+    {
+        //
+    }
 
 
 //
@@ -309,67 +293,64 @@ MU_TEST(rss20AppendExisting)
 //
 
 
-MU_TEST(atomItemTitle)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    auto item = feed.items()[0];
-    assert(item.title() == "C-API Support update");
-}
+    SECTION("atomItemTitle")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        auto item = feed.items()[0];
+        REQUIRE(item.title() == "C-API Support update");
+    }
 
+    SECTION("atomItemTitleSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+        auto item = feed.append();
+        item.title("Example Title");
+        REQUIRE(tostring(feed.element()) == (
+                "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+                        "<entry>"
+                        "<title type=\"text\">Example Title</title>"
+                        "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                        "<content type=\"html\"/>"
+                        "<author>"
+                        "<name/>"
+                        "</author>"
+                        "<id/>"
+                        "<published>1970-01-01T00:00:00Z</published>"
+                        "<updated>1970-01-01T00:00:00Z</updated>"
+                        "</entry>"
+                        "</feed>"
+        ));
+    }
 
-MU_TEST(atomItemTitleSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
-    auto item = feed.append();
-    item.title("Example Title");
-    assert(tostring(feed.element()) == (
-        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
-            "<entry>"
-                "<title type=\"text\">Example Title</title>"
-                "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
-                "<content type=\"html\"/>"
-                "<author>"
-                    "<name/>"
-                "</author>"
-                "<id/>"
-                "<published>1970-01-01T00:00:00Z</published>"
-                "<updated>1970-01-01T00:00:00Z</updated>"
-            "</entry>"
-        "</feed>"
-    ));
-}
+    SECTION("rss20ItemTitle")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        auto item = feed.items()[0];
+        REQUIRE(item.title() == "Illinois Budget on hold");
+    }
 
-
-MU_TEST(rss20ItemTitle)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    auto item = feed.items()[0];
-    assert(item.title() == "Illinois Budget on hold");
-}
-
-
-MU_TEST(rss20ItemTitleSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
-    auto item = feed.append();
-    item.title("Example Title");
-    assert(tostring(feed.element()) == (
-        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
-                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
-                "version=\"2.0\">"
-            "<channel>"
-                "<item>"
-                    "<title>Example Title</title>"
-                    "<link/>"
-                    "<ns0:creator/>"
-                    "<guid isPermaLink=\"false\"/>"
-                    "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
-                    "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
-                "</item>"
-            "</channel>"
-        "</rss>"
-    ));
-}
+    SECTION("rss20ItemTitleSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+        auto item = feed.append();
+        item.title("Example Title");
+        REQUIRE(tostring(feed.element()) == (
+                "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                        "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                        "version=\"2.0\">"
+                        "<channel>"
+                        "<item>"
+                        "<title>Example Title</title>"
+                        "<link/>"
+                        "<ns0:creator/>"
+                        "<guid isPermaLink=\"false\"/>"
+                        "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+                        "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
+                        "</item>"
+                        "</channel>"
+                        "</rss>"
+        ));
+    }
 
 
 //
@@ -377,69 +358,67 @@ MU_TEST(rss20ItemTitleSet)
 //
 
 
-MU_TEST(atomItemLink)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    auto item = feed.items()[0];
-    assert(item.link() == ("http://feedproxy.google.com/~r/PyPyStatusBlog/"
-                           "~3/S2p48K40LA8/c-api-support-update.html"));
-}
+    SECTION("atomItemLink")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        auto item = feed.items()[0];
+        REQUIRE(item.link() == ("http://feedproxy.google.com/~r/PyPyStatusBlog/"
+                "~3/S2p48K40LA8/c-api-support-update.html"));
+    }
 
+    SECTION("atomItemLinkSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+        auto item = feed.append();
+        item.link("http://www.example.com/");
+        REQUIRE(tostring(feed.element()) == (
+                "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+                        "<entry>"
+                        "<title type=\"text\"/>"
+                        "<link rel=\"alternate\" type=\"text/html\" "
+                        "href=\"http://www.example.com/\"/>"
+                        "<content type=\"html\"/>"
+                        "<author>"
+                        "<name/>"
+                        "</author>"
+                        "<id/>"
+                        "<published>1970-01-01T00:00:00Z</published>"
+                        "<updated>1970-01-01T00:00:00Z</updated>"
+                        "</entry>"
+                        "</feed>"
+        ));
+    }
 
-MU_TEST(atomItemLinkSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
-    auto item = feed.append();
-    item.link("http://www.example.com/");
-    assert(tostring(feed.element()) == (
-        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
-            "<entry>"
-                "<title type=\"text\"/>"
-                "<link rel=\"alternate\" type=\"text/html\" "
-                    "href=\"http://www.example.com/\"/>"
-                "<content type=\"html\"/>"
-                "<author>"
-                    "<name/>"
-                "</author>"
-                "<id/>"
-                "<published>1970-01-01T00:00:00Z</published>"
-                "<updated>1970-01-01T00:00:00Z</updated>"
-            "</entry>"
-        "</feed>"
-    ));
-}
+    SECTION("rss20ItemLink")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        auto item = feed.items()[0];
+        REQUIRE(item.link()
+                       == "http://www.metafilter.com/157514/Illinois-Budget-on-hold");
+    }
 
-
-MU_TEST(rss20ItemLink)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    auto item = feed.items()[0];
-    assert(item.link() == "http://www.metafilter.com/157514/Illinois-Budget-on-hold");
-}
-
-
-MU_TEST(rss20ItemLinkSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
-    auto item = feed.append();
-    item.link("http://www.example.com/");
-    assert(tostring(feed.element()) == (
-        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
-                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
-                "version=\"2.0\">"
-            "<channel>"
-                "<item>"
-                    "<title/>"
-                    "<link>http://www.example.com/</link>"
-                    "<ns0:creator/>"
-                    "<guid isPermaLink=\"false\"/>"
-                    "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
-                    "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
-                "</item>"
-            "</channel>"
-        "</rss>"
-    ));
-}
+    SECTION("rss20ItemLinkSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+        auto item = feed.append();
+        item.link("http://www.example.com/");
+        REQUIRE(tostring(feed.element()) == (
+                "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                        "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                        "version=\"2.0\">"
+                        "<channel>"
+                        "<item>"
+                        "<title/>"
+                        "<link>http://www.example.com/</link>"
+                        "<ns0:creator/>"
+                        "<guid isPermaLink=\"false\"/>"
+                        "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+                        "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
+                        "</item>"
+                        "</channel>"
+                        "</rss>"
+        ));
+    }
 
 
 //
@@ -447,71 +426,68 @@ MU_TEST(rss20ItemLinkSet)
 //
 
 
-MU_TEST(atomItemContent)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    auto item = feed.items()[0];
-    std::string expect("<p>As you know, PyPy can emulate the");
-    assert(expect == item.content().substr(0, expect.size()));
-}
+    SECTION("atomItemContent")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        auto item = feed.items()[0];
+        std::string expect("<p>As you know, PyPy can emulate the");
+        REQUIRE(expect == item.content().substr(0, expect.size()));
+    }
 
+    SECTION("atomItemContentSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+        auto item = feed.append();
+        item.content("My content");
+        item.type(etree::feed::CTYPE_HTML);
+        REQUIRE(tostring(feed.element()) == (
+                "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+                        "<entry>"
+                        "<title type=\"text\"/>"
+                        "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                        "<content type=\"html\">My content</content>"
+                        "<author>"
+                        "<name/>"
+                        "</author>"
+                        "<id/>"
+                        "<published>1970-01-01T00:00:00Z</published>"
+                        "<updated>1970-01-01T00:00:00Z</updated>"
+                        "</entry>"
+                        "</feed>"
+        ));
+    }
 
-MU_TEST(atomItemContentSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
-    auto item = feed.append();
-    item.content("My content");
-    item.type(etree::feed::CTYPE_HTML);
-    assert(tostring(feed.element()) == (
-        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
-            "<entry>"
-                "<title type=\"text\"/>"
-                "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
-                "<content type=\"html\">My content</content>"
-                "<author>"
-                    "<name/>"
-                "</author>"
-                "<id/>"
-                "<published>1970-01-01T00:00:00Z</published>"
-                "<updated>1970-01-01T00:00:00Z</updated>"
-            "</entry>"
-        "</feed>"
-    ));
-}
+    SECTION("rss20ItemContent")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        auto item = feed.items()[0];
+        std::string expect("<a href=\"http://interactive.wbez.org/");
+        REQUIRE(item.content().substr(0, expect.size()) == expect);
+    }
 
-
-MU_TEST(rss20ItemContent)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    auto item = feed.items()[0];
-    std::string expect("<a href=\"http://interactive.wbez.org/");
-    assert(item.content().substr(0, expect.size()) == expect);
-}
-
-
-MU_TEST(rss20ItemContentSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
-    auto item = feed.append();
-    item.content("http://www.example.com/");
-    assert(tostring(feed.element()) == (
-        "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
-                "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
-                "version=\"2.0\">"
-            "<channel>"
-                "<item>"
-                    "<title/>"
-                    "<link/>"
-                    "<ns0:creator/>"
-                    "<guid isPermaLink=\"false\"/>"
-                    "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
-                    "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
-                    "<description>http://www.example.com/</description>"
-                "</item>"
-            "</channel>"
-        "</rss>"
-    ));
-}
+    SECTION("rss20ItemContentSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+        auto item = feed.append();
+        item.content("http://www.example.com/");
+        REQUIRE(tostring(feed.element()) == (
+                "<rss xmlns:ns0=\"http://purl.org/dc/elements/1.1/\" "
+                        "xmlns:ns1=\"http://www.w3.org/2005/Atom\" "
+                        "version=\"2.0\">"
+                        "<channel>"
+                        "<item>"
+                        "<title/>"
+                        "<link/>"
+                        "<ns0:creator/>"
+                        "<guid isPermaLink=\"false\"/>"
+                        "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+                        "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
+                        "<description>http://www.example.com/</description>"
+                        "</item>"
+                        "</channel>"
+                        "</rss>"
+        ));
+    }
 
 
 //
@@ -519,70 +495,67 @@ MU_TEST(rss20ItemContentSet)
 //
 
 
-MU_TEST(atomItemContentType)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    assert(feed.items()[0].type() == etree::feed::CTYPE_HTML);
-}
+    SECTION("atomItemContentType")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        REQUIRE(feed.items()[0].type() == etree::feed::CTYPE_HTML);
+    }
 
+    SECTION("atomItemContentTypeSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+        auto item = feed.append();
+        item.content("");
 
-MU_TEST(atomItemContentTypeSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
-    auto item = feed.append();
-    item.content("");
+        item.type(etree::feed::CTYPE_HTML);
+        REQUIRE(tostring(feed.element()) == (
+                "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+                        "<entry>"
+                        "<title type=\"text\"/>"
+                        "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                        "<content type=\"html\"/>"
+                        "<author>"
+                        "<name/>"
+                        "</author>"
+                        "<id/>"
+                        "<published>1970-01-01T00:00:00Z</published>"
+                        "<updated>1970-01-01T00:00:00Z</updated>"
+                        "</entry>"
+                        "</feed>"
+        ));
 
-    item.type(etree::feed::CTYPE_HTML);
-    assert(tostring(feed.element()) == (
-        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
-            "<entry>"
-                "<title type=\"text\"/>"
-                "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
-                "<content type=\"html\"/>"
-                "<author>"
-                    "<name/>"
-                "</author>"
-                "<id/>"
-                "<published>1970-01-01T00:00:00Z</published>"
-                "<updated>1970-01-01T00:00:00Z</updated>"
-            "</entry>"
-        "</feed>"
-    ));
+        item.type(etree::feed::CTYPE_TEXT);
+        REQUIRE(tostring(feed.element()) == (
+                "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+                        "<entry>"
+                        "<title type=\"text\"/>"
+                        "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                        "<content type=\"text\"/>"
+                        "<author>"
+                        "<name/>"
+                        "</author>"
+                        "<id/>"
+                        "<published>1970-01-01T00:00:00Z</published>"
+                        "<updated>1970-01-01T00:00:00Z</updated>"
+                        "</entry>"
+                        "</feed>"
+        ));
+    }
 
-    item.type(etree::feed::CTYPE_TEXT);
-    assert(tostring(feed.element()) == (
-        "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
-            "<entry>"
-                "<title type=\"text\"/>"
-                "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
-                "<content type=\"text\"/>"
-                "<author>"
-                    "<name/>"
-                "</author>"
-                "<id/>"
-                "<published>1970-01-01T00:00:00Z</published>"
-                "<updated>1970-01-01T00:00:00Z</updated>"
-            "</entry>"
-        "</feed>"
-    ));
-}
+    SECTION("rss20ItemContentType")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        REQUIRE(feed.items()[0].type() == etree::feed::CTYPE_HTML);
+        // ...
+    }
 
-
-MU_TEST(rss20ItemContentType)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    assert(feed.items()[0].type() == etree::feed::CTYPE_HTML);
-    // ...
-}
-
-
-MU_TEST(rss20ItemContentTypeSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
-    auto item = feed.append();
-    item.type(etree::feed::CTYPE_HTML);
-    // ...
-}
+    SECTION("rss20ItemContentTypeSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+        auto item = feed.append();
+        item.type(etree::feed::CTYPE_HTML);
+        // ...
+    }
 
 
 //
@@ -590,57 +563,54 @@ MU_TEST(rss20ItemContentTypeSet)
 //
 
 
-MU_TEST(atomItemAuthor)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    assert(feed.items()[0].author() == "Armin Rigo");
-}
+    SECTION("atomItemAuthor")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        REQUIRE(feed.items()[0].author() == "Armin Rigo");
+    }
 
+    SECTION("atomItemAuthorSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+        auto item = feed.append();
+        item.author("My Author");
+        REQUIRE(tostring(item.element()) == (
+                "<entry>"
+                        "<title type=\"text\"/>"
+                        "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                        "<content type=\"html\"/>"
+                        "<author>"
+                        "<name>My Author</name>"
+                        "</author>"
+                        "<id/>"
+                        "<published>1970-01-01T00:00:00Z</published>"
+                        "<updated>1970-01-01T00:00:00Z</updated>"
+                        "</entry>"
+        ));
+    }
 
-MU_TEST(atomItemAuthorSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
-    auto item = feed.append();
-    item.author("My Author");
-    assert(tostring(item.element()) == (
-        "<entry>"
-            "<title type=\"text\"/>"
-            "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
-            "<content type=\"html\"/>"
-            "<author>"
-                "<name>My Author</name>"
-            "</author>"
-            "<id/>"
-            "<published>1970-01-01T00:00:00Z</published>"
-            "<updated>1970-01-01T00:00:00Z</updated>"
-        "</entry>"
-    ));
-}
+    SECTION("rss20ItemAuthor")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        REQUIRE(feed.items()[0].author() == "AlexiaSky");
+    }
 
-
-MU_TEST(rss20ItemAuthor)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    assert(feed.items()[0].author() == "AlexiaSky");
-}
-
-
-MU_TEST(rss20ItemAuthorSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
-    auto item = feed.append();
-    item.author("My Author");
-    assert(tostring(item.element()) == (
-        "<item>"
-            "<title/>"
-            "<link/>"
-            "<ns0:creator>My Author</ns0:creator>"
-            "<guid isPermaLink=\"false\"/>"
-            "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
-            "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
-        "</item>"
-    ));
-}
+    SECTION("rss20ItemAuthorSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+        auto item = feed.append();
+        item.author("My Author");
+        REQUIRE(tostring(item.element()) == (
+                "<item>"
+                        "<title/>"
+                        "<link/>"
+                        "<ns0:creator>My Author</ns0:creator>"
+                        "<guid isPermaLink=\"false\"/>"
+                        "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+                        "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
+                        "</item>"
+        ));
+    }
 
 
 //
@@ -648,60 +618,57 @@ MU_TEST(rss20ItemAuthorSet)
 //
 
 
-MU_TEST(atomItemGuid)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    assert(feed.items()[0].guid() == (
-        "tag:blogger.com,1999:blog-3971202189709462152"
-        ".post-8582726091670983181"
-    ));
-}
+    SECTION("atomItemGuid")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        REQUIRE(feed.items()[0].guid() == (
+                "tag:blogger.com,1999:blog-3971202189709462152"
+                        ".post-8582726091670983181"
+        ));
+    }
 
+    SECTION("atomItemGuidSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+        auto item = feed.append();
+        item.guid("x");
+        REQUIRE(tostring(item.element()) == (
+                "<entry>"
+                        "<title type=\"text\"/>"
+                        "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                        "<content type=\"html\"/>"
+                        "<author>"
+                        "<name/>"
+                        "</author>"
+                        "<id>x</id>"
+                        "<published>1970-01-01T00:00:00Z</published>"
+                        "<updated>1970-01-01T00:00:00Z</updated>"
+                        "</entry>"
+        ));
+    }
 
-MU_TEST(atomItemGuidSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
-    auto item = feed.append();
-    item.guid("x");
-    assert(tostring(item.element()) == (
-        "<entry>"
-            "<title type=\"text\"/>"
-            "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
-            "<content type=\"html\"/>"
-            "<author>"
-                "<name/>"
-            "</author>"
-            "<id>x</id>"
-            "<published>1970-01-01T00:00:00Z</published>"
-            "<updated>1970-01-01T00:00:00Z</updated>"
-        "</entry>"
-    ));
-}
+    SECTION("rss20ItemGuid")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        REQUIRE(feed.items()[0].guid() == "tag:metafilter.com,2016:site.157514");
+    }
 
-
-MU_TEST(rss20ItemGuid)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    assert(feed.items()[0].guid() == "tag:metafilter.com,2016:site.157514");
-}
-
-
-MU_TEST(rss20ItemGuidSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
-    auto item = feed.append();
-    item.guid("x");
-    assert(tostring(item.element()) == (
-        "<item>"
-            "<title/>"
-            "<link/>"
-            "<ns0:creator/>"
-            "<guid isPermaLink=\"false\">x</guid>"
-            "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
-            "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
-        "</item>"
-    ));
-}
+    SECTION("rss20ItemGuidSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+        auto item = feed.append();
+        item.guid("x");
+        REQUIRE(tostring(item.element()) == (
+                "<item>"
+                        "<title/>"
+                        "<link/>"
+                        "<ns0:creator/>"
+                        "<guid isPermaLink=\"false\">x</guid>"
+                        "<pubDate>Thu, 01 Jan 1970 00:00:00 +0000</pubDate>"
+                        "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
+                        "</item>"
+        ));
+    }
 
 
 //
@@ -709,57 +676,54 @@ MU_TEST(rss20ItemGuidSet)
 //
 
 
-MU_TEST(atomItemPublished)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    assert(feed.items()[0].published() == 1456415640);
-}
+    SECTION("atomItemPublished")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        REQUIRE(feed.items()[0].published() == 1456415640);
+    }
 
+    SECTION("atomItemPublishedSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+        auto item = feed.append();
+        item.published(1);
+        REQUIRE(tostring(item.element()) == (
+                "<entry>"
+                        "<title type=\"text\"/>"
+                        "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                        "<content type=\"html\"/>"
+                        "<author>"
+                        "<name/>"
+                        "</author>"
+                        "<id/>"
+                        "<published>1970-01-01T00:00:01Z</published>"
+                        "<updated>1970-01-01T00:00:00Z</updated>"
+                        "</entry>"
+        ));
+    }
 
-MU_TEST(atomItemPublishedSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
-    auto item = feed.append();
-    item.published(1);
-    assert(tostring(item.element()) == (
-        "<entry>"
-            "<title type=\"text\"/>"
-            "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
-            "<content type=\"html\"/>"
-            "<author>"
-                "<name/>"
-            "</author>"
-            "<id/>"
-            "<published>1970-01-01T00:00:01Z</published>"
-            "<updated>1970-01-01T00:00:00Z</updated>"
-        "</entry>"
-    ));
-}
+    SECTION("rss20ItemPublished")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        REQUIRE(feed.items()[0].published() == 1456713220);
+    }
 
-
-MU_TEST(rss20ItemPublished)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    assert(feed.items()[0].published() == 1456713220);
-}
-
-
-MU_TEST(rss20ItemPublishedSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
-    auto item = feed.append();
-    item.published(1);
-    assert(tostring(item.element()) == (
-        "<item>"
-            "<title/>"
-            "<link/>"
-            "<ns0:creator/>"
-            "<guid isPermaLink=\"false\"/>"
-            "<pubDate>Thu, 01 Jan 1970 00:00:01 +0000</pubDate>"
-            "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
-        "</item>"
-    ));
-}
+    SECTION("rss20ItemPublishedSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+        auto item = feed.append();
+        item.published(1);
+        REQUIRE(tostring(item.element()) == (
+                "<item>"
+                        "<title/>"
+                        "<link/>"
+                        "<ns0:creator/>"
+                        "<guid isPermaLink=\"false\"/>"
+                        "<pubDate>Thu, 01 Jan 1970 00:00:01 +0000</pubDate>"
+                        "<ns1:updated>1970-01-01T00:00:00Z</ns1:updated>"
+                        "</item>"
+        ));
+    }
 
 
 //
@@ -767,54 +731,53 @@ MU_TEST(rss20ItemPublishedSet)
 //
 
 
-MU_TEST(atomItemUpdated)
-{
-    auto feed = etree::feed::fromelement(atomFeed);
-    assert(feed.items()[0].updated() == 1456417492);
-}
+    SECTION("atomItemUpdated")
+    {
+        auto feed = etree::feed::fromelement(atomFeed);
+        REQUIRE(feed.items()[0].updated() == 1456417492);
+    }
 
+    SECTION("atomItemUpdatedSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
+        auto item = feed.append();
+        item.updated(1);
+        REQUIRE(tostring(item.element()) == (
+                "<entry>"
+                        "<title type=\"text\"/>"
+                        "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
+                        "<content type=\"html\"/>"
+                        "<author>"
+                        "<name/>"
+                        "</author>"
+                        "<id/>"
+                        "<published>1970-01-01T00:00:00Z</published>"
+                        "<updated>1970-01-01T00:00:01Z</updated>"
+                        "</entry>"
+        ));
+    }
 
-MU_TEST(atomItemUpdatedSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_ATOM);
-    auto item = feed.append();
-    item.updated(1);
-    assert(tostring(item.element()) == (
-        "<entry>"
-            "<title type=\"text\"/>"
-            "<link rel=\"alternate\" type=\"text/html\" href=\"\"/>"
-            "<content type=\"html\"/>"
-            "<author>"
-                "<name/>"
-            "</author>"
-            "<id/>"
-            "<published>1970-01-01T00:00:00Z</published>"
-            "<updated>1970-01-01T00:00:01Z</updated>"
-        "</entry>"
-    ));
-}
+    SECTION("rss20ItemUpdated")
+    {
+        auto feed = etree::feed::fromelement(rss20Feed);
+        REQUIRE(feed.items()[0].updated() == 0);
+    }
 
+    SECTION("rss20ItemUpdatedSet")
+    {
+        auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
+        auto item = feed.append();
+        item.updated(1);
+        REQUIRE(tostring(item.element()) == (
+                "<item>"
+                        "<title/>"
+                        "<link/>"
+                        "<ns0:creator/>"
+                        "<guid isPermaLink=\"false\"/>"
+                        "<pubDate>Thu, 01 Jan 1970 00:00:01 +0000</pubDate>"
+                        "<ns1:updated>1970-01-01T00:00:01Z</ns1:updated>"
+                        "</item>"
+        ));
+    }
 
-MU_TEST(rss20ItemUpdated)
-{
-    auto feed = etree::feed::fromelement(rss20Feed);
-    assert(feed.items()[0].updated() == 0);
-}
-
-
-MU_TEST(rss20ItemUpdatedSet)
-{
-    auto feed = etree::feed::create(etree::feed::FORMAT_RSS20);
-    auto item = feed.append();
-    item.updated(1);
-    assert(tostring(item.element()) == (
-        "<item>"
-            "<title/>"
-            "<link/>"
-            "<ns0:creator/>"
-            "<guid isPermaLink=\"false\"/>"
-            "<pubDate>Thu, 01 Jan 1970 00:00:01 +0000</pubDate>"
-            "<ns1:updated>1970-01-01T00:00:01Z</ns1:updated>"
-        "</item>"
-    ));
 }

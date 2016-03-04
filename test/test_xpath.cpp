@@ -3,22 +3,21 @@
  * License: http://opensource.org/licenses/MIT
  */
 
-#include <cassert>
 #include <utility>
 #include <vector>
 
 #include <elementtree.hpp>
 
-#include "myunit.hpp"
+#include "catch.hpp"
 
 
-MU_TEST(contextConstructorNoNs)
+TEST_CASE("contextConstructorNoNs", "[xpath]")
 {
     etree::XPathContext ctx;
 }
 
 
-MU_TEST(contextConstructor)
+TEST_CASE("contextConstructor", "[xpath]")
 {
     etree::XPathContext ctx(etree::ns_list{
       {"foo", "urn:foo"}
@@ -26,7 +25,7 @@ MU_TEST(contextConstructor)
 }
 
 
-MU_TEST(contextNsListRespected)
+TEST_CASE("contextNsListRespected", "[xpath]")
 {
     auto elem = etree::fromstring(
         "<root><child xmlns=\"urn:foo\"/></root>"
@@ -36,98 +35,96 @@ MU_TEST(contextNsListRespected)
     });
 
     auto expr = etree::XPath("child", ctx);
-    assert(expr.findall(elem).size() == 0);
+    REQUIRE(expr.findall(elem).size() == 0);
 
     auto expr2 = etree::XPath("foo:child", ctx);
-    assert(expr2.findall(elem).size() == 1);
+    REQUIRE(expr2.findall(elem).size() == 1);
 }
 
 
-MU_TEST(Constructor)
+TEST_CASE("XPathConstructor", "[xpath]")
 {
     auto xp = etree::XPath(".");
-    assert(xp.expr() == ".");
+    REQUIRE(xp.expr() == ".");
 }
 
 
-MU_TEST(ConstructorParseError)
+TEST_CASE("ConstructorParseError", "[xpath]")
 {
-    auto e = myunit::raises<etree::xml_error>([&]() {
-        etree::XPath("&%^&%^&");
-    });
-    assert(e.what() == std::string("Invalid expression"));
+    REQUIRE_THROWS_AS(etree::XPath("&%^&%^&"), etree::xml_error);
+    //REQUIRE(e.what() == std::string("Invalid expression"));
 }
 
 
-MU_TEST(CopyConstructor)
+TEST_CASE("CopyConstructor", "[xpath]")
 {
     auto xp = etree::XPath(".");
     auto xp2 = xp;
-    assert(xp.expr() == xp2.expr());
+    REQUIRE(xp.expr() == xp2.expr());
 }
 
 
-MU_TEST(Expr)
+TEST_CASE("Expr", "[xpath]")
 {
     auto xp = etree::XPath(".");
-    assert(xp.expr() == ".");
+    REQUIRE(xp.expr() == ".");
 }
 
 
-MU_TEST(FindOrder)
+TEST_CASE("FindOrder", "[xpath]")
 {
     auto elem = etree::fromstring("<root><a/><b/><c/></root>");
     auto xp = etree::XPath("./*");
-    assert(elem.child("a") == xp.find(elem));
+    REQUIRE(elem.child("a") == xp.find(elem));
 }
 
 
-MU_TEST(FindNoMatch)
+TEST_CASE("FindNoMatch", "[xpath]")
 {
     auto elem = etree::fromstring("<root><a/><b/><c/></root>");
     auto xp = etree::XPath("./nonexistent");
-    assert(! xp.find(elem));
+    REQUIRE_FALSE(xp.find(elem));
 }
 
 
-MU_TEST(Findall)
+TEST_CASE("Findall", "[xpath]")
 {
     auto elem = etree::fromstring("<root><a/><b/><c/></root>");
     auto xp = etree::XPath("./*");
-    assert(elem.children() == xp.findall(elem));
+    REQUIRE(elem.children() == xp.findall(elem));
 }
 
 
-MU_TEST(FindallNoMatch)
+TEST_CASE("FindallNoMatch", "[xpath]")
 {
     auto elem = etree::fromstring("<root><a/><b/><c/></root>");
     auto xp = etree::XPath("./nonexistent");
-    assert(elem.children("nonexistent") == xp.findall(elem));
+    REQUIRE(elem.children("nonexistent") == xp.findall(elem));
 }
 
 
-MU_TEST(removeall)
+TEST_CASE("removeall", "[xpath]")
 {
     auto elem = etree::fromstring("<root><a/><b/><c/></root>");
     auto xp = etree::XPath("./b");
     auto removed = xp.removeall(elem);
-    assert(removed.size() == 1);
-    assert(! removed[0].getparent());
-    assert(elem.children("b").size() == 0);
+    REQUIRE(removed.size() == 1);
+    REQUIRE_FALSE(removed[0].getparent());
+    REQUIRE(elem.children("b").size() == 0);
 }
 
 
-MU_TEST(FindText)
+TEST_CASE("FindText", "[xpath]")
 {
     auto elem = etree::fromstring("<root><name>David</name></root>");
     auto xp = etree::XPath("name");
-    assert("David" == xp.findtext(elem));
+    REQUIRE("David" == xp.findtext(elem));
 }
 
 
-MU_TEST(FindTextDefault)
+TEST_CASE("FindTextDefault", "[xpath]")
 {
     auto elem = etree::fromstring("<root><name>David</name></root>");
     auto xp = etree::XPath("age");
-    assert("Unknown" == xp.findtext(elem, "Unknown"));
+    REQUIRE("Unknown" == xp.findtext(elem, "Unknown"));
 }

@@ -1,11 +1,11 @@
 
-#include <cassert>
 #include <utility>
 #include <vector>
 
 #include <elementtree.hpp>
 
-#include "myunit.hpp"
+#include "catch.hpp"
+
 #include "test_consts.hpp"
 
 
@@ -17,23 +17,23 @@ using etree::Element;
 // ------------
 
 
-MU_TEST(elemDestructor)
+TEST_CASE("elemDestructor", "[element]")
 {
     Element e("x");
 }
 
 
-MU_TEST(elemKvList)
+TEST_CASE("elemKvList", "[element]")
 {
     Element e("x", {
         {"a", "b"},
         {"c", "d"}
     });
 
-    assert(e.attrib().get("a") == "b");
-    assert(! e.attrib().has("b"));
-    assert(e.attrib().get("c") == "d");
-    assert(! e.attrib().has("d"));
+    REQUIRE(e.attrib().get("a") == "b");
+    REQUIRE_FALSE(e.attrib().has("b"));
+    REQUIRE(e.attrib().get("c") == "d");
+    REQUIRE_FALSE(e.attrib().has("d"));
 }
 
 
@@ -42,58 +42,58 @@ MU_TEST(elemKvList)
 // ---------
 
 
-MU_TEST(elemQname)
+TEST_CASE("elemQname", "[element]")
 {
     Element e("x");
-    assert(e.qname() == "x");
+    REQUIRE(e.qname() == "x");
 }
 
 
-MU_TEST(elemQnameNs)
+TEST_CASE("elemQnameNs", "[element]")
 {
     Element e("{urn:woah}x");
-    assert(e.qname() == "{urn:woah}x");
+    REQUIRE(e.qname() == "{urn:woah}x");
 }
 
 
-MU_TEST(elemQnameSet)
+TEST_CASE("elemQnameSet", "[element]")
 {
     Element e("x");
     e.qname("y");
-    assert(e.qname() == "y");
+    REQUIRE(e.qname() == "y");
 }
 
 
-MU_TEST(elemQnameSetNs)
+TEST_CASE("elemQnameSetNs", "[element]")
 {
     Element e("x");
     e.qname("{x}y");
-    assert(e.qname() == "{x}y");
+    REQUIRE(e.qname() == "{x}y");
 }
 
 
-MU_TEST(elemTag)
+TEST_CASE("elemTag", "[element]")
 {
     Element e("x");
-    assert(e.tag() == "x");
+    REQUIRE(e.tag() == "x");
 }
 
 
-MU_TEST(elemTagSet)
+TEST_CASE("elemTagSet", "[element]")
 {
     Element e("x");
     e.tag("y");
-    assert(e.tag() == "y");
-    assert(e.ns() == "");
+    REQUIRE(e.tag() == "y");
+    REQUIRE(e.ns() == "");
 }
 
 
-MU_TEST(elemTagSetKeepNs)
+TEST_CASE("elemTagSetKeepNs", "[element]")
 {
     Element e("{x}y");
     e.tag("z");
-    assert(e.tag() == "z");
-    assert(e.ns() == "x");
+    REQUIRE(e.tag() == "z");
+    REQUIRE(e.ns() == "x");
 }
 
 
@@ -102,7 +102,7 @@ MU_TEST(elemTagSetKeepNs)
 //
 
 
-MU_TEST(elemChildIter)
+TEST_CASE("elemChildIter", "[element]")
 {
     auto root = etree::fromstring(DOC);
     std::vector<std::string> qnames, expect {
@@ -113,7 +113,7 @@ MU_TEST(elemChildIter)
     for(auto child : *root.child("person")) {
         qnames.push_back(child.qname().tostring());
     }
-    assert(qnames == expect);
+    REQUIRE(qnames == expect);
 }
 
 
@@ -122,7 +122,7 @@ MU_TEST(elemChildIter)
 //
 
 
-MU_TEST(visit)
+TEST_CASE("visit", "[element]")
 {
     auto root = etree::fromstring(DOC);
     std::vector<std::string> got, expect {
@@ -135,7 +135,7 @@ MU_TEST(visit)
     visit(root, [&](Element &e) {
         got.push_back(e.qname().tostring());
     });
-    assert(got == expect);
+    REQUIRE(got == expect);
 }
 
 
@@ -144,25 +144,25 @@ MU_TEST(visit)
 // ----------
 
 
-MU_TEST(elemAncestorOfTrue)
+TEST_CASE("elemAncestorOfTrue", "[element]")
 {
     auto root = etree::fromstring("<a><b/></a>");
-    assert(root.ancestorOf(*root.child("b")));
+    REQUIRE(root.ancestorOf(*root.child("b")));
 }
 
 
-MU_TEST(elemAncestorOfFalse)
+TEST_CASE("elemAncestorOfFalse", "[element]")
 {
     auto root = etree::fromstring("<a><b/></a>");
-    assert(! root.child("b")->ancestorOf(root));
+    REQUIRE_FALSE(root.child("b")->ancestorOf(root));
 }
 
 
-MU_TEST(elemAncestorOfFalseWrongDoc)
+TEST_CASE("elemAncestorOfFalseWrongDoc", "[element]")
 {
     auto root = etree::fromstring("<a><b/></a>");
     auto root2 = etree::fromstring("<a><b/></a>");
-    assert(! root.ancestorOf(root2));
+    REQUIRE_FALSE(root.ancestorOf(root2));
 }
 
 
@@ -171,80 +171,76 @@ MU_TEST(elemAncestorOfFalseWrongDoc)
 // ------
 
 
-MU_TEST(elemAppendSelfFails)
+TEST_CASE("elemAppendSelfFails", "[element]")
 {
     auto root = etree::fromstring(DOC);
-    myunit::raises<etree::cyclical_tree_error>([&]() {
-        root.append(root);
-    });
+    REQUIRE_THROWS_AS(root.append(root), etree::cyclical_tree_error);
 }
 
 
-MU_TEST(elemAppendAncestorFails)
+TEST_CASE("elemAppendAncestorFails", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
-    myunit::raises<etree::cyclical_tree_error>([&]() {
-        person.append(root);
-    });
+    REQUIRE_THROWS_AS(person.append(root), etree::cyclical_tree_error);
 }
 
 
-MU_TEST(elemAppendNew)
+TEST_CASE("elemAppendNew", "[element]")
 {
     auto root = etree::Element("root");
     auto child = etree::Element("child");
     root.append(child);
-    assert(root.size() == 1);
-    assert(child == *root.child("child"));
+    REQUIRE(root.size() == 1);
+    REQUIRE(child == *root.child("child"));
 }
 
 
-MU_TEST(elemAppendNewTwice)
+TEST_CASE("elemAppendNewTwice", "[element]")
 {
     auto root = etree::Element("root");
     auto child = etree::Element("child");
     root.append(child);
     root.append(child);
-    assert(root.size() == 1);
-    assert(root.child("child") == child);
+    REQUIRE(root.size() == 1);
+    REQUIRE(root.child("child") == child);
 }
 
 
-MU_TEST(elemAppendDuplicateNs)
+TEST_CASE("elemAppendDuplicateNs", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto child = etree::Element("{urn:ns}bar");
     child.attrib().set("{urn:ns}baz", "1");
     root.append(child);
-    assert(etree::tostring(child) == "<ns:bar ns:baz=\"1\"/>");
+    REQUIRE(etree::tostring(child) == "<ns:bar ns:baz=\"1\"/>");
 }
 
 
-MU_TEST(elemAppendMoveNsSimple1)
+TEST_CASE("elemAppendMoveNsSimple1", "[element]")
 {
     auto root = etree::fromstring("<a xmlns:ns=\"urn:ns\"/>");
     auto root2 = etree::fromstring("<b xmlns=\"urn:ns\"/>");
     root.append(root2);
-    assert(etree::tostring(root) == "<a xmlns:ns=\"urn:ns\"><ns:b/></a>");
+    REQUIRE(etree::tostring(root) == "<a xmlns:ns=\"urn:ns\"><ns:b/></a>");
 }
 
 
-MU_TEST(elemAppendMoveNsSimple2)
+TEST_CASE("elemAppendMoveNsSimple2", "[element]")
 {
     auto root = etree::fromstring("<a xmlns=\"urn:ns\"/>");
     auto root2 = etree::fromstring("<b xmlns=\"urn:ns\"/>");
     root.append(root2);
-    assert(etree::tostring(root) == "<a xmlns=\"urn:ns\"><b/></a>");
+    REQUIRE(etree::tostring(root) == "<a xmlns=\"urn:ns\"><b/></a>");
 }
 
 
-MU_TEST(elemAppendMoveNsNested)
+TEST_CASE("elemAppendMoveNsNested", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto root2 = etree::fromstring(DOC);
     root.append(*root2.find("person/name"));
-    // ASsert(0)
+    // REQUIRE(0)
 }
 
 
@@ -253,32 +249,32 @@ MU_TEST(elemAppendMoveNsNested)
 //
 
 
-MU_TEST(child)
+TEST_CASE("child", "[element]")
 {
     auto root = etree::fromstring("<root><child>x</child></root>");
     auto child = root.child("child");
-    assert(child);
-    assert(child->text() == "x");
+    REQUIRE(child);
+    REQUIRE(child->text() == "x");
 }
 
 
-MU_TEST(childNs)
+TEST_CASE("childNs", "[element]")
 {
     auto root = etree::fromstring(
         "<root>"
         "<child xmlns=\"urn:foo\">x</child>"
         "</root>");
     auto child = root.child("{urn:foo}child");
-    assert(child);
-    assert(child->text() == "x");
+    REQUIRE(child);
+    REQUIRE(child->text() == "x");
 }
 
 
-MU_TEST(childAbsent)
+TEST_CASE("childAbsent", "[element]")
 {
     auto root = etree::fromstring("<root/>");
     auto child = root.child("{urn:foo}child");
-    assert(! child);
+    REQUIRE_FALSE(child);
 }
 
 
@@ -287,42 +283,42 @@ MU_TEST(childAbsent)
 //
 
 
-MU_TEST(ensurechildPresent)
+TEST_CASE("ensurechildPresent", "[element]")
 {
     auto root = etree::fromstring("<root><child>x</child></root>");
     auto child = root.ensurechild("child");
-    assert(child.text() == "x");
-    assert(root.children("child").size() == 1);
+    REQUIRE(child.text() == "x");
+    REQUIRE(root.children("child").size() == 1);
 }
 
 
-MU_TEST(ensurechildNsPresent)
+TEST_CASE("ensurechildNsPresent", "[element]")
 {
     auto root = etree::fromstring(
         "<root>"
         "<child xmlns=\"urn:foo\">x</child>"
         "</root>");
     auto child = root.ensurechild("{urn:foo}child");
-    assert(child.text() == "x");
-    assert(root.children("{urn:foo}child").size() == 1);
+    REQUIRE(child.text() == "x");
+    REQUIRE(root.children("{urn:foo}child").size() == 1);
 }
 
 
-MU_TEST(ensurechildAbsent)
+TEST_CASE("ensurechildAbsent", "[element]")
 {
     auto root = etree::fromstring("<root/>");
     auto child = root.ensurechild("child");
-    assert(child.getparent() == root);
-    assert(root.children("child").size() == 1);
+    REQUIRE(child.getparent() == root);
+    REQUIRE(root.children("child").size() == 1);
 }
 
 
-MU_TEST(ensurechildAbsentNs)
+TEST_CASE("ensurechildAbsentNs", "[element]")
 {
     auto root = etree::fromstring("<root/>");
     auto child = root.ensurechild("{urn:foo}child");
-    assert(child.getparent() == root);
-    assert(root.children("{urn:foo}child").size() == 1);
+    REQUIRE(child.getparent() == root);
+    REQUIRE(root.children("{urn:foo}child").size() == 1);
 }
 
 
@@ -330,30 +326,30 @@ MU_TEST(ensurechildAbsentNs)
 // Element::ensurens()
 //
 
-MU_TEST(ensurens)
+TEST_CASE("ensurens", "[element]")
 {
     auto root = etree::fromstring("<root/>");
     root.ensurens("urn:foo");
-    assert(etree::tostring(root) == "<root xmlns:ns0=\"urn:foo\"/>");
+    REQUIRE(etree::tostring(root) == "<root xmlns:ns0=\"urn:foo\"/>");
 }
 
 
-MU_TEST(ensurensExisting)
+TEST_CASE("ensurensExisting", "[element]")
 {
     auto root = etree::fromstring("<root xmlns:ns0=\"urn:foo\"/>");
     root.ensurens("urn:foo");
-    assert(etree::tostring(root) == "<root xmlns:ns0=\"urn:foo\"/>");
+    REQUIRE(etree::tostring(root) == "<root xmlns:ns0=\"urn:foo\"/>");
 }
 
 
-MU_TEST(ensurensOnParent)
+TEST_CASE("ensurensOnParent", "[element]")
 {
     auto root = etree::fromstring(
         "<root xmlns:ns0=\"urn:foo\">"
             "<child/>"
         "</root>");
     root.child("child")->ensurens("urn:foo");
-    assert(etree::tostring(root) == (
+    REQUIRE(etree::tostring(root) == (
         "<root xmlns:ns0=\"urn:foo\">"
             "<child/>"
         "</root>"
@@ -366,62 +362,62 @@ MU_TEST(ensurensOnParent)
 //
 
 
-MU_TEST(elemGetnextNone)
+TEST_CASE("elemGetnextNone", "[element]")
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(! root.child("c")->getnext());
+    REQUIRE_FALSE(root.child("c")->getnext());
 }
 
 
-MU_TEST(elemGetnext)
+TEST_CASE("elemGetnext", "[element]")
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(root.child("b") == root.child("a")->getnext());
+    REQUIRE(root.child("b") == root.child("a")->getnext());
 }
 
 
-MU_TEST(elemGetprevNone)
+TEST_CASE("elemGetprevNone", "[element]")
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(! root.child("a")->getprev());
+    REQUIRE_FALSE(root.child("a")->getprev());
 }
 
 
-MU_TEST(elemGetParentRoot)
+TEST_CASE("elemGetParentRoot", "[element]")
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(! root.getparent());
+    REQUIRE_FALSE(root.getparent());
 }
 
 
-MU_TEST(elemGetParentNotroot)
+TEST_CASE("elemGetParentNotroot", "[element]")
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(root.child("a")->getparent() == root);
+    REQUIRE(root.child("a")->getparent() == root);
 }
 
 
-MU_TEST(elemGetroottree)
+TEST_CASE("elemGetroottree", "[element]")
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(root.getroottree() == root.getroottree());
+    REQUIRE(root.getroottree() == root.getroottree());
 }
 
 
-MU_TEST(elemGetroottreeDifferentDocs)
+TEST_CASE("elemGetroottreeDifferentDocs", "[element]")
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
     auto root2 = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(root.getroottree() != root2.getroottree());
+    REQUIRE(root.getroottree() != root2.getroottree());
 }
 
 
-MU_TEST(elemGetroottreeRemoved)
+TEST_CASE("elemGetroottreeRemoved", "[element]")
 {
     auto root = etree::fromstring("<root><a/><b/><c/></root>");
     auto elem = *root.child("a");
     elem.remove();
-    assert(root.getroottree() != elem.getroottree());
+    REQUIRE(root.getroottree() != elem.getroottree());
 }
 
 
@@ -430,47 +426,43 @@ MU_TEST(elemGetroottreeRemoved)
 // -----
 
 
-MU_TEST(elemInsertSelfFails)
+TEST_CASE("elemInsertSelfFails", "[element]")
 {
     auto root = etree::fromstring(DOC);
-    myunit::raises<etree::cyclical_tree_error>([&]() {
-        root.insert(0, root);
-    });
+    REQUIRE_THROWS_AS(root.insert(0, root), etree::cyclical_tree_error);
 }
 
 
-MU_TEST(elemInsertAncestorFails)
+TEST_CASE("elemInsertAncestorFails", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
-    myunit::raises<etree::cyclical_tree_error>([&]() {
-        person.insert(0, root);
-    });
+    REQUIRE_THROWS_AS(person.insert(0, root), etree::cyclical_tree_error);
 }
 
 
-MU_TEST(elemInsertNew)
+TEST_CASE("elemInsertNew", "[element]")
 {
     auto root = etree::Element("root");
     auto child = etree::Element("child");
     root.insert(0, child);
-    assert(root.size() == 1);
-    assert(root.child("child") == child);
+    REQUIRE(root.size() == 1);
+    REQUIRE(root.child("child") == child);
 }
 
 
-MU_TEST(elemInsertNewTwice)
+TEST_CASE("elemInsertNewTwice", "[element]")
 {
     auto root = etree::Element("root");
     auto child = etree::Element("child");
     root.insert(0, child);
     root.insert(0, child);
-    assert(root.size() == 1);
-    assert(root.child("child") == child);
+    REQUIRE(root.size() == 1);
+    REQUIRE(root.child("child") == child);
 }
 
 
-MU_TEST(elemInsertDuplicateNs)
+TEST_CASE("elemInsertDuplicateNs", "[element]")
 {
     auto root = etree::fromstring(
         "<who xmlns:ns=\"urn:ns\">"
@@ -481,7 +473,7 @@ MU_TEST(elemInsertDuplicateNs)
         {"{urn:ns}attr", "1"},
     });
     root.insert(0, child);
-    assert(etree::tostring(root) == (
+    REQUIRE(etree::tostring(root) == (
         "<who xmlns:ns=\"urn:ns\">"
             "<ns:child ns:attr=\"1\"/>"
             "<ns:person/>"
@@ -490,39 +482,39 @@ MU_TEST(elemInsertDuplicateNs)
 }
 
 
-MU_TEST(elemInsertIndexZeroWhileEmpty)
+TEST_CASE("elemInsertIndexZeroWhileEmpty", "[element]")
 {
     auto root = etree::Element("a");
     auto child = etree::Element("b");
     root.insert(0, child);
-    assert(etree::tostring(root) == "<a><b/></a>");
+    REQUIRE(etree::tostring(root) == "<a><b/></a>");
 }
 
 
-MU_TEST(elemInsertIndexPastEnd)
+TEST_CASE("elemInsertIndexPastEnd", "[element]")
 {
     auto root = etree::fromstring("<a><b/></a>");
     auto child = etree::Element("c");
     root.insert(100, child);
-    assert(etree::tostring(root) == "<a><b/><c/></a>");
+    REQUIRE(etree::tostring(root) == "<a><b/><c/></a>");
 }
 
 
-MU_TEST(elemInsertMoveNsSimple1)
+TEST_CASE("elemInsertMoveNsSimple1", "[element]")
 {
     auto root = etree::fromstring("<a xmlns:ns=\"urn:ns\"><c/></a>");
     auto root2 = etree::fromstring("<b xmlns=\"urn:ns\"/>");
     root.insert(0, root2);
-    assert(etree::tostring(root) == "<a xmlns:ns=\"urn:ns\"><ns:b/><c/></a>");
+    REQUIRE(etree::tostring(root) == "<a xmlns:ns=\"urn:ns\"><ns:b/><c/></a>");
 }
 
 
-MU_TEST(elemInsertMoveNsSimple2)
+TEST_CASE("elemInsertMoveNsSimple2", "[element]")
 {
     auto root = etree::fromstring("<a xmlns=\"urn:ns\"><c/></a>");
     auto root2 = etree::fromstring("<foo:b xmlns:foo=\"urn:ns\"/>");
     root.insert(0, root2);
-    assert(etree::tostring(root) == "<a xmlns=\"urn:ns\"><b/><c/></a>");
+    REQUIRE(etree::tostring(root) == "<a xmlns=\"urn:ns\"><b/><c/></a>");
 }
 
 
@@ -531,48 +523,48 @@ MU_TEST(elemInsertMoveNsSimple2)
 // ------
 
 
-MU_TEST(elemRemoveNoArg)
+TEST_CASE("elemRemoveNoArg", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
     person.remove();
-    assert(! person.getparent());
-    assert(! root.child("person"));
+    REQUIRE_FALSE(person.getparent());
+    REQUIRE_FALSE(root.child("person"));
 }
 
 
-MU_TEST(elemRemoveArg)
+TEST_CASE("elemRemoveArg", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
     root.remove(person);
-    assert(! person.getparent());
-    assert(! root.child("person"));
+    REQUIRE_FALSE(person.getparent());
+    REQUIRE_FALSE(root.child("person"));
 }
 
 
-MU_TEST(elemRemoveArgNotParent)
+TEST_CASE("elemRemoveArgNotParent", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto name = *root.find("person/name");
     root.remove(name);
-    assert(root.size() == 1);
-    assert(name.getparent()->tag() == "person");
-    assert(! root.child("name"));
+    REQUIRE(root.size() == 1);
+    REQUIRE(name.getparent()->tag() == "person");
+    REQUIRE_FALSE(root.child("name"));
 }
 
 
-MU_TEST(elemRemoveTwiceNoArgs)
+TEST_CASE("elemRemoveTwiceNoArgs", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
     person.remove();
     person.remove();
-    assert(! root.child("person"));
+    REQUIRE_FALSE(root.child("person"));
 }
 
 
-MU_TEST(elemRemoveSucceeds)
+TEST_CASE("elemRemoveSucceeds", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
@@ -580,7 +572,7 @@ MU_TEST(elemRemoveSucceeds)
 }
 
 
-MU_TEST(elemRemoveTwiceOkay)
+TEST_CASE("elemRemoveTwiceOkay", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
@@ -589,45 +581,45 @@ MU_TEST(elemRemoveTwiceOkay)
 }
 
 
-MU_TEST(elemRemoveThenAppend)
+TEST_CASE("elemRemoveThenAppend", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto person = *root.child("person");
     root.remove(person);
     root.append(person);
-    assert(DOC == etree::tostring(root));
+    REQUIRE(DOC == etree::tostring(root));
 }
 
 
-MU_TEST(elemRemoveNsPreserved)
+TEST_CASE("elemRemoveNsPreserved", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto name = *root.find("person/name");
     name.remove();
-    assert(etree::tostring(name) ==
+    REQUIRE(etree::tostring(name) ==
            "<name xmlns:ns0=\"urn:ns\" ns0:attrx=\"3\">David</name>");
 }
 
 
-MU_TEST(elemRemoveAddNsCollapsed)
+TEST_CASE("elemRemoveAddNsCollapsed", "[element]")
 {
     auto root = etree::fromstring(DOC);
     auto name = *root.find("person/name");
     name.remove();
     root.append(name);
-    assert(etree::tostring(name) ==
+    REQUIRE(etree::tostring(name) ==
            "<name ns:attrx=\"3\">David</name>");
 }
 
 
-MU_TEST(elemRemovePreservesTail)
+TEST_CASE("elemRemovePreservesTail", "[element]")
 {
     auto elem = etree::Element("person");
     auto e2 = etree::SubElement(elem, "name");
     e2.tail("\n\n");
     e2.remove();
     elem.append(e2);
-    assert(etree::tostring(elem) == (
+    REQUIRE(etree::tostring(elem) == (
         "<person><name/>\n"
         "\n"
         "</person>"
@@ -635,42 +627,42 @@ MU_TEST(elemRemovePreservesTail)
 }
 
 
-MU_TEST(elemRemovePreservesTailTextOnly)
+TEST_CASE("elemRemovePreservesTailTextOnly", "[element]")
 {
     auto elem = etree::fromstring("<a><b/><c/></a>");
     elem.child("b")->remove();
-    assert(etree::tostring(elem) == "<a><c/></a>");
+    REQUIRE(etree::tostring(elem) == "<a><c/></a>");
 }
 
 
-MU_TEST(elemText)
+TEST_CASE("elemText", "[element]")
 {
     auto elem = etree::fromstring("<name>David</name>");
-    assert(elem.text() == "David");
+    REQUIRE(elem.text() == "David");
 }
 
 
-MU_TEST(elemTextSet)
+TEST_CASE("elemTextSet", "[element]")
 {
     auto elem = etree::fromstring("<name/>");
     elem.text("David");
-    assert("<name>David</name>" == etree::tostring(elem));
+    REQUIRE("<name>David</name>" == etree::tostring(elem));
 }
 
 
-MU_TEST(elemTextSetEmpty)
+TEST_CASE("elemTextSetEmpty", "[element]")
 {
     auto elem = etree::fromstring("<name>David</name>");
     elem.text("");
-    assert("<name/>" == etree::tostring(elem));
+    REQUIRE("<name/>" == etree::tostring(elem));
 }
 
 
-MU_TEST(elemTextSetChildElements)
+TEST_CASE("elemTextSetChildElements", "[element]")
 {
     auto elem = etree::fromstring("<name><lang/></name>");
     elem.text("David");
-    assert("<name>David<lang/></name>" == etree::tostring(elem));
+    REQUIRE("<name>David<lang/></name>" == etree::tostring(elem));
 }
 
 
@@ -679,7 +671,7 @@ MU_TEST(elemTextSetChildElements)
 //
 
 
-MU_TEST(elemTostring)
+TEST_CASE("elemTostring", "[element]")
 {
     auto elem = etree::Element("name");
     elem.text("David");
@@ -691,11 +683,11 @@ MU_TEST(elemTostring)
     auto got = etree::tostring(elem);
     auto expect = ("<name xmlns:ns0=\"urn:ns\" xmlns:ns1=\"urn:bar\" "
                   "ns0:x=\"1\" ns1:y=\"2\">David</name>");
-    assert(got == expect);
+    REQUIRE(got == expect);
 }
 
 
-MU_TEST(treeTostring)
+TEST_CASE("treeTostring", "[element]")
 {
     auto elem = etree::Element("name");
     elem.text("David");
@@ -708,7 +700,7 @@ MU_TEST(treeTostring)
     auto expect = ("<?xml version=\"1.0\"?>\n"
                    "<name xmlns:ns0=\"urn:ns\" xmlns:ns1=\"urn:bar\" "
                     "ns0:x=\"1\" ns1:y=\"2\">David</name>\n");
-    assert(got == expect);
+    REQUIRE(got == expect);
 }
 
 
@@ -717,18 +709,18 @@ MU_TEST(treeTostring)
 // ---
 
 
-MU_TEST(elemGetNoNs)
+TEST_CASE("elemGetNoNs", "[element]")
 {
     auto root = etree::fromstring(DOC);
-    assert("human" == root.child("person")->get("type"));
+    REQUIRE("human" == root.child("person")->get("type"));
 }
 
 
-MU_TEST(elemGetNs)
+TEST_CASE("elemGetNs", "[element]")
 {
     auto root = etree::fromstring(NS_DOC);
     #define NS "{urn:ns}"
-    assert("human" == root.child(NS "person")->get(NS "type"));
+    REQUIRE("human" == root.child(NS "person")->get(NS "type"));
 }
 
 
@@ -737,17 +729,17 @@ MU_TEST(elemGetNs)
 //
 
 
-MU_TEST(elemFindOrder)
+TEST_CASE("elemFindOrder", "[element]")
 {
     auto elem = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(elem.child("a") == *elem.find("./*"));
+    REQUIRE(elem.child("a") == *elem.find("./*"));
 }
 
 
-MU_TEST(elemFindNoMatch)
+TEST_CASE("elemFindNoMatch", "[element]")
 {
     auto elem = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(! elem.find("./nonexistent"));
+    REQUIRE_FALSE(elem.find("./nonexistent"));
 }
 
 
@@ -756,22 +748,22 @@ MU_TEST(elemFindNoMatch)
 //
 
 
-MU_TEST(copy)
+TEST_CASE("copy", "[element]")
 {
     auto e = etree::fromstring("<root><a/><b/><c/></root>");
     auto e2 = e.copy();
-    assert(e != e2);
-    assert(e.getroottree() != e2.getroottree());
+    REQUIRE(e != e2);
+    REQUIRE(e.getroottree() != e2.getroottree());
     e.attrib().set("test", "test");
-    assert(e2.attrib().get("test") == "");
+    REQUIRE(e2.attrib().get("test") == "");
 }
 
 
-MU_TEST(copyNs)
+TEST_CASE("copyNs", "[element]")
 {
     auto e = etree::fromstring("<root xmlns:foo=\"urn:foo\"><foo:a/></root>");
     auto e2 = e.child("{urn:foo}a")->copy();
-    assert(etree::tostring(e2) == "<foo:a xmlns:foo=\"urn:foo\"/>");
+    REQUIRE(etree::tostring(e2) == "<foo:a xmlns:foo=\"urn:foo\"/>");
 }
 
 
@@ -780,17 +772,17 @@ MU_TEST(copyNs)
 //
 
 
-MU_TEST(elemFindall)
+TEST_CASE("elemFindall", "[element]")
 {
     auto elem = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(elem.children() == elem.findall("./*"));
+    REQUIRE(elem.children() == elem.findall("./*"));
 }
 
 
-MU_TEST(elemFindallNoMatch)
+TEST_CASE("elemFindallNoMatch", "[element]")
 {
     auto elem = etree::fromstring("<root><a/><b/><c/></root>");
-    assert(elem.children("missing") == elem.findall("./missing"));
+    REQUIRE(elem.children("missing") == elem.findall("./missing"));
 }
 
 
@@ -799,17 +791,17 @@ MU_TEST(elemFindallNoMatch)
 //
 
 
-MU_TEST(elemFindtext)
+TEST_CASE("elemFindtext", "[element]")
 {
     auto elem = etree::fromstring("<root><name>David</name></root>");
-    assert("David" == elem.findtext("name"));
+    REQUIRE("David" == elem.findtext("name"));
 }
 
 
-MU_TEST(elemFindtextDefault)
+TEST_CASE("elemFindtextDefault", "[element]")
 {
     auto elem = etree::fromstring("<root><name>David</name></root>");
-    assert("Unknown" == elem.findtext("age", "Unknown"));
+    REQUIRE("Unknown" == elem.findtext("age", "Unknown"));
 }
 
 
@@ -818,7 +810,7 @@ MU_TEST(elemFindtextDefault)
 //
 
 
-MU_TEST(graft)
+TEST_CASE("graft", "[element]")
 {
     auto elem = etree::fromstring(
         "<root>"
@@ -829,7 +821,7 @@ MU_TEST(graft)
         "</root>"
     );
     elem.child("tag2")->graft();
-    assert(etree::tostring(elem) == (
+    REQUIRE(etree::tostring(elem) == (
         "<root>"
             "<tag1/> Hello"
             "<tag3/> there"
@@ -843,36 +835,30 @@ MU_TEST(graft)
 //
 
 
-MU_TEST(elemIndexInBounds)
+TEST_CASE("elemIndexInBounds", "[element]")
 {
     auto elem = etree::fromstring("<root><child/></root>");
-    assert(*elem.child("child") == elem[0]);
+    REQUIRE(*elem.child("child") == elem[0]);
 }
 
 
-MU_TEST(elemIndexOutOfBounds)
+TEST_CASE("elemIndexOutOfBounds", "[element]")
 {
     auto elem = etree::fromstring("<root><child/></root>");
-    myunit::raises<etree::out_of_bounds_error>([&]() {
-        elem[1];
-    });
+    REQUIRE_THROWS_AS(elem[1], etree::out_of_bounds_error);
 }
 
 
-MU_TEST(elemIndexOutOfBoundsNoChildren)
+TEST_CASE("elemIndexOutOfBoundsNoChildren", "[element]")
 {
     auto elem = etree::fromstring("<root/>");
-    myunit::raises<etree::out_of_bounds_error>([&]() {
-        elem[0];
-    });
+    REQUIRE_THROWS_AS(elem[0], etree::out_of_bounds_error);
 }
 
 
 
-MU_TEST(elemIndexNegative)
+TEST_CASE("elemIndexNegative", "[element]")
 {
     auto elem = etree::fromstring("<root><child/></root>");
-    auto e = myunit::raises<etree::out_of_bounds_error>([&]() {
-        elem[-1];
-    });
+    REQUIRE_THROWS_AS(elem[-1], etree::out_of_bounds_error);
 }

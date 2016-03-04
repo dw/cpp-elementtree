@@ -3,117 +3,116 @@
  * License: http://opensource.org/licenses/MIT
  */
 
-#include <cassert>
 #include <utility>
 #include <vector>
 
 #include <elementtree.hpp>
 
-#include "myunit.hpp"
+#include "catch.hpp"
 
 
-MU_TEST(ConstructNsTag)
+TEST_CASE("ConstructNsTag", "[qname]")
 {
     auto qn = etree::QName("ns", "tag");
-    assert(qn.ns() == "ns");
-    assert(qn.tag() == "tag");
+    REQUIRE(qn.ns() == "ns");
+    REQUIRE(qn.tag() == "tag");
 }
 
 
-MU_TEST(ConstructCopy)
+TEST_CASE("ConstructCopy", "[qname]")
 {
     auto qn = etree::QName("ns", "tag");
     auto qn2 = qn;
-    assert(qn2.ns() == "ns");
-    assert(qn2.tag() == "tag");
+    REQUIRE(qn2.ns() == "ns");
+    REQUIRE(qn2.tag() == "tag");
 }
 
 
-MU_TEST(ConstructUniversalName)
+TEST_CASE("ConstructUniversalName", "[qname]")
 {
     auto qn = etree::QName(std::string("{ns}tag"));
-    assert(qn.ns() == "ns");
-    assert(qn.tag() == "tag");
+    REQUIRE(qn.ns() == "ns");
+    REQUIRE(qn.tag() == "tag");
 }
 
 
-MU_TEST(ConstructUniversalNameChar)
+TEST_CASE("ConstructUniversalNameChar", "[qname]")
 {
     auto qn = etree::QName("{ns}tag");
-    assert(qn.ns() == "ns");
-    assert(qn.tag() == "tag");
+    REQUIRE(qn.ns() == "ns");
+    REQUIRE(qn.tag() == "tag");
 }
 
 
-MU_TEST(TostringNoNs)
+TEST_CASE("TostringNoNs", "[qname]")
 {
     auto qn = etree::QName("nons");
-    assert(qn.tostring() == "nons");
+    REQUIRE(qn.tostring() == "nons");
 }
 
 
-MU_TEST(TostringNs)
+TEST_CASE("TostringNs", "[qname]")
 {
     auto qn = etree::QName("{urn:ns}nons");
-    assert(qn.tostring() == "{urn:ns}nons");
+    REQUIRE(qn.tostring() == "{urn:ns}nons");
 }
 
 
-MU_TEST(Equals)
+TEST_CASE("Equals", "[qname]")
 {
     auto qn = etree::QName("{urn:ns}nons");
-    assert(qn.equals("urn:ns", "nons"));
+    REQUIRE(qn.equals("urn:ns", "nons"));
 }
 
 
-MU_TEST(EqualsFalse)
+TEST_CASE("EqualsFalse", "[qname]")
 {
     auto qn = etree::QName("{urn:ns}nons");
-    assert(! qn.equals("urn:ns", "ns"));
+    REQUIRE(! qn.equals("urn:ns", "ns"));
 }
 
 
-MU_TEST(EqualsFalseNoNs)
+TEST_CASE("EqualsFalseNoNs", "[qname]")
 {
     auto qn = etree::QName("{urn:ns}nons");
-    assert(! qn.equals(NULL, "nons"));
+    REQUIRE_FALSE(qn.equals(NULL, "nons"));
 }
 
 
-MU_TEST(EqualsFalseWrongTag)
+TEST_CASE("EqualsFalseWrongTag", "[qname]")
 {
     auto qn = etree::QName("{urn:ns}nons");
-    assert(! qn.equals("urn:ns", "ns"));
+    REQUIRE_FALSE(qn.equals("urn:ns", "ns"));
 }
 
 
-MU_TEST(OpEqTrue)
+TEST_CASE("OpEqTrue", "[qname]")
 {
     auto qn = etree::QName("{urn:ns}nons");
     auto qn2 = etree::QName("{urn:ns}nons");
-    assert(qn == qn2);
+    REQUIRE(qn == qn2);
 }
 
 
-MU_TEST(OpFalseUnequalNs)
+TEST_CASE("OpFalseUnequalNs", "[qname]")
 {
     auto qn = etree::QName("{urn:ns}nons");
     auto qn2 = etree::QName("{urn:ns2}nons");
-    assert(qn != qn2);
+    REQUIRE(qn != qn2);
 }
 
 
-MU_TEST(OpEqFalseUnequalTag)
+TEST_CASE("OpEqFalseUnequalTag", "[qname]")
 {
     auto qn = etree::QName("{urn:ns}nons");
     auto qn2 = etree::QName("{urn:ns}ns");
-    assert(qn != qn2);
+    REQUIRE(qn != qn2);
 }
 
 
-MU_TEST(OpUnequalMissingNs)
+TEST_CASE("OpUnequalMissingNs", "[qname]")
 {
     auto qn = etree::QName("nons");
     auto qn2 = etree::QName("{urn:ns2}nons");
-    assert(qn != qn2);
+    REQUIRE(qn != qn2);
 }

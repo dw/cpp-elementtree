@@ -3,13 +3,13 @@
  * License: http://opensource.org/licenses/MIT
  */
 
-#include <cassert>
 #include <utility>
 #include <vector>
 
 #include <elementtree.hpp>
 
-#include "myunit.hpp"
+#include "catch.hpp"
+
 #include "test_consts.hpp"
 
 using std::pair;
@@ -17,65 +17,65 @@ using std::vector;
 using std::string;
 
 
-MU_TEST(Has)
+TEST_CASE("Has", "[attrib]")
 {
     auto root = etree::fromstring(DOC);
-    assert(root.attrib().has("type"));
-    assert(! root.attrib().has("missing"));
+    REQUIRE(root.attrib().has("type"));
+    REQUIRE_FALSE(root.attrib().has("missing"));
 }
 
 
-MU_TEST(Get)
+TEST_CASE("Get", "[attrib]")
 {
     auto root = etree::fromstring(DOC);
-    assert("people" == root.attrib().get("type"));
-    assert("" == root.attrib().get("x"));
-    assert("true" == root.attrib().get("{urn:ns}x"));
+    REQUIRE("people" == root.attrib().get("type"));
+    REQUIRE("" == root.attrib().get("x"));
+    REQUIRE("true" == root.attrib().get("{urn:ns}x"));
 }
 
 
-MU_TEST(GetDefault)
+TEST_CASE("GetDefault", "[attrib]")
 {
     auto root = etree::fromstring(DOC);
-    assert("people" == root.attrib().get("type", "default"));
-    assert("default" == root.attrib().get("x", "default"));
-    assert("true" == root.attrib().get("{urn:ns}x", "default"));
+    REQUIRE("people" == root.attrib().get("type", "default"));
+    REQUIRE("default" == root.attrib().get("x", "default"));
+    REQUIRE("true" == root.attrib().get("{urn:ns}x", "default"));
 }
 
 
-MU_TEST(SetNoExist)
+TEST_CASE("SetNoExist", "[attrib]")
 {
     auto e = etree::Element("a");
     e.attrib().set("a", "b");
-    assert("b" == e.attrib().get("a"));
+    REQUIRE("b" == e.attrib().get("a"));
 }
 
 
-MU_TEST(SetNs)
+TEST_CASE("SetNs", "[attrib]")
 {
     auto e = etree::Element("a");
     e.attrib().set("{x}y", "1");
-    assert("1" == e.attrib().get("{x}y"));
+    REQUIRE("1" == e.attrib().get("{x}y"));
 }
 
 
-MU_TEST(SetKv)
+TEST_CASE("SetKv", "[attrib]")
 {
     auto e = etree::Element("a");
     e.attrib().set({
         {"x", "1"},
         {"y", "2"}
     });
-    assert(e.attrib().size() == 2);
-    assert("1" == e.attrib().get("x"));
-    assert("2" == e.attrib().get("y"));
+    REQUIRE(e.attrib().size() == 2);
+    REQUIRE("1" == e.attrib().get("x"));
+    REQUIRE("2" == e.attrib().get("y"));
 }
 
 
-MU_TEST(Keys)
+TEST_CASE("Keys", "[attrib]")
 {
     auto root = etree::fromstring(DOC);
-    assert(root.attrib().keys() == vector<etree::QName>({
+    REQUIRE(root.attrib().keys() == vector<etree::QName>({
         "type",
         "count",
         "{urn:ns}x"
@@ -83,48 +83,48 @@ MU_TEST(Keys)
 }
 
 
-MU_TEST(KeysEmpty)
+TEST_CASE("KeysEmpty", "[attrib]")
 {
     auto e = etree::Element("a");
-    assert(e.attrib().keys() == vector<etree::QName> {});
+    REQUIRE(e.attrib().keys() == vector<etree::QName> {});
 }
 
 
-MU_TEST(Remove)
+TEST_CASE("Remove", "[attrib]")
 {
     auto root = etree::fromstring(DOC);
-    assert(root.attrib().remove("type"));
-    assert(! root.attrib().remove("type"));
-    assert(! root.attrib().has("type"));
+    REQUIRE(root.attrib().remove("type"));
+    REQUIRE_FALSE(root.attrib().remove("type"));
+    REQUIRE_FALSE(root.attrib().has("type"));
 }
 
 
-MU_TEST(RemoveNs)
+TEST_CASE("RemoveNs", "[attrib]")
 {
     auto root = etree::fromstring(DOC);
-    assert(root.attrib().remove("{urn:ns}x"));
-    assert(! root.attrib().remove("{urn:ns}x"));
-    assert(! root.attrib().has("{urn:ns}x"));
+    REQUIRE(root.attrib().remove("{urn:ns}x"));
+    REQUIRE_FALSE(root.attrib().remove("{urn:ns}x"));
+    REQUIRE_FALSE(root.attrib().has("{urn:ns}x"));
 }
 
 
-MU_TEST(RemoveEmpty)
+TEST_CASE("RemoveEmpty", "[attrib]")
 {
     auto e = etree::Element("a");
-    assert(! e.attrib().remove("x"));
+    REQUIRE_FALSE(e.attrib().remove("x"));
 }
 
 
-MU_TEST(size)
+TEST_CASE("size", "[attrib]")
 {
     etree::Element e("x");
 
-    assert(e.attrib().size() == 0);
+    REQUIRE(e.attrib().size() == 0);
     e.attrib().set("a", "b");
-    assert(e.attrib().size() == 1);
+    REQUIRE(e.attrib().size() == 1);
 
     e.attrib().remove("a");
-    assert(e.attrib().size() == 0);
+    REQUIRE(e.attrib().size() == 0);
 }
 
 
@@ -133,7 +133,7 @@ MU_TEST(size)
 //
 
 
-MU_TEST(iter)
+TEST_CASE("iter", "[attrib]")
 {
     vector<pair<string, string>> got, expect {
         { "type", "people" },
@@ -145,11 +145,11 @@ MU_TEST(iter)
     for(auto attr : root.attrib()) {
         got.emplace_back(attr.qname().tostring(), attr.value());
     }
-    assert(got == expect);
+    REQUIRE(got == expect);
 }
 
 
-MU_TEST(iterSurvivesMutation)
+TEST_CASE("iterSurvivesMutation", "[attrib]")
 {
     auto root = etree::fromstring("<a a=\"1\" b=\"2\" c=\"3\"/>");
     std::vector<std::string> got, expect {
@@ -165,6 +165,6 @@ MU_TEST(iterSurvivesMutation)
         }
     }
 
-    assert(got == expect);
-    assert(etree::tostring(root) == "<a b=\"2\" c=\"3\"/>");
+    REQUIRE(got == expect);
+    REQUIRE(etree::tostring(root) == "<a b=\"2\" c=\"3\"/>");
 }

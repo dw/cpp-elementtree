@@ -3,105 +3,102 @@
  * License: http://opensource.org/licenses/MIT
  */
 
-#include <cassert>
 #include <utility>
 #include <vector>
 
 #include <elementtree.hpp>
 
-#include "myunit.hpp"
+#include "catch.hpp"
 
 
-MU_TEST(DefaultConstructor)
+TEST_CASE("DefaultConstructor", "[nullable]")
 {
     auto val = etree::Nullable<etree::Element>();
-    assert(! val);
+    REQUIRE_FALSE(val);
 }
 
 
-MU_TEST(Constructor)
+TEST_CASE("Constructor", "[nullable]")
 {
     auto elem = etree::Element("a");
     auto val = etree::Nullable<etree::Element>(elem);
-    assert(val);
-    assert(elem == *val);
+    REQUIRE(val);
+    REQUIRE(elem == *val);
 }
 
 
-MU_TEST(RvalConstructor)
+TEST_CASE("RvalConstructor", "[nullable]")
 {
     auto val = etree::Nullable<etree::Element>(etree::Element("a"));
-    assert(val);
-    assert(val->tag() == "a");
+    REQUIRE(val);
+    REQUIRE(val->tag() == "a");
 }
 
 
-MU_TEST(CopyConstructorUnset)
+TEST_CASE("CopyConstructorUnset", "[nullable]")
 {
     auto val = etree::Nullable<etree::Element>();
     auto val2 = val;
-    assert(! val);
-    assert(! val2);
-    assert(val == val2);
+    REQUIRE_FALSE(val);
+    REQUIRE_FALSE(val2);
+    REQUIRE(val == val2);
 }
 
 
-MU_TEST(CopyConstructorSet)
+TEST_CASE("CopyConstructorSet", "[nullable]")
 {
     auto elem = etree::Element("a");
     auto val = etree::Nullable<etree::Element>(elem);
     auto val2 = val;
-    assert(val);
-    assert(val2);
-    assert(val == val2);
+    REQUIRE(val);
+    REQUIRE(val2);
+    REQUIRE(val == val2);
 }
 
 
-MU_TEST(AssignUnsetToUnset)
+TEST_CASE("AssignUnsetToUnset", "[nullable]")
 {
     auto val = etree::Nullable<etree::Element>();
     auto val2 = etree::Nullable<etree::Element>();
     val2 = val;
-    assert(! val);
-    assert(! val2);
+    REQUIRE_FALSE(val);
+    REQUIRE_FALSE(val2);
 }
 
 
-MU_TEST(AssignSetToUnset)
+TEST_CASE("AssignSetToUnset", "[nullable]")
 {
     auto elem = etree::Element("a");
     auto val = etree::Nullable<etree::Element>(elem);
     auto val2 = etree::Nullable<etree::Element>();
     val2 = val;
-    assert(val);
-    assert(val2);
-    assert(*val == *val2);
+    REQUIRE(val);
+    REQUIRE(val2);
+    REQUIRE(*val == *val2);
 }
 
 
-MU_TEST(AssignUnsetToSet)
+TEST_CASE("AssignUnsetToSet", "[nullable]")
 {
     auto elem = etree::Element("a");
     auto val = etree::Nullable<etree::Element>();
     auto val2 = etree::Nullable<etree::Element>(elem);
     val2 = val;
-    assert(! val);
-    assert(! val2);
+    REQUIRE_FALSE(val);
+    REQUIRE_FALSE(val2);
 }
 
 
-MU_TEST(DerefUnset)
+TEST_CASE("DerefUnset", "[nullable]")
 {
     auto val = etree::Nullable<etree::Element>();
-    myunit::raises<etree::missing_value_error>([&]() {
-        *val;
-    });
+    REQUIRE_THROWS_AS(*val, etree::missing_value_error);
 }
 
 
-MU_TEST(DerefSet)
+TEST_CASE("DerefSet", "[nullable]")
 {
     auto elem = etree::Element("a");
     auto val = etree::Nullable<etree::Element>(elem);
-    assert(val == elem);
+    REQUIRE(val == elem);
 }
