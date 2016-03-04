@@ -46,135 +46,6 @@ static struct _atexit_libxml_cleanup {
     }
 } _atexit_libxml_cleanup;
 
-
-// -----------------------
-// Nullable implementation
-// -----------------------
-
-
-template<typename T>
-Nullable<T>::Nullable()
-    : set_(false)
-{
-}
-
-
-template<typename T>
-Nullable<T>::Nullable(const T &val)
-    : set_(true)
-{
-    new (reinterpret_cast<T *>(val_)) T(val);
-}
-
-
-template<typename T>
-Nullable<T>::Nullable(const Nullable<T> &val)
-    : set_(val.set_)
-{
-    if(set_) {
-        new (reinterpret_cast<T *>(val_)) T(*val);
-    }
-}
-
-
-#ifdef ETREE_0X
-template<typename T>
-Nullable<T>::Nullable(T &&val)
-    : set_(true)
-{
-    new (reinterpret_cast<T *>(val_)) T(val);
-}
-#endif
-
-
-template<typename T>
-Nullable<T>::~Nullable()
-{
-    if(set_) {
-        reinterpret_cast<T *>(val_)->~T();
-    }
-}
-
-
-template<typename T>
-bool Nullable<T>::operator==(const Nullable<T> &other) const
-{
-    if(set_ && (set_ == other.set_)) {
-        return **this == *other;
-    }
-    return set_ == other.set_;
-}
-
-
-template<typename T>
-bool Nullable<T>::operator==(const T &other) const
-{
-    if(! set_) {
-        return false;
-    }
-    return other == **this;
-}
-
-
-template<typename T>
-Nullable<T> &Nullable<T>::operator=(const Nullable<T> &other)
-{
-    if(this != &other) {
-        this->~Nullable();
-        set_ = other.set_;
-        if(set_) {
-            new (reinterpret_cast<T *>(val_)) T(*other);
-        }
-    }
-    return *this;
-}
-
-template<typename T>
-Nullable<T>::operator bool() const
-{
-    return set_;
-}
-
-
-template<typename T>
-T &Nullable<T>::operator *()
-{
-    if(! set_) {
-        throw missing_value_error();
-    }
-    return *reinterpret_cast<T *>(val_);
-}
-
-
-template<typename T>
-T *Nullable<T>::operator ->()
-{
-    return &**this;
-}
-
-
-template<typename T>
-const T &Nullable<T>::operator *() const
-{
-    if(! set_) {
-        throw missing_value_error();
-    }
-    return *reinterpret_cast<const T *>(val_);
-}
-
-
-template<typename T>
-const T *Nullable<T>::operator ->() const
-{
-    return &**this;
-}
-
-
-// Instantiations.
-template class Nullable<Element>;
-template class Nullable<string>;
-
-
 // ----------------------------------------
 // libxml2 DOM reference counting functions
 // ----------------------------------------
@@ -186,7 +57,6 @@ template class Nullable<string>;
  * Therefore we refcount each node and have a single ref() on its parent
  * document.
  */
-
 
 template<typename T>
 static inline intptr_t &
@@ -802,14 +672,14 @@ XPath::operator =(const XPath &other)
 }
 
 
-Nullable<Element>
+optional<Element>
 XPath::find(const Element &e) const
 {
     std::vector<Element> out = findall(e);
     if(out.empty()) {
-        return Nullable<Element>();
+        return optional<Element>();
     }
-    return Nullable<Element>(out[0]);
+    return optional<Element>(out[0]);
 }
 
 
@@ -1406,18 +1276,18 @@ Element::operator=(const Element &e)
 }
 
 
-Nullable<Element>
+optional<Element>
 Element::child() const
 {
     xmlNode *p = node_->children;
     if(nextElement_(p)) {
         return Element(p);
     }
-    return Nullable<Element>();
+    return optional<Element>();
 }
 
 
-Nullable<Element>
+optional<Element>
 Element::child(const QName &qn) const
 {
     for(xmlNode *cur = node_->children; cur; cur = cur->next) {
@@ -1427,7 +1297,7 @@ Element::child(const QName &qn) const
             }
         }
     }
-    return Nullable<Element>();
+    return optional<Element>();
 }
 
 
@@ -1484,7 +1354,7 @@ Element::copy()
 }
 
 
-Nullable<Element>
+optional<Element>
 Element::find(const XPath &expr) const
 {
     return expr.find(*this);
@@ -1662,19 +1532,19 @@ Element::ancestorOf(const Element &e) const
 }
 
 
-Nullable<Element>
+optional<Element>
 Element::getprev() const
 {
     for(auto cur = node_->prev; cur; cur = cur->prev) {
        if(cur->type == XML_ELEMENT_NODE) {
-            return Nullable<Element>(cur);
+            return optional<Element>(cur);
        }
     }
-    return Nullable<Element>();
+    return optional<Element>();
 }
 
 
-Nullable<Element>
+optional<Element>
 Element::getnext() const
 {
     for(auto cur = node_->next; cur; cur = cur->next) {
@@ -1682,20 +1552,20 @@ Element::getnext() const
             return Element(cur);
        }
     }
-    return Nullable<Element>();
+    return optional<Element>();
 }
 
 
-Nullable<Element>
+optional<Element>
 Element::getparent() const
 {
     switch(node_->parent->type) {
         case XML_DOCUMENT_NODE:
         case XML_HTML_DOCUMENT_NODE:
         case XML_DOCB_DOCUMENT_NODE:
-            return Nullable<Element>();
+            return optional<Element>();
         default:
-            return Nullable<Element>(node_->parent);
+            return optional<Element>(node_->parent);
     }
 }
 

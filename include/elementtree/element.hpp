@@ -12,6 +12,8 @@
 #include <vector>
 #include <mutex>
 
+#include <elementtree/stdinc.hpp>
+
 
 #if __cplusplus >= 201103L
 #   include <initializer_list>
@@ -218,118 +220,11 @@ std::ostream &operator<< (std::ostream &out, const Element &elem);
  */
 std::ostream &operator<< (std::ostream &out, const QName &qname);
 
-
 /**
- * Lightweight wrapper to add nullable semantics to another type. This template
- * is presently only implemented for the Element type, attempting to
- * instantiate it with other types will fail.
- *
- * Nullable objects can be implicitly converted to boolean to test whether
- * their contents exists, and dereferenced to access the stored value, if any:
- *
- * \code
- *      Nullable<Element> maybe = parent.child("foo");
- *      if(maybe) {
- *          // Nullable contains a value. "*maybe" will dereference its value.
- *      } else {
- *          // Nullable is empty. "*maybe" will throw an exception.
- *      }
- * \endcode
+ * Convenient alias for Optional<Element> to avoid typing "etree::" twice in
+ * scopes that do not import Optional and Element.
  */
-template<typename T>
-class Nullable {
-    /// Storage for contained type. This allows an unset nullable to truly have
-    //no constructed value, and also allows the value type to lack a default
-    //constructor.
-    unsigned char val_[sizeof(T)];
-
-    /// True if val_ contains a value.
-    bool set_;
-
-    public:
-    /**
-     * Construct an unset Nullable.
-     */
-    Nullable();
-
-    /**
-     * Construct a set Nullable containing a value.
-     *
-     * @param val       Value to copy.
-     */
-    Nullable(const T &val);
-
-    /**
-     * Copy the value from another Nullable.
-     *
-     * @param val       Value to copy.
-     */
-    Nullable(const Nullable<T> &val);
-
-    #ifdef ETREE_0X
-    /**
-     * C++11: construct a set Nullable by moving a value.
-     *
-     * @param val       Value to copy.
-     */
-    Nullable(T &&val);
-    #endif
-
-    /**
-     * Destroy the contained value if this Nullable is set.
-     */
-    ~Nullable();
-
-    /**
-     * Return true if both nullables are empty, or both nullables contain the
-     * same value.
-     */
-
-    bool operator==(const Nullable<T> &other) const;
-
-    /**
-     * Return true if both nullables are empty, or both nullables contain the
-     * same value.
-     */
-    bool operator==(const T &other) const;
-
-    /**
-     * Copy the instance and its contained value, if any.
-     */
-    Nullable<T> &operator=(const Nullable<T> &other);
-
-    /**
-     * Evaluate to true if this Nullable is set.
-     */
-    ETREE_EXPLICIT operator bool() const;
-
-    /**
-     * Return the contained value, or throw missing_value_error().
-     */
-    T &operator *();
-
-    /*
-     * Return the contained value, or throw missing_value_error().
-     */
-    T *operator ->();
-
-    /**
-     * Return the contained value, or throw missing_value_error().
-     */
-    const T &operator *() const;
-
-    /**
-     * Return the contained value, or throw missing_value_error().
-     */
-    const T *operator ->() const;
-};
-
-/**
- * Convenient alias for Nullable<Element> to avoid typing "etree::" twice in
- * scopes that do not import Nullable and Element.
- */
-typedef Nullable<Element> NullableElement;
-
+typedef optional<Element> OptionalElement;
 
 /**
  * Canonical representation for a name-namespace pair, without namespace
@@ -515,7 +410,7 @@ class XPath {
      * @param e         Root element to search from.
      * @returns         Matching Element, if any.
      */
-    Nullable<Element> find(const Element &e) const;
+    optional<Element> find(const Element &e) const;
 
     /**
      * Return all Elements matching the expression.
@@ -870,9 +765,9 @@ class Element
      * Return the first, if any exist.
      *
      * @returns
-     *      Element, if any, otherwise an empty nullable.
+     *      Element, if any, otherwise an empty optional.
      */
-    Nullable<Element> child() const;
+    optional<Element> child() const;
 
     /**
      * Return the first child matching a name, if any exist.
@@ -880,9 +775,9 @@ class Element
      * @param qn
      *      Name of the child to locate.
      * @returns
-     *      Element, if any, otherwise an empty nullable.
+     *      Element, if any, otherwise an empty optional.
      */
-    Nullable<Element> child(const QName &qn) const;
+    optional<Element> child(const QName &qn) const;
 
     /**
      * Like child(), except appends the element if it was missing.
@@ -915,7 +810,7 @@ class Element
      * @param expr      Expression to element.
      * @returns         Vector of matching elements.
      */
-    Nullable<Element> find(const XPath &expr) const;
+    optional<Element> find(const XPath &expr) const;
 
     /**
      * \copybrief XPath::findtext
@@ -1033,17 +928,17 @@ class Element
     /**
      * Return the next sibling element, if any.
      */
-    Nullable<Element> getnext() const;
+    optional<Element> getnext() const;
 
     /**
      * Return the parent element, if this element is not the document root.
      */
-    Nullable<Element> getparent() const;
+    optional<Element> getparent() const;
 
     /**
      * Return the previous sibling element, if any.
      */
-    Nullable<Element> getprev() const;
+    optional<Element> getprev() const;
 
     /**
      * Return the ElementTree this element belongs to.
@@ -1109,7 +1004,7 @@ class Element
  */
 class ChildIterator
 {
-    Nullable<Element> elem_;
+    optional<Element> elem_;
 
     public:
     ChildIterator();
