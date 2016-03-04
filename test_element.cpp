@@ -9,10 +9,6 @@
 #include "test_consts.hpp"
 
 
-// operator[] negative
-// operator[] positive
-// operator[] size
-
 using etree::Element;
 
 
@@ -679,20 +675,6 @@ MU_TEST(elemTextSetChildElements)
 
 
 //
-// fromstring
-//
-
-MU_TEST(elemFromstringBadXml)
-{
-    auto e = myunit::raises<etree::xml_error>([&]() {
-        etree::fromstring("corrupt");
-    });
-    auto expect = "Start tag expected, '<' not found\n";
-    assert(e.what() == std::string(expect));
-}
-
-
-//
 // tostring
 //
 
@@ -853,4 +835,43 @@ MU_TEST(graft)
             "<tag3/> there"
         "</root>"
     ));
+}
+
+
+//
+// Element::operator[]
+//
+
+MU_TEST(elemIndexInBounds)
+{
+    auto elem = etree::fromstring("<root><child/></root>");
+    assert(*elem.child("child") == elem[0]);
+}
+
+
+MU_TEST(elemIndexOutOfBounds)
+{
+    auto elem = etree::fromstring("<root><child/></root>");
+    myunit::raises<etree::out_of_bounds_error>([&]() {
+        elem[1];
+    });
+}
+
+
+MU_TEST(elemIndexOutOfBoundsNoChildren)
+{
+    auto elem = etree::fromstring("<root/>");
+    myunit::raises<etree::out_of_bounds_error>([&]() {
+        elem[0];
+    });
+}
+
+
+
+MU_TEST(elemIndexNegative)
+{
+    auto elem = etree::fromstring("<root><child/></root>");
+    auto e = myunit::raises<etree::out_of_bounds_error>([&]() {
+        elem[-1];
+    });
 }

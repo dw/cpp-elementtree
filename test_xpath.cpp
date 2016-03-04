@@ -54,7 +54,7 @@ MU_TEST(ConstructorParseError)
     auto e = myunit::raises<etree::xml_error>([&]() {
         etree::XPath("&%^&%^&");
     });
-    assert(e.what() == std::string("Invalid expression\n"));
+    assert(e.what() == std::string("Invalid expression"));
 }
 
 

@@ -32,6 +32,7 @@ test_main: \
 		test_element.o \
 		test_feed.o \
 		test_nullable.o \
+		test_parse.o \
 		test_qname.o \
 		test_xpath.o \
 		element.o \

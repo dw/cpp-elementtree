@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <cstdio> // snprintf().
 #include <cstdlib>
 #include <cstring>
@@ -301,7 +302,11 @@ maybeThrow_()
 {
     xmlError *error = ::xmlGetLastError();
     if(error) {
-        throw xml_error(error->message);
+        std::string s(error->message);
+        while(s.size() && ::isspace(s[s.size() - 1])) {
+            s.pop_back();
+        }
+        throw xml_error(s.c_str());
     }
 }
 
@@ -1899,7 +1904,8 @@ parse_(T obj)
     xmlDoc *doc = readIoFunc(readCbFunc, dummyClose_,
                              static_cast<void *>(obj), 0, 0, options);
 
-    if(doc && doc->children) {
+    xmlNode *c;
+    if(doc && (c = doc->children, nextElement_(c))) {
         return ElementTree(doc);
     }
 
@@ -1916,7 +1922,7 @@ fromstring(const char *s, size_t n)
         n = ::strlen(s);
     }
     StringBuf sb(s, n);
-    ElementTree doc = parse_< ::xmlReadIO, stringBufRead__>(&sb);
+    ElementTree doc = parse_<::xmlReadIO, stringBufRead__>(&sb);
     return doc.getroot();
 }
 
@@ -1924,7 +1930,7 @@ fromstring(const char *s, size_t n)
 ElementTree
 parse(std::istream &is)
 {
-    return parse_<xmlReadIO, istreamRead__>(&is);
+    return parse_<::xmlReadIO, istreamRead__>(&is);
 }
 
 
