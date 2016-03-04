@@ -13,6 +13,10 @@ target_link_libraries(test_main PRIVATE elementtree)
 
 add_test(test_main test_main)
 
+add_executable(catch_test_main)
+
+target_link_libraries(catch_test_main PRIVATE elementtree)
+
 #This copies the contents of testdata/ to the build directory at configure time
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/testdata
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
