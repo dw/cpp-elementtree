@@ -442,7 +442,7 @@ class XPathContext {
 
     public:
     ~XPathContext();
-    XPathContext(const ns_list &ns_list = {});
+    XPathContext(const etree::ns_list &ns_list = {});
     XPathContext(const XPathContext &other);
 };
 
