@@ -932,9 +932,13 @@ Attribute::value() const
 AttrIterator::AttrIterator(_xmlNode *node, _xmlAttr *attr)
     : node_(node)
     , attr_(attr)
+    , next_(0)
 {
     if(node_) {
         ref(node_);
+    }
+    if(attr_) {
+        next_ = attr_->next;
     }
 }
 
@@ -978,7 +982,10 @@ AttrIterator::operator *()
 AttrIterator &
 AttrIterator::operator ++()
 {
-    attr_ = attr_->next;
+    attr_ = next_;
+    if(attr_) {
+        next_ = attr_->next;
+    }
     return *this;
 }
 

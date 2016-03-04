@@ -101,6 +101,7 @@ MU_TEST(elemTagSetKeepNs)
 // ChildIterator
 //
 
+
 MU_TEST(elemChildIter)
 {
     auto root = etree::fromstring(DOC);
@@ -163,7 +164,6 @@ MU_TEST(elemAncestorOfFalseWrongDoc)
     auto root2 = etree::fromstring("<a><b/></a>");
     assert(! root.ancestorOf(root2));
 }
-
 
 
 // ------
@@ -841,6 +841,7 @@ MU_TEST(graft)
 //
 // Element::operator[]
 //
+
 
 MU_TEST(elemIndexInBounds)
 {

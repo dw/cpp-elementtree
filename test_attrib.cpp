@@ -16,23 +16,6 @@ using std::vector;
 using std::string;
 
 
-// AttrIterator
-MU_TEST(Iter)
-{
-    vector<pair<string, string>> got, expect {
-        { "type", "people" },
-        { "count", "1" },
-        { "{urn:ns}x", "true" },
-    };
-
-    auto root = etree::fromstring(DOC);
-    for(auto attr : root.attrib()) {
-        got.emplace_back(attr.qname().tostring(), attr.value());
-    }
-    assert(got == expect);
-}
-
-
 MU_TEST(Has)
 {
     auto root = etree::fromstring(DOC);
@@ -141,4 +124,46 @@ MU_TEST(size)
 
     e.attrib().remove("a");
     assert(e.attrib().size() == 0);
+}
+
+
+//
+// AttrIterator
+//
+
+
+MU_TEST(iter)
+{
+    vector<pair<string, string>> got, expect {
+        { "type", "people" },
+        { "count", "1" },
+        { "{urn:ns}x", "true" },
+    };
+
+    auto root = etree::fromstring(DOC);
+    for(auto attr : root.attrib()) {
+        got.emplace_back(attr.qname().tostring(), attr.value());
+    }
+    assert(got == expect);
+}
+
+
+MU_TEST(iterSurvivesMutation)
+{
+    auto root = etree::fromstring("<a a=\"1\" b=\"2\" c=\"3\"/>");
+    std::vector<std::string> got, expect {
+        "b",
+        "c"
+    };
+
+    for(auto attr : root.attrib()) {
+        if(attr.tag() == "a") {
+            root.attrib().remove("a");
+        } else {
+            got.push_back(attr.tag());
+        }
+    }
+
+    assert(got == expect);
+    assert(etree::tostring(root) == "<a b=\"2\" c=\"3\"/>");
 }

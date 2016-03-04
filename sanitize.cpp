@@ -85,16 +85,11 @@ int main()
             e.graft();
         }
 
-        std::vector<etree::QName> toRemove;
         for(auto &attr : e.attrib()) {
             auto tag = attr.tag();
             if(! attrWhitelist.count(tag)) {
-                toRemove.push_back(tag);
+                e.attrib().remove(tag);
             }
-        }
-
-        for(auto &qn : toRemove) {
-            e.attrib().remove(qn);
         }
     }
 

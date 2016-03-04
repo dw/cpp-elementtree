@@ -580,11 +580,18 @@ class Attribute
 /**
  * Represents iteration position produced by AttrMap::begin() and
  * AttrMap::end().
+ *
+ * AttrIterator caches its next pointer, so that it is safe to delete an
+ * attribute via Element.attrib().remove() during iteration.
+ *
+ * AttrIterator holds a reference to its parent Element, so that it is safe to
+ * remove the element from its source document during iteration.
  */
 class AttrIterator
 {
     _xmlNode *node_;
     _xmlAttr *attr_;
+    _xmlAttr *next_;
 
     public:
     ~AttrIterator();
