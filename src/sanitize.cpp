@@ -1,7 +1,8 @@
 #include <iostream>
 #include <unordered_set>
-#include "element.hpp"
-#include "feed.hpp"
+
+#include <elementtree/element.hpp>
+#include <elementtree/feed.hpp>
 
 static const char tagRemove_[] = (
     "style\0" "script\0" "noscript\0" "object\0"

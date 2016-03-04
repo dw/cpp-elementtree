@@ -6,7 +6,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "feed.hpp"
+#include <elementtree/feed.hpp>
 
 
 namespace etree {

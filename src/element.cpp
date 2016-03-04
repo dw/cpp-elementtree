@@ -22,7 +22,7 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
-#include "element.hpp"
+#include "elementtree/element.hpp"
 
 
 namespace etree {
@@ -692,7 +692,7 @@ XPathContext::~XPathContext()
 }
 
 
-XPathContext::XPathContext(const ns_list &ns_list)
+XPathContext::XPathContext(const etree::ns_list &ns_list)
 {
     ::xmlResetLastError();
 

@@ -7,11 +7,10 @@
 #include <utility>
 #include <vector>
 
+#include <elementtree.hpp>
+
 #include "myunit.hpp"
-#include "element.hpp"
-#include "feed.hpp"
 #include "test_consts.hpp"
-#include "feed.hpp"
 
 using std::pair;
 using std::vector;

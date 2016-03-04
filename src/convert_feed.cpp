@@ -1,7 +1,7 @@
 #include <iostream>
-#include "element.hpp"
-#include "feed.hpp"
 
+#include <elementtree/element.hpp>
+#include <elementtree/feed.hpp>
 
 int main()
 {
