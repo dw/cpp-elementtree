@@ -115,7 +115,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li><a class="el" href="namespaceetree.html#a9af8da3c2473806c6f5d0f82e39ef252" title="Serialize an element. ">etree::tostring()</a> should copy up namespaces to subelements like lxml</li>
 <li>Make child/attr iterators mutation-safe</li>
 <li>Handle comments better.</li>
-<li>Rewrite &amp; better tests for Element::graft(). </li>
+<li>Rewrite &amp; better tests for Element::graft().</li>
+<li>reparent() must update refcounts when the document has changed, if there are any exitent Elements for deeply nested child nodes. </li>
 </ul>
 </div></div><!-- contents -->
 <!-- start footer part -->
