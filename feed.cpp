@@ -27,45 +27,7 @@ static const XPathContext kContext(ns_list{
     {"dc", DUBLIN_CORE_NS}
 });
 
-static const XPath kAtomLinkPath = XPath(
-    "atom:link[@rel='alternate' and @type='text/html']",
-    kContext);
-static const XPath kAtomIconPath = XPath(
-    "atom:icon | atom:image",
-    kContext);
-static const XPath kAtomEntryPath = XPath(
-    "atom:entry",
-    kContext);
-static const XPath kAtomTitlePath = XPath(
-    "atom:title",
-    kContext);
-static const XPath kAtomSubtitlePath = XPath(
-    "atom:subtitle",
-    kContext);
-static const XPath kAtomContentPath = XPath(
-    "atom:content",
-    kContext);
-static const XPath kAtomAuthorPath(
-    "atom:author/atom:name",
-    kContext);
-static const XPath kAtomGuidPath(
-    "atom:id",
-    kContext);
-static const XPath kAtomPublishedPath(
-    "atom:published",
-    kContext);
-static const XPath kAtomUpdatedPath(
-    "atom:updated",
-    kContext);
-
-static const XPath kDublinCoreCreatorPath{"dc:creator", kContext};
-static const XPath kRssIconPath{"channel/image/url"};
-static const XPath kRssItemContentPath{"description"};
-static const XPath kRssItemGuidPath{"guid"};
-static const XPath kRssPublishedPath{"pubDate"};
-static const XPath kRssItemsPath{"channel/item"};
-static const XPath kRssLinkPath{"link"};
-static const XPath kRssTitlePath{"title"};
+#define ATOM_LINK_PATH "atom:link[@rel='alternate' and @type='text/html']"
 
 static const QName kAtomAuthorTag(ATOM_NS, "author");
 static const QName kAtomContentTag(ATOM_NS, "content");
@@ -75,13 +37,31 @@ static const QName kAtomIconTag(ATOM_NS, "icon");
 static const QName kAtomIdTag(ATOM_NS, "id");
 static const QName kAtomLinkTag(ATOM_NS, "link");
 static const QName kAtomNameTag(ATOM_NS, "name");
-static const QName kAtomOriginalGuidAttr{READER_NS, "original-id"};
+static const QName kAtomOriginalGuidAttr(READER_NS, "original-id");
 static const QName kAtomPublishedTag(ATOM_NS, "published");
 static const QName kAtomRootTag(ATOM_NS, "feed");
 static const QName kAtomSubtitleTag(ATOM_NS, "subtitle");
 static const QName kAtomSummaryTag(ATOM_NS, "summary");
 static const QName kAtomTitleTag(ATOM_NS, "title");
 static const QName kAtomUpdatedTag(ATOM_NS, "updated");
+static const XPath kAtomAuthorPath("atom:author/atom:name", kContext);
+static const XPath kAtomContentPath("atom:content", kContext);
+static const XPath kAtomEntryPath("atom:entry", kContext);
+static const XPath kAtomGuidPath("atom:id", kContext);
+static const XPath kAtomIconPath("atom:icon | atom:image", kContext);
+static const XPath kAtomLinkPath(ATOM_LINK_PATH, kContext);
+static const XPath kAtomPublishedPath("atom:published", kContext);
+static const XPath kAtomSubtitlePath("atom:subtitle", kContext);
+static const XPath kAtomTitlePath("atom:title", kContext);
+static const XPath kAtomUpdatedPath("atom:updated", kContext);
+static const XPath kDublinCoreCreatorPath("dc:creator", kContext);
+static const XPath kRssIconPath("channel/image/url");
+static const XPath kRssItemContentPath("description");
+static const XPath kRssItemGuidPath("guid");
+static const XPath kRssItemsPath("channel/item");
+static const XPath kRssLinkPath("link");
+static const XPath kRssPublishedPath("pubDate");
+static const XPath kRssTitlePath("title");
 
 
 // ----------------
