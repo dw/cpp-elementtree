@@ -13,7 +13,15 @@ target_link_libraries(test_main PRIVATE elementtree)
 
 add_test(test_main test_main)
 
-add_executable(catch_test_main)
+add_executable(catch_test_main
+    catch_test_main.cpp
+    catch_test_attrib.cpp
+    catch_test_element.cpp
+    catch_test_feed.cpp
+    catch_test_nullable.cpp
+    catch_test_parse.cpp
+    catch_test_qname.cpp
+    catch_test_xpath.cpp)
 
 target_link_libraries(catch_test_main PRIVATE elementtree)
 
